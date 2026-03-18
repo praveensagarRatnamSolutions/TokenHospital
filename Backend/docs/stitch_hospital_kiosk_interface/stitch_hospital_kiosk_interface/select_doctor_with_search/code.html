@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b9dee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Hospital Kiosk - Choose Your Doctor</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-hidden">
+<div class="relative flex h-screen w-full flex-col max-w-[1080px] mx-auto bg-white dark:bg-slate-900 shadow-2xl">
+<!-- Top Bar -->
+<header class="flex flex-col items-center pt-12 pb-8 px-10 border-b border-slate-100 dark:border-slate-800">
+<h1 class="text-5xl font-bold tracking-tight mb-4 text-slate-900 dark:text-white">Choose Your Doctor</h1>
+<p class="text-2xl text-slate-500 dark:text-slate-400 text-center max-w-2xl leading-relaxed">
+                Select a doctor or let the system assign one automatically.
+            </p>
+</header>
+<!-- Main Content Area (Scrollable) -->
+<main class="flex-1 overflow-y-auto px-10 pt-10 pb-32">
+<!-- Auto Assign Action -->
+<!-- Search Bar Section -->
+<div class="mb-10">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-6 text-slate-400 text-4xl">search</span>
+<input class="w-full pl-20 pr-10 py-8 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-2xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all shadow-sm dark:text-white placeholder:text-slate-400 outline-none" placeholder="Search doctor by name or specialty..." type="text"/>
+</div>
+</div><div class="mb-12">
+<button class="w-full flex items-center justify-center gap-4 bg-primary hover:bg-primary/90 text-white rounded-xl py-8 px-10 transition-colors shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-5xl">magic_button</span>
+<span class="text-3xl font-bold">Auto Assign Best Available Doctor</span>
+</button>
+</div>
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-4xl">medical_services</span>
+                    Available Specialists
+                </h2>
+<div class="flex gap-4">
+<span class="flex items-center gap-2 text-slate-500 text-xl">
+<span class="w-4 h-4 rounded-full bg-emerald-500"></span> Available
+                    </span>
+<span class="flex items-center gap-2 text-slate-500 text-xl">
+<span class="w-4 h-4 rounded-full bg-amber-500"></span> Busy
+                    </span>
+</div>
+</div>
+<!-- Doctor Grid -->
+<div class="grid grid-cols-2 gap-8">
+<!-- Doctor Card 1 -->
+<div class="flex flex-col bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border-2 border-transparent hover:border-primary cursor-pointer transition-all shadow-sm">
+<div class="w-full aspect-square bg-slate-200 dark:bg-slate-700 rounded-lg mb-6 bg-cover bg-center overflow-hidden" data-alt="Professional female doctor in a white lab coat smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCQCpaSnhJ_YdEflgTOs3wJ1_nSbZitUe3oBPnSudWnRs0Sxa7ZI0wKq7twfm-LjZHcqEQnLSthlj0-h9-m5U5C6q7pLDAAoptrY7MCnr0ohDcx0BcCBcrZkWBWpw74vcIzD20JsDU8lQenNHW4lPo2OstT8Dit7Z7Y6p1pTsggngmBby90C-I2ElNHIJfHEqojxdxLnkah10BAhKf-Ic082Cil0gLzrHwOBrLRjBlYPSL6UEJdutHFJ36sjCTE7VUk-9J-0ZfQhbL7')">
+</div>
+<div class="flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white leading-tight">Dr. Sarah Smith</h3>
+<span class="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full text-sm font-bold uppercase tracking-wider">Available</span>
+</div>
+<p class="text-xl text-primary font-semibold mb-4">Cardiology Specialist</p>
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-lg">
+<span class="material-symbols-outlined">group</span>
+<span>Waiting: <strong class="text-slate-900 dark:text-white">2 Patients</strong></span>
+</div>
+</div>
+</div>
+<!-- Doctor Card 2 -->
+<div class="flex flex-col bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border-2 border-transparent hover:border-primary cursor-pointer transition-all shadow-sm">
+<div class="w-full aspect-square bg-slate-200 dark:bg-slate-700 rounded-lg mb-6 bg-cover bg-center overflow-hidden" data-alt="Male doctor with stethoscope around his neck" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDYlijfAdolmec822LcdqultADlP_LTPndBC7aoarjObdK4ePu2sGPxb824KJIe_0S3GUa1B5q1dAZl5P8rYdSr7kjQUsAzlsLrry2khgZNTF7YS4gyASjkGeEker-UYxUYYNVnK76KDnzfWDYPQ5j-tMuawvvO37vLUwqjy6RGI7quw8cKC2DS3h4rS8TnawbVhGERJzSfLqQGX8b1Ldwy8HZ9ZDBLl0Yrv2J256FsGRBpdmh2wPafEf-r0kXtLykfSFSf_fTF2m8n')">
+</div>
+<div class="flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white leading-tight">Dr. James Wilson</h3>
+<span class="px-3 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full text-sm font-bold uppercase tracking-wider">Busy</span>
+</div>
+<p class="text-xl text-primary font-semibold mb-4">Pediatrics</p>
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-lg">
+<span class="material-symbols-outlined">group</span>
+<span>Waiting: <strong class="text-slate-900 dark:text-white">5 Patients</strong></span>
+</div>
+</div>
+</div>
+<!-- Doctor Card 3 -->
+<div class="flex flex-col bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border-2 border-transparent hover:border-primary cursor-pointer transition-all shadow-sm">
+<div class="w-full aspect-square bg-slate-200 dark:bg-slate-700 rounded-lg mb-6 bg-cover bg-center overflow-hidden" data-alt="Female medical professional with a warm smile" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBuKhaYXP2zq83POS2pvh28x4ATFHW1ecUJuTnj0EtRDxQDUz5y7Pa1IfgogMVNaVRrMK50tDaSF1ckVbMuMylktpPSN423pDaPKelIuEpuN_JEro-Rt-vKMHSr2Xeoa6yv3PuI1dxNhtoqYlnu1xTTa0VbJGGpvPO1X5CowMANx8ALmlT4v18ClV_dsh5Vf18dGdvCdvsswqdeIUY8WGAWbRi2OBINnP9UIrmpikES67qNkCY1JEtb7Bq1FRP-zOLJSWS3iPDuqTlW')">
+</div>
+<div class="flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white leading-tight">Dr. Elena Rodriguez</h3>
+<span class="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full text-sm font-bold uppercase tracking-wider">Available</span>
+</div>
+<p class="text-xl text-primary font-semibold mb-4">Neurology Specialist</p>
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-lg">
+<span class="material-symbols-outlined">group</span>
+<span>Waiting: <strong class="text-slate-900 dark:text-white">1 Patient</strong></span>
+</div>
+</div>
+</div>
+<!-- Doctor Card 4 -->
+<div class="flex flex-col bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border-2 border-transparent hover:border-primary cursor-pointer transition-all shadow-sm">
+<div class="w-full aspect-square bg-slate-200 dark:bg-slate-700 rounded-lg mb-6 bg-cover bg-center overflow-hidden" data-alt="Male doctor looking professional and confident" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBAAkvl0et2y3K5KelamMiKPEpbnUSQiCoSkCMyfLUlqYvsOEpBMT9BpsdJimQAenuLj46KKQbgnKqnEh8XtFkHm-8mb4-09Kv27g1GVIYrGUezWKh9RcgTetF5oUW8wmyV_mfh-osM--Gz1wSrXuinwCrY9Hd172vZM7paBeYLCXaWWToMvxNCG9aKTtDjdZMbHL4qdX8Mstnv7UA376pu_MIF6z_dFUjHesruIe39slMREegc_6b55pUiZm0EXde_suA5y5mLIAe')">
+</div>
+<div class="flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white leading-tight">Dr. Michael Chen</h3>
+<span class="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full text-sm font-bold uppercase tracking-wider">Available</span>
+</div>
+<p class="text-xl text-primary font-semibold mb-4">General Medicine</p>
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-lg">
+<span class="material-symbols-outlined">group</span>
+<span>Waiting: <strong class="text-slate-900 dark:text-white">0 Patients</strong></span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<footer class="absolute bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 p-10 flex gap-6">
+<button class="flex-1 flex items-center justify-center gap-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl py-8 px-6 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-4xl">arrow_back</span>
+<span class="text-3xl font-bold">Back</span>
+</button>
+<button class="flex-[2] flex items-center justify-center gap-3 bg-primary text-white rounded-xl py-8 px-6 transition-transform active:scale-95 shadow-xl shadow-primary/25">
+<span class="text-3xl font-bold">Confirm Selection</span>
+<span class="material-symbols-outlined text-4xl">arrow_forward</span>
+</button>
+</footer>
+</div>
+</body></html>

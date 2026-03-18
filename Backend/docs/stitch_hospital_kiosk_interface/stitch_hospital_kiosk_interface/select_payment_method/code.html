@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b9dee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Hospital Kiosk - Payment Selection</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased h-screen overflow-hidden">
+<!-- Main Container (1080x1920 Kiosk Layout) -->
+<div class="flex flex-col h-full w-full max-w-[1080px] mx-auto shadow-2xl bg-white dark:bg-background-dark relative overflow-hidden">
+<!-- TopAppBar Section -->
+<header class="pt-12 pb-8 px-8 border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-center gap-4 mb-10">
+<div class="bg-primary/10 p-3 rounded-xl text-primary">
+<span class="material-symbols-outlined !text-5xl">medical_services</span>
+</div>
+<h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">City General Hospital</h2>
+</div>
+<div class="text-center space-y-4">
+<h1 class="text-6xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Select Payment Method</h1>
+<p class="text-2xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-medium">
+                    Please choose how you would like to pay for the consultation.
+                </p>
+</div>
+</header>
+<!-- Main Section: Grid of Payment Options -->
+<main class="flex-1 flex items-center justify-center p-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-5xl">
+<!-- Card 1: Cash at Counter -->
+<button class="group flex flex-col items-center justify-between p-10 bg-white dark:bg-slate-800 border-4 border-slate-100 dark:border-slate-700 rounded-[2rem] shadow-xl hover:border-primary transition-all duration-300 active:scale-95 text-center h-[500px]">
+<div class="w-full h-64 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-6 overflow-hidden relative">
+<div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+<span class="material-symbols-outlined !text-[120px] text-primary">payments</span>
+</div>
+<div>
+<h3 class="text-4xl font-bold mb-4 text-slate-900 dark:text-slate-100">Cash at Counter</h3>
+<p class="text-xl text-slate-500 dark:text-slate-400 font-medium">Pay at the reception desk</p>
+</div>
+</button>
+<!-- Card 2: UPI Payment -->
+<button class="group flex flex-col items-center justify-between p-10 bg-white dark:bg-slate-800 border-4 border-slate-100 dark:border-slate-700 rounded-[2rem] shadow-xl hover:border-primary transition-all duration-300 active:scale-95 text-center h-[500px]">
+<div class="w-full h-64 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-6 overflow-hidden relative">
+<div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+<span class="material-symbols-outlined !text-[120px] text-primary">qr_code_2</span>
+</div>
+<div>
+<h3 class="text-4xl font-bold mb-4 text-slate-900 dark:text-slate-100">UPI Payment</h3>
+<p class="text-xl text-slate-500 dark:text-slate-400 font-medium">Scan and pay using any UPI app</p>
+</div>
+</button>
+<!-- Card 3: Card Payment (Bonus for UI Balance) -->
+<button class="group flex flex-col items-center justify-between p-10 bg-white dark:bg-slate-800 border-4 border-slate-100 dark:border-slate-700 rounded-[2rem] shadow-xl hover:border-primary transition-all duration-300 active:scale-95 text-center h-[500px]">
+<div class="w-full h-64 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-6 overflow-hidden relative">
+<div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+<span class="material-symbols-outlined !text-[120px] text-primary">credit_card</span>
+</div>
+<div>
+<h3 class="text-4xl font-bold mb-4 text-slate-900 dark:text-slate-100">Card Payment</h3>
+<p class="text-xl text-slate-500 dark:text-slate-400 font-medium">Swipe or tap your credit/debit card</p>
+</div>
+</button>
+<!-- Card 4: Insurance (Bonus for UI Balance) -->
+<button class="group flex flex-col items-center justify-between p-10 bg-white dark:bg-slate-800 border-4 border-slate-100 dark:border-slate-700 rounded-[2rem] shadow-xl hover:border-primary transition-all duration-300 active:scale-95 text-center h-[500px]">
+<div class="w-full h-64 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-6 overflow-hidden relative">
+<div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+<span class="material-symbols-outlined !text-[120px] text-primary">health_and_safety</span>
+</div>
+<div>
+<h3 class="text-4xl font-bold mb-4 text-slate-900 dark:text-slate-100">Insurance</h3>
+<p class="text-xl text-slate-500 dark:text-slate-400 font-medium">Claim through your provider</p>
+</div>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation Section -->
+<footer class="p-12 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+<div class="flex justify-between items-center max-w-5xl mx-auto gap-8">
+<!-- Back Button -->
+<button class="flex-1 flex items-center justify-center gap-4 py-8 rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-3xl font-bold active:bg-slate-100 transition-colors shadow-sm">
+<span class="material-symbols-outlined !text-4xl">arrow_back</span>
+<span>Back</span>
+</button>
+<!-- Continue Button -->
+<button class="flex-[1.5] flex items-center justify-center gap-4 py-8 rounded-2xl bg-primary text-white text-3xl font-bold active:brightness-90 transition-all shadow-lg shadow-primary/30">
+<span>Continue</span>
+<span class="material-symbols-outlined !text-4xl">arrow_forward</span>
+</button>
+</div>
+</footer>
+<!-- Help Button Floating (Common for Kiosks) -->
+<button class="absolute bottom-40 right-12 w-24 h-24 rounded-full bg-slate-900 dark:bg-primary text-white shadow-2xl flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined !text-5xl">help_outline</span>
+</button>
+</div>
+</body></html>
