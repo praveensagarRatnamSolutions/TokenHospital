@@ -1,0 +1,832 @@
+/* PatientCheckin.css - Industry Standard CSS with BEM methodology */
+
+/* CSS Variables */
+:root {
+  /* Colors from the Tailwind config */
+  --color-primary: #2b9dee;
+  --color-primary-container: #d7edff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #001e30;
+  --color-secondary: #475569;
+  --color-error: #ef4444;
+  --color-error-container: #fee2e2;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #991b1b;
+  --color-background: #f6f7f8;
+  --color-surface: #ffffff;
+  --color-surface-variant: #f1f5f9;
+  --color-surface-container: #f1f5f9;
+  --color-surface-container-low: #f8fafc;
+  --color-surface-container-high: #e2e8f0;
+  --color-surface-container-highest: #cbd5e1;
+  --color-on-surface: #0f172a;
+  --color-on-surface-variant: #475569;
+  --color-outline: #cbd5e1;
+  --color-outline-variant: #e2e8f0;
+  --color-inverse-surface: #1e293b;
+  --color-inverse-on-surface: #f8fafc;
+  --color-inverse-primary: #90ccff;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  --spacing-4xl: 6rem;
+
+  /* Typography */
+  --font-family: 'Inter', sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* Border Radius */
+  --radius-md: 1rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-base: all 0.3s ease;
+  --transition-transform: transform 0.2s ease;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-background);
+  /* overflow: hidden; */
+  min-height: max(884px, 100dvh);
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+/* Main Container */
+.patient-checkin {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  color: var(--color-on-surface);
+}
+
+/* Header Styles */
+.patient-checkin__header {
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-2xl);
+  height: 8rem;
+  width: 100%;
+  z-index: 50;
+  position: relative;
+}
+
+.patient-checkin__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.patient-checkin__brand-icon-wrapper {
+  padding: var(--spacing-sm);
+  background-color: rgba(43, 157, 238, 0.1);
+  border-radius: var(--radius-md);
+}
+
+.patient-checkin__brand-icon {
+  font-size: 3rem;
+  color: var(--color-primary);
+}
+
+.patient-checkin__title {
+  font-family: var(--font-family);
+  font-weight: 800;
+  font-size: 2.25rem;
+  letter-spacing: -0.025em;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.patient-checkin__subtitle {
+  color: var(--color-secondary);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+.patient-checkin__help-icon {
+  font-size: 2.5rem;
+  color: var(--color-outline);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.patient-checkin__help-icon:hover {
+  color: var(--color-primary);
+}
+
+/* Main Content */
+.patient-checkin__main {
+  flex: 1;
+  overflow: hidden;
+  padding: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+.patient-checkin__grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--spacing-2xl);
+  height: 100%;
+}
+
+/* Left Column */
+.patient-checkin__left-column {
+  grid-column: span 7;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+  overflow-y: auto;
+  padding-right: var(--spacing-md);
+}
+
+/* Instruction Card */
+.patient-checkin__instruction {
+  background-color: rgba(43, 157, 238, 0.05);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-2xl);
+  border-left: 8px solid var(--color-primary);
+}
+
+.patient-checkin__instruction-title {
+  font-size: var(--font-size-4xl);
+  font-weight: 700;
+  color: var(--color-on-primary-container);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.2;
+}
+
+.patient-checkin__instruction-text {
+  font-size: var(--font-size-2xl);
+  color: var(--color-on-surface-variant);
+  line-height: 1.4;
+}
+
+/* Form Section */
+.patient-checkin__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+.patient-checkin__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.patient-checkin__label {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-secondary);
+  margin-left: var(--spacing-md);
+  line-height: 1.3;
+}
+
+.patient-checkin__input-wrapper {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--color-outline-variant);
+  transition: var(--transition-base);
+}
+
+.patient-checkin__input-wrapper:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(43, 157, 238, 0.1);
+}
+
+.patient-checkin__input-wrapper--phone {
+  border-color: var(--color-primary);
+}
+
+.patient-checkin__input-icon {
+  color: var(--color-outline);
+  padding: 0 var(--spacing-lg);
+  font-size: var(--font-size-4xl);
+}
+
+.patient-checkin__input-icon--active {
+  color: var(--color-primary);
+}
+
+.patient-checkin__input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-4xl);
+  font-weight: 700;
+  padding: var(--spacing-2xl) 0;
+  outline: none;
+  color: var(--color-on-surface);
+}
+
+.patient-checkin__input::placeholder {
+  color: var(--color-outline);
+}
+
+.patient-checkin__input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.patient-checkin__input[type='number']::-webkit-outer-spin-button,
+.patient-checkin__input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.patient-checkin__row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-2xl);
+}
+
+.patient-checkin__phone-display {
+  width: 100%;
+  background: transparent;
+  font-size: var(--font-size-6xl);
+  font-weight: 800;
+  padding: var(--spacing-lg) var(--spacing-sm);
+  color: var(--color-primary);
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  min-height: 7rem;
+  display: flex;
+  align-items: center;
+}
+
+.patient-checkin__clear-button {
+  margin-right: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--color-outline);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.patient-checkin__clear-button:hover {
+  color: var(--color-error);
+}
+
+.patient-checkin__clear-icon {
+  font-size: 2.5rem;
+}
+
+/* Right Column */
+.patient-checkin__right-column {
+  grid-column: span 5;
+  background-color: var(--color-surface-container-low);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2xl);
+  padding: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--spacing-lg);
+}
+
+/* Numpad */
+.patient-checkin__numpad {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+.patient-checkin__numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.patient-checkin__numpad-btn {
+  height: 110px;
+  font-size: var(--font-size-4xl);
+  font-weight: 700;
+  background-color: var(--color-surface);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  transition: var(--transition-base);
+  color: var(--color-on-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient-checkin__numpad-btn:hover {
+  background-color: var(--color-primary-container);
+}
+
+.patient-checkin__numpad-btn:active {
+  transform: scale(0.95);
+}
+
+.patient-checkin__numpad-btn--special {
+  background-color: var(--color-surface-variant);
+  color: var(--color-on-surface-variant);
+}
+
+.patient-checkin__numpad-btn--special:hover {
+  background-color: var(--color-surface-container-high);
+}
+
+.patient-checkin__numpad-icon {
+  font-size: 2.5rem;
+}
+
+/* Privacy Card */
+.patient-checkin__privacy-card {
+  margin-top: var(--spacing-2xl);
+}
+
+.patient-checkin__privacy-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 4px solid var(--color-surface);
+}
+
+.patient-checkin__privacy-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1);
+  opacity: 0.3;
+}
+
+.patient-checkin__privacy-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--color-surface-container-low), transparent);
+}
+
+.patient-checkin__privacy-badge {
+  position: absolute;
+  bottom: var(--spacing-lg);
+  left: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  z-index: 1;
+}
+
+.patient-checkin__privacy-icon {
+  color: var(--color-primary);
+  font-size: var(--font-size-4xl);
+}
+
+.patient-checkin__privacy-text {
+  color: var(--color-on-surface-variant);
+  font-weight: 500;
+  font-size: var(--font-size-xl);
+  line-height: 1.4;
+}
+
+/* Footer */
+.patient-checkin__footer {
+  background-color: rgba(248, 250, 252, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  width: 100%;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 12rem;
+  padding: 0 var(--spacing-4xl) var(--spacing-2xl);
+  box-shadow: 0 -20px 50px -12px rgba(0, 0, 0, 0.1);
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+}
+
+.patient-checkin__footer-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-lg);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition-transform);
+  font-family: var(--font-family);
+}
+
+.patient-checkin__footer-btn:active {
+  transform: scale(0.9);
+}
+
+.patient-checkin__footer-btn--back {
+  padding: var(--spacing-md) var(--spacing-3xl);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-secondary);
+}
+
+.patient-checkin__footer-btn--language {
+  padding: var(--spacing-md) var(--spacing-2xl);
+  border-radius: var(--radius-full);
+  color: var(--color-secondary);
+}
+
+.patient-checkin__footer-btn--language:hover {
+  background-color: var(--color-surface-container-high);
+}
+
+.patient-checkin__footer-btn--confirm {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl) var(--spacing-3xl);
+  box-shadow:
+    var(--shadow-2xl),
+    0 0 0 2px rgba(43, 157, 238, 0.4);
+}
+
+.patient-checkin__footer-actions {
+  display: flex;
+  gap: var(--spacing-2xl);
+}
+
+.patient-checkin__footer-icon {
+  font-size: 2.5rem;
+}
+
+.patient-checkin__footer-icon--large {
+  font-size: 2.5rem;
+}
+
+.patient-checkin__footer-text {
+  font-weight: 700;
+  font-size: var(--font-size-3xl);
+  line-height: 1.2;
+}
+
+.patient-checkin__footer-text--large {
+  font-size: var(--font-size-3xl);
+}
+
+/* FAB */
+.patient-checkin__fab {
+  position: fixed;
+  bottom: 13rem;
+  right: var(--spacing-2xl);
+  z-index: 60;
+}
+
+.patient-checkin__fab-btn {
+  width: 96px;
+  height: 96px;
+  background-color: var(--color-inverse-surface);
+  color: var(--color-inverse-on-surface);
+  border: none;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-2xl);
+  cursor: pointer;
+  transition: var(--transition-transform);
+}
+
+.patient-checkin__fab-btn:active {
+  transform: scale(0.9);
+}
+
+.patient-checkin__fab-btn:hover {
+  background-color: var(--color-primary);
+}
+
+.patient-checkin__fab-icon {
+  font-size: var(--font-size-6xl);
+}
+
+/* Responsive Design */
+@media (max-width: 1536px) {
+  .patient-checkin__title {
+    font-size: 2rem;
+  }
+
+  .patient-checkin__phone-display {
+    font-size: 3rem;
+  }
+
+  .patient-checkin__footer-text {
+    /* font-size: 2rem; */
+  }
+
+  .patient-checkin__footer-text--large {
+    /* font-size: 2.5rem; */
+  }
+}
+
+@media (max-width: 1280px) {
+  .patient-checkin__grid {
+    gap: var(--spacing-lg);
+  }
+
+  .patient-checkin__instruction-title {
+    font-size: 2rem;
+  }
+
+  .patient-checkin__instruction-text {
+    font-size: 1.5rem;
+  }
+
+  .patient-checkin__input {
+    font-size: 2rem;
+    padding: var(--spacing-xl) 0;
+  }
+
+  .patient-checkin__phone-display {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .patient-checkin__header {
+    padding: 0 var(--spacing-xl);
+    height: 6rem;
+  }
+
+  .patient-checkin__brand-icon {
+    font-size: 2.5rem;
+  }
+
+  .patient-checkin__title {
+    font-size: 1.75rem;
+  }
+
+  .patient-checkin__subtitle {
+    font-size: 1rem;
+  }
+
+  .patient-checkin__main {
+    padding: var(--spacing-xl);
+  }
+
+  .patient-checkin__grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .patient-checkin__left-column,
+  .patient-checkin__right-column {
+    grid-column: span 1;
+  }
+
+  .patient-checkin__right-column {
+    padding: var(--spacing-xl);
+  }
+
+  .patient-checkin__footer {
+    height: auto;
+    min-height: 8rem;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .patient-checkin__footer-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .patient-checkin__fab {
+    bottom: 2rem;
+    right: 1rem;
+  }
+
+  .patient-checkin__fab-btn {
+    width: 72px;
+    height: 72px;
+  }
+
+  .patient-checkin__fab-icon {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-checkin__row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .patient-checkin__numpad-btn {
+    height: 80px;
+    font-size: 2rem;
+  }
+
+  .patient-checkin__footer-btn--back {
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+
+  .patient-checkin__footer-btn--confirm {
+    padding: var(--spacing-lg) var(--spacing-2xl);
+  }
+
+  .patient-checkin__footer-text {
+    font-size: 1.5rem;
+  }
+
+  .patient-checkin__footer-text--large {
+    font-size: 1.75rem;
+  }
+}
+
+/* Dark Mode Support */
+/* @media (prefers-color-scheme: dark) {
+  .patient-checkin {
+    color-scheme: dark;
+  }
+
+  .patient-checkin__header {
+    background-color: var(--color-inverse-surface);
+  }
+
+  .patient-checkin__brand-icon-wrapper {
+    background-color: rgba(43, 157, 238, 0.2);
+  }
+
+  .patient-checkin__title {
+    color: var(--color-inverse-primary);
+  }
+
+  .patient-checkin__subtitle {
+    color: var(--color-outline);
+  }
+
+  .patient-checkin__help-icon {
+    color: var(--color-outline);
+  }
+
+  .patient-checkin__main {
+    background-color: var(--color-background);
+  }
+
+  .patient-checkin__input-wrapper {
+    background-color: var(--color-surface-container-low);
+    border-color: var(--color-outline);
+  }
+
+  .patient-checkin__input {
+    color: var(--color-inverse-on-surface);
+  }
+
+  .patient-checkin__instruction {
+    background-color: rgba(43, 157, 238, 0.1);
+  }
+
+  .patient-checkin__instruction-title {
+    color: var(--color-inverse-on-surface);
+  }
+
+  .patient-checkin__instruction-text {
+    color: var(--color-outline);
+  }
+
+  .patient-checkin__numpad-btn {
+    background-color: var(--color-surface-container);
+    color: var(--color-inverse-on-surface);
+  }
+
+  .patient-checkin__footer {
+    background-color: rgba(30, 41, 59, 0.95);
+  }
+
+  .patient-checkin__footer-btn--back {
+    background-color: var(--color-surface-container);
+    border-color: var(--color-outline);
+    color: var(--color-inverse-on-surface);
+  }
+
+  .patient-checkin__footer-btn--language {
+    color: var(--color-outline);
+  }
+
+  .patient-checkin__footer-btn--language:hover {
+    background-color: var(--color-surface-container-high);
+  }
+} */
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .patient-checkin__numpad-btn,
+  .patient-checkin__footer-btn,
+  .patient-checkin__fab-btn,
+  .patient-checkin__input-wrapper,
+  .patient-checkin__clear-button {
+    transition: none;
+    animation: none;
+  }
+
+  .patient-checkin__numpad-btn:active,
+  .patient-checkin__footer-btn:active,
+  .patient-checkin__fab-btn:active {
+    transform: none;
+  }
+}
+
+/* Focus States */
+.patient-checkin__numpad-btn:focus-visible,
+.patient-checkin__footer-btn:focus-visible,
+.patient-checkin__fab-btn:focus-visible,
+.patient-checkin__clear-button:focus-visible,
+.patient-checkin__help-icon:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.patient-checkin__input:focus-visible {
+  outline: none;
+}
+
+/* Print Styles */
+@media print {
+  .patient-checkin {
+    height: auto;
+    overflow: visible;
+  }
+
+  .patient-checkin__header,
+  .patient-checkin__footer,
+  .patient-checkin__fab,
+  .patient-checkin__right-column {
+    display: none;
+  }
+
+  .patient-checkin__main {
+    overflow: visible;
+    padding: var(--spacing-md);
+  }
+
+  .patient-checkin__left-column {
+    overflow: visible;
+  }
+
+  .patient-checkin__instruction {
+    break-inside: avoid;
+  }
+}

@@ -11,11 +11,12 @@ import SelectDepartment from '@/components/kiosk/SelectDepartment';
 import SelectDoctor from '@/components/kiosk/SelectDoctor';
 import PaymentMethod from '@/components/kiosk/PaymentMethod';
 import TokenGenerated from '@/components/kiosk/TokenGenerated';
+import CheckInDetails from '@/components/kiosk/CheckInDetails';
 
-type KioskStep = 'HOME' | 'DEPARTMENT' | 'DOCTOR' | 'PAYMENT' | 'TOKEN';
+type KioskStep = 'HOME' | 'CHECKIN' | 'DEPARTMENT' | 'DOCTOR' | 'PAYMENT' | 'TOKEN';
 
 export default function KioskPage() {
-  const [step, setStep] = useState<KioskStep>('HOME');
+  const [step, setStep] = useState<KioskStep>('CHECKIN');
   const dispatch = useAppDispatch();
   const tokenData = useAppSelector((state) => state.token);
 
@@ -40,33 +41,37 @@ export default function KioskPage() {
 
   const prevStep = () => {
     switch (step) {
-      case 'DEPARTMENT': setStep('HOME'); break;
-      case 'DOCTOR': setStep('DEPARTMENT'); break;
-      case 'PAYMENT': setStep('DOCTOR'); break;
-      default: setStep('HOME');
+      case 'DEPARTMENT':
+        setStep('CHECKIN');
+        break;
+      case 'CHECKIN':
+        setStep('HOME');
+        break;
+      case 'DOCTOR':
+        setStep('DEPARTMENT');
+        break;
+      case 'PAYMENT':
+        setStep('DOCTOR');
+        break;
+      default:
+        setStep('HOME');
     }
   };
 
   return (
     <div className="kiosk-container overflow-hidden">
-      {step === 'HOME' && <HomeWelcome onStart={() => nextStep('DEPARTMENT')} />}
+      {step === 'HOME' && <HomeWelcome onStart={() => nextStep('CHECKIN')} />}
+      {step === 'CHECKIN' && (
+        <CheckInDetails onNext={() => nextStep('DEPARTMENT')} onBack={prevStep} />
+      )}
       {step === 'DEPARTMENT' && (
-        <SelectDepartment 
-          onNext={() => nextStep('DOCTOR')} 
-          onBack={prevStep} 
-        />
+        <SelectDepartment onNext={() => nextStep('DOCTOR')} onBack={prevStep} />
       )}
       {step === 'DOCTOR' && (
-        <SelectDoctor 
-          onNext={() => nextStep('PAYMENT')} 
-          onBack={prevStep} 
-        />
+        <SelectDoctor onNext={() => nextStep('PAYMENT')} onBack={prevStep} />
       )}
       {step === 'PAYMENT' && (
-        <PaymentMethod 
-          onNext={() => nextStep('TOKEN')} 
-          onBack={prevStep} 
-        />
+        <PaymentMethod onNext={() => nextStep('TOKEN')} onBack={prevStep} />
       )}
       {step === 'TOKEN' && <TokenGenerated onFinish={handleReset} />}
     </div>
