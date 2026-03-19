@@ -22,6 +22,7 @@ export default function KioskPage() {
   // Auto-reset to home after inactivity on Token screen
   useEffect(() => {
     if (step === 'TOKEN') {
+      console.log('kiosk');
       const timer = setTimeout(() => {
         handleReset();
       }, 30000); // 30 seconds
@@ -40,10 +41,17 @@ export default function KioskPage() {
 
   const prevStep = () => {
     switch (step) {
-      case 'DEPARTMENT': setStep('HOME'); break;
-      case 'DOCTOR': setStep('DEPARTMENT'); break;
-      case 'PAYMENT': setStep('DOCTOR'); break;
-      default: setStep('HOME');
+      case 'DEPARTMENT':
+        setStep('HOME');
+        break;
+      case 'DOCTOR':
+        setStep('DEPARTMENT');
+        break;
+      case 'PAYMENT':
+        setStep('DOCTOR');
+        break;
+      default:
+        setStep('HOME');
     }
   };
 
@@ -51,22 +59,13 @@ export default function KioskPage() {
     <div className="kiosk-container overflow-hidden">
       {step === 'HOME' && <HomeWelcome onStart={() => nextStep('DEPARTMENT')} />}
       {step === 'DEPARTMENT' && (
-        <SelectDepartment 
-          onNext={() => nextStep('DOCTOR')} 
-          onBack={prevStep} 
-        />
+        <SelectDepartment onNext={() => nextStep('DOCTOR')} onBack={prevStep} />
       )}
       {step === 'DOCTOR' && (
-        <SelectDoctor 
-          onNext={() => nextStep('PAYMENT')} 
-          onBack={prevStep} 
-        />
+        <SelectDoctor onNext={() => nextStep('PAYMENT')} onBack={prevStep} />
       )}
       {step === 'PAYMENT' && (
-        <PaymentMethod 
-          onNext={() => nextStep('TOKEN')} 
-          onBack={prevStep} 
-        />
+        <PaymentMethod onNext={() => nextStep('TOKEN')} onBack={prevStep} />
       )}
       {step === 'TOKEN' && <TokenGenerated onFinish={handleReset} />}
     </div>
