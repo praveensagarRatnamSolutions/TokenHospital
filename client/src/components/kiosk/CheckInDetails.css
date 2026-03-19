@@ -476,7 +476,7 @@ body {
 }
 
 .patient-checkin__footer-btn--back {
-  padding: var(--spacing-2xl) var(--spacing-2xl);
+  padding: var(--spacing-md) var(--spacing-3xl);
   background-color: var(--color-surface);
   border: 2px solid var(--color-outline-variant);
   border-radius: var(--radius-lg);
@@ -498,7 +498,7 @@ body {
   background-color: var(--color-primary);
   color: var(--color-on-primary);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-2xl) var(--spacing-4xl);
+  padding: var(--spacing-xl) var(--spacing-3xl);
   box-shadow:
     var(--shadow-2xl),
     0 0 0 2px rgba(43, 157, 238, 0.4);
@@ -519,12 +519,12 @@ body {
 
 .patient-checkin__footer-text {
   font-weight: 700;
-  font-size: var(--font-size-4xl);
+  font-size: var(--font-size-3xl);
   line-height: 1.2;
 }
 
 .patient-checkin__footer-text--large {
-  font-size: var(--font-size-5xl);
+  font-size: var(--font-size-3xl);
 }
 
 /* FAB */
@@ -573,11 +573,11 @@ body {
   }
 
   .patient-checkin__footer-text {
-    font-size: 2rem;
+    /* font-size: 2rem; */
   }
 
   .patient-checkin__footer-text--large {
-    font-size: 2.5rem;
+    /* font-size: 2.5rem; */
   }
 }
 
@@ -650,7 +650,7 @@ body {
 
   .patient-checkin__footer-actions {
     width: 100%;
-    justify-content: center;
+    justify-content: space-between;
   }
 
   .patient-checkin__fab {
@@ -697,7 +697,7 @@ body {
 }
 
 /* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .patient-checkin {
     color-scheme: dark;
   }
@@ -769,7 +769,7 @@ body {
   .patient-checkin__footer-btn--language:hover {
     background-color: var(--color-surface-container-high);
   }
-}
+} */
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
