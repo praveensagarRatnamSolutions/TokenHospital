@@ -2,44 +2,60 @@ const User = require('./auth.model');
 const Hospital = require('../hospital/hospital.model');
 const { generateToken } = require('../../utils/jwt');
 
+const mongoose = require("mongoose");
+
 const registerUser = async (userData) => {
   const { name, email, password, hospitalName, phone } = userData;
 
-  // 1. Check if user already exists
-  const userExists = await User.findOne({ email });
-  if (userExists) {
-    throw new Error("Account already exists with this email");
+  // Start a session for the transaction
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 1. Check if user already exists
+    const userExists = await User.findOne({ email }).session(session);
+    if (userExists) {
+      throw new Error("Account already exists with this email");
+    }
+
+    // 2. Create Admin (Notice the .session(session) passed to all ops)
+    const [admin] = await User.create([{
+      name,
+      email,
+      password,
+      role: "admin",
+    }], { session });
+
+    // 3. Create Hospital
+    const [hospital] = await Hospital.create([{
+      name: hospitalName,
+      email,
+      phone,
+      createdBy: admin._id,
+    }], { session });
+
+    // 4. Link hospital to admin
+    admin.hospitalId = hospital._id;
+    await admin.save({ session });
+
+    // Commit the changes
+    await session.commitTransaction();
+    
+    return {
+      _id: admin._id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+      hospitalId: hospital._id,
+      token: generateToken(admin._id, admin.role, hospital._id),
+    };
+  } catch (error) {
+    // If anything fails, undo every change made during this process
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
   }
-
-  // 2. Create Admin (no hospitalId yet)
-  const admin = await User.create({
-    name,
-    email,
-    password,
-    role: "admin", // ✅ force admin
-  });
-
-  // 3. Create Hospital (tenant)
-  const hospital = await Hospital.create({
-    name: hospitalName,
-    email,
-    phone,
-    createdBy: admin._id,
-  });
-
-  // 4. Link hospital to admin
-  admin.hospitalId = hospital._id;
-  await admin.save();
-
-  // 5. Return response
-  return {
-    _id: admin._id,
-    name: admin.name,
-    email: admin.email,
-    role: admin.role,
-    hospitalId: hospital._id,
-    token: generateToken(admin._id, admin.role, hospital._id),
-  };
 };
 
 const loginUser = async (email, password) => {

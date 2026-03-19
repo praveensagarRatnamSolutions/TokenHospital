@@ -27,9 +27,7 @@ const userSchema = new mongoose.Schema(
     hospitalId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Hospital", // Required for admin/doctor, not required for superadmin
-      required: function () {
-        return this.role !== "superadmin";
-      },
+     
     },
   },
   {

@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { HospitalsList } from '@/components/superadmin/HospitalsList';
 import { HospitalForm } from '@/components/superadmin/HospitalForm';
 import { Hospital, hospitalApi } from '@/services/hospitalApi';
+import { Button } from '@/components/ui/button';
 
 export default function HospitalsPage() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
@@ -29,10 +30,11 @@ export default function HospitalsPage() {
     fetchHospitals();
   }, []);
 
-  const filteredHospitals = hospitals.filter(h =>
-    h.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    h.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    h.address.city.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredHospitals = hospitals.filter(
+    (h) =>
+      h.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      h.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      h.address.city.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleCreate = () => {
@@ -56,18 +58,18 @@ export default function HospitalsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Hospitals Management</h1>
           <p className="text-slate-500">Manage all registered hospitals in the system</p>
         </div>
-        <button
+        <Button
           onClick={handleCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium w-full sm:w-auto"
         >
           <Plus className="w-5 h-5" />
           Add Hospital
-        </button>
+        </Button>
       </div>
 
       <div className="bg-white dark:bg-slate-950 border rounded-xl shadow-sm">

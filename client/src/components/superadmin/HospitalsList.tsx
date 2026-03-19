@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Edit2, Power, AlertCircle, Loader } from 'lucide-react';
 import { Hospital, hospitalApi } from '@/services/hospitalApi';
+import { Button } from '@/components/ui/button';
 
 interface HospitalsListProps {
   hospitals: Hospital[];
@@ -11,7 +12,12 @@ interface HospitalsListProps {
   isLoading?: boolean;
 }
 
-export function HospitalsList({ hospitals, onEdit, onRefresh, isLoading = false }: HospitalsListProps) {
+export function HospitalsList({
+  hospitals,
+  onEdit,
+  onRefresh,
+  isLoading = false,
+}: HospitalsListProps) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,13 +25,13 @@ export function HospitalsList({ hospitals, onEdit, onRefresh, isLoading = false 
     try {
       setActionLoading(hospitalId);
       setError(null);
-      
+
       if (isActive) {
         await hospitalApi.deactivateHospital(hospitalId);
       } else {
         await hospitalApi.activateHospital(hospitalId);
       }
-      
+
       onRefresh();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update hospital status');
@@ -35,14 +41,18 @@ export function HospitalsList({ hospitals, onEdit, onRefresh, isLoading = false 
   };
 
   const handleDelete = async (hospitalId: string) => {
-    if (!confirm('Are you sure you want to delete this hospital? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to delete this hospital? This action cannot be undone.',
+      )
+    ) {
       return;
     }
 
     try {
       setActionLoading(hospitalId);
       setError(null);
-      
+
       await hospitalApi.deleteHospital(hospitalId);
       onRefresh();
     } catch (err: any) {
@@ -63,7 +73,8 @@ export function HospitalsList({ hospitals, onEdit, onRefresh, isLoading = false 
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b bg-slate-50 dark:bg-slate-900">
@@ -90,59 +101,92 @@ export function HospitalsList({ hospitals, onEdit, onRefresh, isLoading = false 
               </tr>
             ) : (
               hospitals.map((hospital) => (
-                <tr key={hospital._id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                <tr
+                  key={hospital._id}
+                  className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-100 dark:border-slate-800"
+                >
                   <td className="px-6 py-4">
-                    <div>
-                      <p className="font-medium">{hospital.name}</p>
-                      <p className="text-xs text-slate-500">{hospital._id.substring(0, 8)}...</p>
+                    <div className="flex flex-col">
+                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                        {hospital.name}
+                      </span>
+                      <span className="text-xs text-slate-500 font-mono uppercase tracking-wider">
+                        ID: {hospital._id.substring(0, 8)}
+                      </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm">{hospital.email}</td>
-                  <td className="px-6 py-4 text-sm">{hospital.phone}</td>
-                  <td className="px-6 py-4 text-sm">{hospital.address.city}</td>
+
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                    {hospital.email}
+                  </td>
+
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                    {hospital.phone}
+                  </td>
+
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                    {hospital.address?.city || 'N/A'}
+                  </td>
+
                   <td className="px-6 py-4">
-                    <span className={`text-xs font-medium px-3 py-1 rounded-full ${
-                      hospital.isActive 
-                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' 
-                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        hospital.isActive
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full mr-1.5 ${hospital.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}
+                      ></span>
                       {hospital.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
+
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => onEdit(hospital)}
                         disabled={actionLoading === hospital._id}
-                        className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg transition-colors disabled:opacity-50"
-                        title="Edit hospital"
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50"
+                        title="Edit Hospital"
                       >
                         <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(hospital._id, hospital.isActive)}
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          handleToggleStatus(hospital._id, hospital.isActive)
+                        }
                         disabled={actionLoading === hospital._id}
-                        className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
-                          hospital.isActive 
-                            ? 'hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-600 dark:text-amber-400' 
-                            : 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+                        className={`p-2 rounded-lg transition-all disabled:opacity-50 ${
+                          hospital.isActive
+                            ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                            : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
                         }`}
-                        title={hospital.isActive ? 'Deactivate hospital' : 'Activate hospital'}
+                        title={hospital.isActive ? 'Deactivate' : 'Activate'}
                       >
                         {actionLoading === hospital._id ? (
-                          <Loader className="w-4 h-4 animate-spin" />
+                          <Loader className="w-4 h-4 animate-spin text-blue-500" />
                         ) : (
                           <Power className="w-4 h-4" />
                         )}
-                      </button>
-                      <button
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleDelete(hospital._id)}
                         disabled={actionLoading === hospital._id}
-                        className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition-colors disabled:opacity-50"
-                        title="Delete hospital"
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+                        title="Delete Hospital"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -150,6 +194,102 @@ export function HospitalsList({ hospitals, onEdit, onRefresh, isLoading = false 
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader className="w-6 h-6 animate-spin text-slate-400" />
+          </div>
+        ) : hospitals.length === 0 ? (
+          <div className="text-center py-8 text-slate-500">No hospitals found</div>
+        ) : (
+          hospitals.map((hospital) => (
+            <div
+              key={hospital._id}
+              className="p-4 bg-white dark:bg-slate-950 border rounded-lg shadow-sm"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-base">{hospital.name}</h3>
+                  <p className="text-xs text-slate-500 font-mono uppercase mt-1">
+                    ID: {hospital._id.substring(0, 8)}
+                  </p>
+                </div>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
+                    hospital.isActive
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full mr-1.5 ${hospital.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}
+                  ></span>
+                  {hospital.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+
+              <div className="space-y-1 mb-3 text-sm text-slate-600 dark:text-slate-400">
+                <p>
+                  <span className="font-medium">Email:</span> {hospital.email}
+                </p>
+                <p>
+                  <span className="font-medium">Phone:</span> {hospital.phone}
+                </p>
+                <p>
+                  <span className="font-medium">City:</span>{' '}
+                  {hospital.address?.city || 'N/A'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 pt-3 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(hospital)}
+                  disabled={actionLoading === hospital._id}
+                  className="flex-1 h-8 text-xs"
+                >
+                  <Edit2 className="w-3 h-3 mr-1" />
+                  Edit
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleToggleStatus(hospital._id, hospital.isActive)}
+                  disabled={actionLoading === hospital._id}
+                  className="flex-1 h-8 text-xs"
+                >
+                  {actionLoading === hospital._id ? (
+                    <>
+                      <Loader className="w-3 h-3 mr-1 animate-spin" />
+                      Loading
+                    </>
+                  ) : (
+                    <>
+                      <Power className="w-3 h-3 mr-1" />
+                      {hospital.isActive ? 'Disable' : 'Enable'}
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(hospital._id)}
+                  disabled={actionLoading === hospital._id}
+                  className="flex-1 h-8 text-xs text-rose-500 hover:text-rose-600"
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </>
   );

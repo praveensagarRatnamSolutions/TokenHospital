@@ -25,8 +25,10 @@ export interface Hospital {
 }
 
 export interface CreateHospitalDto {
-  name: string;
+  hospitalName: string;
+  adminName: string;
   email: string;
+  password?: string;
   phone: string;
   address: {
     street: string;

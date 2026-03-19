@@ -1,12 +1,18 @@
 const { body, validationResult } = require("express-validator");
 
 const createHospitalValidation = [
-  body("name")
+  body("hospitalName")
     .trim()
     .notEmpty()
     .withMessage("Hospital name is required")
     .isLength({ min: 3 })
     .withMessage("Hospital name must be at least 3 characters"),
+   body("adminName")
+    .trim()
+    .notEmpty()
+    .withMessage("Admin name is required")
+    .isLength({ min: 3 })
+    .withMessage("Admin name must be at least 3 characters"),
   body("email")
     .trim()
     .isEmail()

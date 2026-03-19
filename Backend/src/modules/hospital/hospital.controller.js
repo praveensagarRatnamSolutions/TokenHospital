@@ -2,7 +2,7 @@ const hospitalService = require("./hospital.service");
 
 const createHospital = async (req, res) => {
   try {
-    const hospital = await hospitalService.createHospital(
+    const hospital = await hospitalService.createHospitalBySuperAdmin(
       req.body,
       req.user._id,
     );
