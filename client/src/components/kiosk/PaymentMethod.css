@@ -1,0 +1,846 @@
+/* PaymentMethod.css - Industry Standard CSS with BEM methodology */
+
+/* CSS Variables */
+:root {
+  /* Colors */
+  --color-primary: #2b9dee;
+  --color-primary-rgb: 43, 157, 238;
+  --color-primary-light: rgba(43, 157, 238, 0.1);
+  --color-primary-10: rgba(43, 157, 238, 0.1);
+  --color-primary-20: rgba(43, 157, 238, 0.2);
+
+  --color-background-light: #f6f7f8;
+  --color-background-dark: #101a22;
+
+  --color-white: #ffffff;
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+
+  /* Dark mode colors */
+  --color-dark-bg: #101a22;
+  --color-dark-surface: #1e293b;
+  --color-dark-border: #334155;
+  --color-dark-text: #f1f5f9;
+  --color-dark-text-secondary: #94a3b8;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 2.5rem;
+  --spacing-3xl: 3rem;
+  --spacing-4xl: 4rem;
+  --spacing-5xl: 5rem;
+  --spacing-6xl: 6rem;
+
+  /* Typography */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-7xl: 4.5rem;
+  --font-size-8xl: 6rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-primary: 0 10px 15px -3px rgba(var(--color-primary-rgb), 0.3);
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 2rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-base: all 0.3s ease;
+  --transition-transform: transform 0.2s ease;
+  --transition-colors:
+    background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: max(884px, 100dvh);
+  background-color: var(--color-background-light);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+/* Main Container */
+.payment-method {
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--color-background-light);
+  overflow: hidden;
+  font-family: var(--font-family);
+}
+
+.payment-method__container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-2xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark Mode */
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__container {
+    background-color: var(--color-dark-bg);
+    color: var(--color-dark-text);
+  }
+} */
+
+/* Header Section */
+.payment-method__header {
+  padding: var(--spacing-3xl) var(--spacing-2xl) var(--spacing-2xl);
+  border-bottom: 1px solid var(--color-slate-200);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__header {
+    border-bottom-color: var(--color-dark-border);
+  }
+} */
+
+.payment-method__hospital-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.payment-method__hospital-icon-wrapper {
+  background-color: var(--color-primary-light);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+}
+
+.payment-method__hospital-icon {
+  font-size: var(--font-size-5xl);
+}
+
+.payment-method__hospital-name {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--color-slate-900);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__hospital-name {
+    color: var(--color-dark-text);
+  }
+} */
+
+.payment-method__title-section {
+  text-align: center;
+}
+
+.payment-method__title {
+  font-size: var(--font-size-6xl);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-slate-900);
+  margin-bottom: var(--spacing-md);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__title {
+    color: var(--color-dark-text);
+  }
+} */
+
+.payment-method__subtitle {
+  font-size: var(--font-size-2xl);
+  color: var(--color-slate-500);
+  max-width: 42rem;
+  margin: 0 auto;
+  font-weight: 500;
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__subtitle {
+    color: var(--color-dark-text-secondary);
+  }
+} */
+
+/* Patient Summary Section */
+.payment-method__summary {
+  padding: var(--spacing-2xl) var(--spacing-3xl);
+  background-color: var(--color-slate-50);
+  border-bottom: 1px solid var(--color-slate-200);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__summary {
+    background-color: rgba(30, 41, 59, 0.3);
+    border-bottom-color: var(--color-dark-border);
+  }
+} */
+
+.payment-method__summary-container {
+  max-width: 64rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-2xl);
+}
+
+@media (min-width: 768px) {
+  .payment-method__summary-container {
+    flex-direction: row;
+  }
+}
+
+.payment-method__appointment-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2xl);
+}
+
+.payment-method__token {
+  display: flex;
+  flex-direction: column;
+}
+
+.payment-method__token-label {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-slate-400);
+  margin-bottom: var(--spacing-xs);
+}
+/* 
+@media (prefers-color-scheme: dark) {
+  .payment-method__token-label {
+    color: var(--color-slate-500);
+  }
+} */
+
+.payment-method__token-value {
+  font-size: var(--font-size-4xl);
+  font-weight: 900;
+  color: var(--color-primary);
+}
+
+.payment-method__divider {
+  height: 3rem;
+  width: 1px;
+  background-color: var(--color-slate-300);
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .payment-method__divider {
+    display: block;
+  }
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__divider {
+    background-color: var(--color-dark-border);
+  }
+} */
+
+.payment-method__doctor-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.payment-method__doctor-detail,
+.payment-method__department-detail {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.payment-method__doctor-icon,
+.payment-method__department-icon {
+  font-size: var(--font-size-2xl);
+  color: var(--color-slate-400);
+}
+
+.payment-method__doctor-name {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--color-slate-700);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__doctor-name {
+    color: var(--color-dark-text);
+  }
+} */
+
+.payment-method__department-name {
+  font-size: var(--font-size-xl);
+  color: var(--color-slate-500);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__department-name {
+    color: var(--color-dark-text-secondary);
+  }
+} */
+
+.payment-method__price {
+  background-color: var(--color-white);
+  padding: var(--spacing-md) var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-slate-100);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .payment-method__price {
+    align-items: flex-end;
+  }
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__price {
+    background-color: var(--color-dark-surface);
+    border-color: var(--color-dark-border);
+  }
+} */
+
+.payment-method__price-label {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-slate-400);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__price-label {
+    color: var(--color-slate-500);
+  }
+} */
+
+.payment-method__price-value {
+  font-size: var(--font-size-5xl);
+  font-weight: 900;
+  color: var(--color-slate-900);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__price-value {
+    color: var(--color-dark-text);
+  }
+} */
+
+/* Main Section */
+.payment-method__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  overflow-y: auto;
+}
+
+.payment-method__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-3xl);
+  width: 100%;
+  max-width: 64rem;
+}
+
+@media (min-width: 768px) {
+  .payment-method__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Payment Cards */
+.payment-method__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-2xl);
+  background-color: var(--color-white);
+  border: 4px solid var(--color-slate-100);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  transition: var(--transition-base);
+  text-align: center;
+  height: 500px;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__card {
+    background-color: var(--color-dark-surface);
+    border-color: var(--color-dark-border);
+  }
+} */
+
+.payment-method__card--selected {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-primary);
+}
+
+.payment-method__card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.payment-method__card:active {
+  transform: scale(0.98);
+}
+
+.payment-method__card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.payment-method__card-icon-wrapper {
+  width: 100%;
+  height: 16rem;
+  background-color: var(--color-slate-50);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__card-icon-wrapper {
+    background-color: var(--color-dark-bg);
+  }
+} */
+
+.payment-method__card-icon-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-primary-10);
+  transition: var(--transition-colors);
+}
+
+.payment-method__card:hover .payment-method__card-icon-overlay {
+  background-color: var(--color-primary-20);
+}
+
+.payment-method__card-icon {
+  font-size: 7.5rem;
+  color: var(--color-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.payment-method__card-content {
+  width: 100%;
+}
+
+.payment-method__card-title {
+  font-size: var(--font-size-4xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-slate-900);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__card-title {
+    color: var(--color-dark-text);
+  }
+} */
+
+.payment-method__card-description {
+  font-size: var(--font-size-xl);
+  color: var(--color-slate-500);
+  font-weight: 500;
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__card-description {
+    color: var(--color-dark-text-secondary);
+  }
+} */
+
+/* Footer Section */
+.payment-method__footer {
+  padding: var(--spacing-3xl);
+  border-top: 1px solid var(--color-slate-200);
+  background-color: var(--color-slate-50);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__footer {
+    border-top-color: var(--color-dark-border);
+    background-color: rgba(30, 41, 59, 0.5);
+  }
+} */
+
+.payment-method__footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 64rem;
+  margin: 0 auto;
+  gap: var(--spacing-2xl);
+}
+
+.payment-method__footer-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  transition: var(--transition-base);
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+.payment-method__footer-btn--back {
+  background-color: var(--color-white);
+  border: 2px solid var(--color-slate-200);
+  color: var(--color-slate-700);
+  box-shadow: var(--shadow-sm);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__footer-btn--back {
+    background-color: var(--color-dark-surface);
+    border-color: var(--color-dark-border);
+    color: var(--color-dark-text);
+  }
+} */
+
+.payment-method__footer-btn--back:hover {
+  background-color: var(--color-slate-100);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__footer-btn--back:hover {
+    background-color: var(--color-slate-800);
+  }
+} */
+
+.payment-method__footer-btn--continue {
+  flex: 1.5;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: var(--shadow-primary);
+}
+
+.payment-method__footer-btn--continue:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.payment-method__footer-btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.payment-method__footer-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.payment-method__footer-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.payment-method__footer-icon {
+  font-size: var(--font-size-4xl);
+}
+
+/* Help Button */
+.payment-method__help-btn {
+  position: absolute;
+  bottom: 10rem;
+  right: var(--spacing-3xl);
+  width: 6rem;
+  height: 6rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-slate-900);
+  color: var(--color-white);
+  box-shadow: var(--shadow-2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-transform);
+  cursor: pointer;
+  border: none;
+  z-index: 10;
+}
+
+/* @media (prefers-color-scheme: dark) {
+  .payment-method__help-btn {
+    background-color: var(--color-primary);
+  }
+} */
+
+.payment-method__help-btn:active {
+  transform: scale(0.9);
+}
+
+.payment-method__help-btn:hover {
+  transform: scale(1.05);
+}
+
+.payment-method__help-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.payment-method__help-icon {
+  font-size: var(--font-size-5xl);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .payment-method__title {
+    font-size: var(--font-size-5xl);
+  }
+
+  .payment-method__card-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .payment-method__card-icon {
+    font-size: 6rem;
+  }
+
+  .payment-method__help-btn {
+    width: 5rem;
+    height: 5rem;
+    bottom: 8rem;
+    right: var(--spacing-2xl);
+  }
+
+  .payment-method__help-icon {
+    font-size: var(--font-size-4xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .payment-method__header {
+    padding: var(--spacing-2xl) var(--spacing-lg);
+  }
+
+  .payment-method__title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .payment-method__subtitle {
+    font-size: var(--font-size-xl);
+  }
+
+  .payment-method__summary {
+    padding: var(--spacing-xl) var(--spacing-lg);
+  }
+
+  .payment-method__token-value {
+    font-size: var(--font-size-3xl);
+  }
+
+  .payment-method__price-value {
+    font-size: var(--font-size-4xl);
+  }
+
+  .payment-method__main {
+    padding: var(--spacing-lg);
+  }
+
+  .payment-method__card {
+    height: 450px;
+    padding: var(--spacing-xl);
+  }
+
+  .payment-method__card-icon-wrapper {
+    height: 14rem;
+  }
+
+  .payment-method__footer {
+    padding: var(--spacing-2xl);
+  }
+
+  .payment-method__footer-btn {
+    font-size: var(--font-size-2xl);
+    padding: var(--spacing-xl);
+  }
+
+  .payment-method__help-btn {
+    bottom: 6rem;
+    right: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-method__hospital-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .payment-method__card {
+    height: 400px;
+  }
+
+  .payment-method__card-icon-wrapper {
+    height: 12rem;
+  }
+
+  .payment-method__card-icon {
+    font-size: 5rem;
+  }
+
+  .payment-method__footer-container {
+    flex-direction: column;
+  }
+
+  .payment-method__footer-btn {
+    width: 100%;
+  }
+
+  .payment-method__help-btn {
+    width: 4rem;
+    height: 4rem;
+    bottom: 4rem;
+  }
+
+  .payment-method__help-icon {
+    font-size: var(--font-size-3xl);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .payment-method__card,
+  .payment-method__footer-btn,
+  .payment-method__help-btn,
+  .payment-method__card-icon-overlay {
+    transition: none;
+    animation: none;
+  }
+
+  .payment-method__card:hover,
+  .payment-method__help-btn:hover {
+    transform: none;
+  }
+
+  .payment-method__card:active,
+  .payment-method__footer-btn:active,
+  .payment-method__help-btn:active {
+    transform: none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .payment-method {
+    background: none;
+    height: auto;
+    overflow: visible;
+  }
+
+  .payment-method__container {
+    box-shadow: none;
+    max-width: none;
+  }
+
+  .payment-method__footer,
+  .payment-method__help-btn,
+  .payment-method__card-icon-overlay {
+    display: none;
+  }
+
+  .payment-method__card {
+    border: 2px solid var(--color-slate-300);
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .payment-method__card {
+    border: 4px solid var(--color-slate-900);
+  }
+
+  .payment-method__card--selected {
+    border-color: var(--color-primary);
+  }
+
+  .payment-method__help-btn {
+    border: 2px solid var(--color-white);
+  }
+}
