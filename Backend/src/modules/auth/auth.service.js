@@ -1,35 +1,45 @@
 const User = require('./auth.model');
+const Hospital = require('../hospital/hospital.model');
 const { generateToken } = require('../../utils/jwt');
 
 const registerUser = async (userData) => {
-    const { name, email, password, role, hospitalId } = userData;
+  const { name, email, password, hospitalName, phone } = userData;
 
-    // Check if user exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-        throw new Error('User already exists with this email');
-    }
+  // 1. Check if user already exists
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    throw new Error("Account already exists with this email");
+  }
 
-    const user = await User.create({
-        name,
-        email,
-        password,
-        role,
-        hospitalId,
-    });
+  // 2. Create Admin (no hospitalId yet)
+  const admin = await User.create({
+    name,
+    email,
+    password,
+    role: "admin", // ✅ force admin
+  });
 
-    if (user) {
-        return {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            hospitalId: user.hospitalId,
-            token: generateToken(user._id, user.role, user.hospitalId),
-        };
-    } else {
-        throw new Error('Invalid user data');
-    }
+  // 3. Create Hospital (tenant)
+  const hospital = await Hospital.create({
+    name: hospitalName,
+    email,
+    phone,
+    createdBy: admin._id,
+  });
+
+  // 4. Link hospital to admin
+  admin.hospitalId = hospital._id;
+  await admin.save();
+
+  // 5. Return response
+  return {
+    _id: admin._id,
+    name: admin.name,
+    email: admin.email,
+    role: admin.role,
+    hospitalId: hospital._id,
+    token: generateToken(admin._id, admin.role, hospital._id),
+  };
 };
 
 const loginUser = async (email, password) => {

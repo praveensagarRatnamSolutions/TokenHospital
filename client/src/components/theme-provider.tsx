@@ -12,7 +12,9 @@ function ThemeProvider({
       attribute="class"
       defaultTheme="system"
       enableSystem
+      enableColorScheme
       disableTransitionOnChange
+      storageKey="hospital-theme"
       {...props}
     >
       <ThemeHotkey />
@@ -43,11 +45,12 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.metaKey || event.ctrlKey || event.altKey) {
+      // Only trigger on Ctrl+Shift+L (or Cmd+Shift+L on Mac)
+      if (!((event.ctrlKey || event.metaKey) && event.shiftKey)) {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      if (event.key.toLowerCase() !== "l") {
         return
       }
 
@@ -55,6 +58,7 @@ function ThemeHotkey() {
         return
       }
 
+      event.preventDefault()
       setTheme(resolvedTheme === "dark" ? "light" : "dark")
     }
 

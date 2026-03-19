@@ -1,8 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authController = require('./auth.controller');
-const { registerValidation, loginValidation, validateRequest } = require('./auth.validations');
-const { protect, authorize } = require('../../middlewares/authMiddleware');
+const authController = require("./auth.controller");
+const {
+  registerValidation,
+  loginValidation,
+  validateRequest,
+} = require("./auth.validations");
+const { protect, authorize } = require("../../middlewares/authMiddleware");
 
 /**
  * @swagger
@@ -15,7 +19,7 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Register a new user (Admin/Doctor)
+ *     summary: Register a new user (SuperAdmin/Admin/Doctor)
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -28,7 +32,6 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *               - email
  *               - password
  *               - role
- *               - hospitalId
  *             properties:
  *               name:
  *                 type: string
@@ -39,16 +42,22 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *                 minLength: 6
  *               role:
  *                 type: string
- *                 enum: [admin, doctor]
+ *                 enum: [superadmin, admin, doctor]
  *               hospitalId:
  *                 type: string
+ *                 description: Required for admin and doctor roles, not required for superadmin
  *     responses:
  *       201:
  *         description: User registered successfully
  *       400:
  *         description: Validation errors or User already exists
  */
-router.post('/register', registerValidation, validateRequest, authController.register);
+router.post(
+  "/register",
+  registerValidation,
+  validateRequest,
+  authController.register,
+);
 
 /**
  * @swagger
@@ -76,7 +85,7 @@ router.post('/register', registerValidation, validateRequest, authController.reg
  *       401:
  *         description: Invalid email or password
  */
-router.post('/login', loginValidation, validateRequest, authController.login);
+router.post("/login", loginValidation, validateRequest, authController.login);
 
 /**
  * @swagger
@@ -92,6 +101,6 @@ router.post('/login', loginValidation, validateRequest, authController.login);
  *       401:
  *         description: Not authorized
  */
-router.get('/me', protect, authController.getMe);
+router.get("/me", protect, authController.getMe);
 
 module.exports = router;

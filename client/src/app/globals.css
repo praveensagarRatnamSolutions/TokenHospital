@@ -48,72 +48,99 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Light Mode - Professional Medical Theme */
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.15 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
+  --popover-foreground: oklch(0.15 0 0);
+
+  /* Medical Blue Primary */
+  --primary: oklch(0.45 0.12 260);
+  --primary-foreground: oklch(0.98 0 0);
+
+  /* Healthcare Teal Secondary */
+  --secondary: oklch(0.52 0.13 255);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  --muted: oklch(0.92 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+
+  /* Green for positive actions */
+  --accent: oklch(0.55 0.16 145);
+  --accent-foreground: oklch(0.98 0 0);
+
+  --destructive: oklch(0.6 0.25 30);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.94 0 0);
+  --ring: oklch(0.45 0.12 260);
+
+  /* Healthcare-themed charts */
+  --chart-1: oklch(0.55 0.16 145);
+  --chart-2: oklch(0.45 0.12 260);
+  --chart-3: oklch(0.52 0.13 255);
+  --chart-4: oklch(0.6 0.25 30);
+  --chart-5: oklch(0.65 0.1 330);
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Sidebar - Light Blue background */
+  --sidebar: oklch(0.97 0.02 260);
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-primary: oklch(0.45 0.12 260);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.55 0.16 145);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-ring: oklch(0.45 0.12 260);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Dark Mode - Professional Medical Theme */
+  --background: oklch(0.12 0 0);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.18 0.02 260);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.18 0.02 260);
+  --popover-foreground: oklch(0.95 0 0);
+
+  /* Medical Blue Primary - lighter for dark mode */
+  --primary: oklch(0.65 0.12 260);
+  --primary-foreground: oklch(0.12 0 0);
+
+  /* Healthcare Teal Secondary */
+  --secondary: oklch(0.65 0.13 255);
+  --secondary-foreground: oklch(0.12 0 0);
+
+  --muted: oklch(0.26 0 0);
+  --muted-foreground: oklch(0.7 0 0);
+
+  /* Green for positive actions - adjusted for dark mode */
+  --accent: oklch(0.65 0.16 145);
+  --accent-foreground: oklch(0.12 0 0);
+
+  --destructive: oklch(0.7 0.22 30);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 18%);
+  --ring: oklch(0.65 0.12 260);
+
+  /* Healthcare-themed charts for dark mode */
+  --chart-1: oklch(0.65 0.16 145);
+  --chart-2: oklch(0.65 0.12 260);
+  --chart-3: oklch(0.65 0.13 255);
+  --chart-4: oklch(0.7 0.22 30);
+  --chart-5: oklch(0.68 0.15 330);
+
+  /* Sidebar - Dark Blue background */
+  --sidebar: oklch(0.16 0.02 260);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.65 0.12 260);
+  --sidebar-primary-foreground: oklch(0.12 0 0);
+  --sidebar-accent: oklch(0.65 0.16 145);
+  --sidebar-accent-foreground: oklch(0.12 0 0);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.65 0.12 260);
 }
 
 @layer base {
@@ -125,5 +152,84 @@
   }
   html {
     @apply font-sans;
+  }
+
+  /* Medical Theme Enhancements */
+  button,
+  [role="button"] {
+    @apply transition-all duration-200;
+  }
+
+  /* Primary action buttons - Medical Blue */
+  .btn-primary,
+  button.bg-primary,
+  [role="button"].bg-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg;
+  }
+
+  /* Secondary action buttons - Teal */
+  .btn-secondary,
+  button.bg-secondary,
+  [role="button"].bg-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-md hover:shadow-lg;
+  }
+
+  /* Cards with medical styling */
+  .card,
+  [role="region"],
+  section {
+    @apply bg-card text-card-foreground;
+  }
+
+  /* Input fields - Clean medical style */
+  input,
+  textarea,
+  select {
+    @apply bg-input border border-input rounded-md transition-colors duration-200;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-primary ring-1 ring-primary/30;
+  }
+
+  /* Headers with medical blue accent */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-foreground font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-3xl font-bold;
+  }
+
+  h2 {
+    @apply text-2xl font-bold text-primary/90;
+  }
+
+  h3 {
+    @apply text-xl font-semibold text-primary/80;
+  }
+
+  /* Health status indicators */
+  .badge-success {
+    @apply bg-accent/20 text-accent border border-accent/30 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-error {
+    @apply bg-destructive/20 text-destructive border border-destructive/30 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-warning {
+    @apply bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-500/30 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-info {
+    @apply bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-sm font-medium;
   }
 }

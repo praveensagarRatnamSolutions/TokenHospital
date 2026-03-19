@@ -3,6 +3,7 @@
 import { Search, Bell, User, LogOut } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logout } from '@/store/slices/authSlice';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function Topbar() {
   const dispatch = useAppDispatch();
@@ -22,6 +23,8 @@ export function Topbar() {
       </div>
       
       <div className="flex items-center gap-4">
+        <ThemeToggle />
+        
         <button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-900 relative">
           <Bell className="w-5 h-5 text-slate-600 dark:text-slate-400" />
           <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-950"></span>

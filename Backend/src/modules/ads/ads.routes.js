@@ -54,7 +54,15 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *       201:
  *         description: Ad created with presigned upload URL
  */
-router.post('/', protect, authorize('admin'), createAdValidation, validateRequest, adsController.createAd);
+
+router.post(
+  '/',
+  protect,
+  authorize('admin'),
+  createAdValidation,
+  validateRequest,
+  adsController.createAd
+);
 
 /**
  * @swagger
@@ -119,7 +127,14 @@ router.get('/', protect, adsController.getAds);
  *       404:
  *         description: Ad not found
  */
-router.put('/:id', protect, authorize('admin'), updateAdValidation, validateRequest, adsController.updateAd);
+router.put(
+  '/:id',
+  protect,
+  authorize('admin'),
+  updateAdValidation,
+  validateRequest,
+  adsController.updateAd
+);
 
 /**
  * @swagger

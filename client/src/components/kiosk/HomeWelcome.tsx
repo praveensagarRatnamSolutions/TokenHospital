@@ -18,10 +18,10 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
   ];
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white">
+    <div className="flex-1 flex flex-col h-full bg-background dark:bg-slate-950">
       {/* Header / Carousel Section */}
       <header className="relative w-full overflow-hidden h-[80vh] flex flex-col justify-between">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/80 to-teal-600/60 mix-blend-multiply z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/80 to-teal-600/60 dark:from-blue-600/70 dark:to-teal-700/50 mix-blend-multiply z-10"></div>
         <div 
           className="absolute inset-0 bg-cover bg-center" 
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2053&auto=format&fit=crop')" }}
@@ -61,41 +61,41 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
       </header>
 
       {/* Bottom Section: Token Queue Progress */}
-      <footer className="bg-white border-t border-slate-200 p-4 h-[20vh] flex flex-col justify-center">
+      <footer className="bg-card dark:bg-slate-900 border-t border-border p-4 h-[20vh] flex flex-col justify-center">
         <div className="relative flex justify-between items-start max-w-6xl mx-auto w-full px-12">
           {/* Progress Line */}
-          <div className="absolute top-8 left-20 right-20 h-1 bg-slate-200 z-0">
-            <div className="h-full bg-teal-600 w-1/3"></div>
+          <div className="absolute top-8 left-20 right-20 h-1 bg-slate-200 dark:bg-slate-700 z-0">
+            <div className="h-full bg-teal-600 dark:bg-teal-500 w-1/3"></div>
           </div>
 
           {queueProgress.map((item, index) => (
             <div key={index} className={`relative z-10 flex flex-col items-center w-40 ${item.status === 'Completed' ? 'opacity-50' : ''}`}>
               {item.current ? (
-                <div className="w-24 h-24 rounded-full bg-teal-600 flex items-center justify-center mb-4 shadow-xl shadow-teal-600/40 ring-8 ring-teal-600/20 transition-transform">
+                <div className="w-24 h-24 rounded-full bg-teal-600 dark:bg-teal-500 flex items-center justify-center mb-4 shadow-xl shadow-teal-600/40 dark:shadow-teal-500/30 ring-8 ring-teal-600/20 dark:ring-teal-500/20 transition-transform">
                   <span className="text-white text-3xl font-black">{item.token}</span>
                 </div>
               ) : item.emergency ? (
-                <div className="w-20 h-20 rounded-full bg-rose-500 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30 ring-8 ring-rose-500/10 text-white font-black">
+                <div className="w-20 h-20 rounded-full bg-rose-500 dark:bg-rose-600 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/30 dark:shadow-rose-600/20 ring-8 ring-rose-500/10 dark:ring-rose-600/10 text-white font-black">
                   {item.token}
                 </div>
               ) : (
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 border-2 ${item.status === 'Completed' ? 'bg-slate-200' : 'bg-blue-100 border-blue-200'}`}>
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 border-2 ${item.status === 'Completed' ? 'bg-slate-200 dark:bg-slate-700' : 'bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-700'}`}>
                   {item.status === 'Completed' ? (
-                    <span className="material-symbols-outlined text-slate-500 text-3xl">check</span>
+                    <span className="material-symbols-outlined text-slate-500 dark:text-slate-400 text-3xl">check</span>
                   ) : (
-                    <span className="text-blue-600 text-xl font-bold">{item.token}</span>
+                    <span className="text-blue-600 dark:text-blue-400 text-xl font-bold">{item.token}</span>
                   )}
                 </div>
               )}
-              <span className={`text-lg font-bold ${item.current ? 'text-teal-600 uppercase' : item.emergency ? 'text-rose-500' : 'text-slate-400'}`}>
+              <span className={`text-lg font-bold ${item.current ? 'text-teal-600 dark:text-teal-400 uppercase' : item.emergency ? 'text-rose-500 dark:text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>
                 {item.status}
               </span>
               {(item.counter || item.est) && (
-                <span className="text-sm font-medium text-slate-500 uppercase tracking-widest">
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   {item.counter || `Est. ${item.est}`}
                 </span>
               )}
-              {item.status === 'Completed' && <span className="text-sm font-bold text-slate-400">{item.token}</span>}
+              {item.status === 'Completed' && <span className="text-sm font-bold text-slate-400 dark:text-slate-500">{item.token}</span>}
             </div>
           ))}
         </div>

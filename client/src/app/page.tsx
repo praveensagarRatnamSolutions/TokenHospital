@@ -40,10 +40,14 @@ export default function HomePage() {
         </nav>
 
         <div className="space-x-2">
-          <Button variant="outline">Login</Button>
-          <Button className="bg-blue-700 hover:bg-blue-800 text-white">
-            Get Started
-          </Button>
+          <a href="/login">
+            <Button variant="outline">Login</Button>
+          </a>
+          <a href="/register">
+            <Button className="bg-blue-700 hover:bg-blue-800 text-white">
+              Get Started
+            </Button>
+          </a>
         </div>
       </header>
 
