@@ -3,7 +3,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
-import { MdKeyboardDoubleArrowUp, MdOutlineMedicalServices } from 'react-icons/md';
+import { DoubleArrowUp, MedicalServices } from '../icons';
 
 import './HomeWelcome.css';
 
@@ -30,7 +30,7 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
         <div className="home-welcome__content">
           <div className="home-welcome__brand">
             <span className="material-symbols-outlined home-welcome__brand-icon">
-              <MdOutlineMedicalServices />
+              <MedicalServices />
             </span>
             <div className="home-welcome__brand-divider"></div>
           </div>
@@ -55,7 +55,7 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
         <div className="home-welcome__cta" onClick={onStart}>
           <div className="home-welcome__cta-button">
             <span className="home-welcome__cta-icon">
-              <MdKeyboardDoubleArrowUp />
+              <DoubleArrowUp />
             </span>
             <span className="home-welcome__cta-text">Tap to get token</span>
           </div>

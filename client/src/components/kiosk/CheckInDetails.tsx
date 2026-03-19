@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+
 import {
-  MdOutlinePerson,
-  MdCalendarToday,
-  MdOutlineMonitorWeight,
-  MdOutlineLocalPhone,
-  MdOutlineMedicalServices,
-  MdHelpOutline,
-  MdOutlineCheckCircle,
-  MdOutlineArrowBack,
-  MdOutlineBackspace,
-} from 'react-icons/md';
+  MedicalServices,
+  OutlinePerson,
+  Calendar,
+  Monitor,
+  Phone,
+  Help,
+  Check,
+  ArrowBack,
+  Backspace,
+} from '../icons';
 
 import './CheckInDetails.css';
 
@@ -108,7 +109,7 @@ export default function PatientCheckin({}: IProps) {
         <div className="patient-checkin__brand">
           <div className="patient-checkin__brand-icon-wrapper">
             <span className="material-symbols-outlined patient-checkin__brand-icon">
-              <MdOutlineMedicalServices />
+              <MedicalServices />
             </span>
           </div>
           <div>
@@ -118,7 +119,7 @@ export default function PatientCheckin({}: IProps) {
         </div>
         <div className="patient-checkin__help">
           <span className="material-symbols-outlined patient-checkin__help-icon">
-            <MdHelpOutline />
+            <Help />
           </span>
         </div>
       </header>
@@ -143,7 +144,7 @@ export default function PatientCheckin({}: IProps) {
                 <label className="patient-checkin__label">Full Name</label>
                 <div className="patient-checkin__input-wrapper">
                   <span className="material-symbols-outlined patient-checkin__input-icon">
-                    <MdOutlinePerson />
+                    <OutlinePerson />
                   </span>
                   <input
                     className="patient-checkin__input"
@@ -162,7 +163,7 @@ export default function PatientCheckin({}: IProps) {
                   <label className="patient-checkin__label">Age</label>
                   <div className="patient-checkin__input-wrapper">
                     <span className="material-symbols-outlined patient-checkin__input-icon">
-                      <MdCalendarToday />
+                      <Calendar />
                     </span>
                     <input
                       className="patient-checkin__input"
@@ -180,7 +181,7 @@ export default function PatientCheckin({}: IProps) {
                   <label className="patient-checkin__label">Weight (kg)</label>
                   <div className="patient-checkin__input-wrapper">
                     <span className="material-symbols-outlined patient-checkin__input-icon">
-                      <MdOutlineMonitorWeight />
+                      <Monitor />
                     </span>
                     <input
                       className="patient-checkin__input"
@@ -199,7 +200,7 @@ export default function PatientCheckin({}: IProps) {
                 <label className="patient-checkin__label">Phone Number</label>
                 <div className="patient-checkin__input-wrapper">
                   <span className="material-symbols-outlined patient-checkin__input-icon patient-checkin__input-icon--active">
-                    <MdOutlineLocalPhone />
+                    <Phone />
                   </span>
                   {/* <div className="patient-checkin__phone-display">{phoneNumber}</div> */}
                   <input
@@ -216,7 +217,7 @@ export default function PatientCheckin({}: IProps) {
                     aria-label="Clear phone number"
                   >
                     <span className="material-symbols-outlined patient-checkin__clear-icon">
-                      <MdOutlineBackspace />
+                      <Backspace />
                     </span>
                   </button>
                 </div>
@@ -293,7 +294,7 @@ export default function PatientCheckin({}: IProps) {
             onClick={handleBack}
           >
             <span className="material-symbols-outlined patient-checkin__footer-icon">
-              <MdOutlineArrowBack />
+              <ArrowBack />
             </span>
             <span className="patient-checkin__footer-text">Back</span>
           </button>
@@ -306,7 +307,7 @@ export default function PatientCheckin({}: IProps) {
               Confirm
             </span>
             <span className="material-symbols-outlined patient-checkin__footer-icon patient-checkin__footer-icon--large">
-              <MdOutlineCheckCircle />
+              <Check />
             </span>
           </button>
         </div>
