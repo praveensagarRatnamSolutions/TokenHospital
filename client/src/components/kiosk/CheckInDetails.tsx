@@ -21,11 +21,12 @@ interface IProps {
 }
 
 export default function PatientCheckin({}: IProps) {
-  const [phoneNumber, setPhoneNumber] = useState('(555) 012-3456');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     age: '',
     weight: '',
+    phoneNumber: '',
   });
 
   const handleNumpadClick = (value: string) => {
@@ -196,11 +197,19 @@ export default function PatientCheckin({}: IProps) {
               {/* Phone Number Display */}
               <div className="patient-checkin__field">
                 <label className="patient-checkin__label">Phone Number</label>
-                <div className="patient-checkin__input-wrapper patient-checkin__input-wrapper--phone">
+                <div className="patient-checkin__input-wrapper">
                   <span className="material-symbols-outlined patient-checkin__input-icon patient-checkin__input-icon--active">
                     <MdOutlineLocalPhone />
                   </span>
-                  <div className="patient-checkin__phone-display">{phoneNumber}</div>
+                  {/* <div className="patient-checkin__phone-display">{phoneNumber}</div> */}
+                  <input
+                    className="patient-checkin__input"
+                    placeholder="00000000000"
+                    type="number"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                  />
                   <button
                     className="patient-checkin__clear-button"
                     onClick={handleClearPhone}
@@ -269,16 +278,6 @@ export default function PatientCheckin({}: IProps) {
 
       {/* BottomNavBar / Actions */}
       <footer className="patient-checkin__footer">
-        <button
-          className="patient-checkin__footer-btn patient-checkin__footer-btn--back"
-          onClick={handleBack}
-        >
-          <span className="material-symbols-outlined patient-checkin__footer-icon">
-            <MdOutlineArrowBack />
-          </span>
-          <span className="patient-checkin__footer-text">Back</span>
-        </button>
-
         <div className="patient-checkin__footer-actions">
           {/* <button
             className="patient-checkin__footer-btn patient-checkin__footer-btn--language"
@@ -289,6 +288,15 @@ export default function PatientCheckin({}: IProps) {
             </span>
             <span className="patient-checkin__footer-text">Language</span>
           </button> */}
+          <button
+            className="patient-checkin__footer-btn patient-checkin__footer-btn--back"
+            onClick={handleBack}
+          >
+            <span className="material-symbols-outlined patient-checkin__footer-icon">
+              <MdOutlineArrowBack />
+            </span>
+            <span className="patient-checkin__footer-text">Back</span>
+          </button>
 
           <button
             className="patient-checkin__footer-btn patient-checkin__footer-btn--confirm"

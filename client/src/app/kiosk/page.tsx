@@ -16,7 +16,7 @@ import CheckInDetails from '@/components/kiosk/CheckInDetails';
 type KioskStep = 'HOME' | 'CHECKIN' | 'DEPARTMENT' | 'DOCTOR' | 'PAYMENT' | 'TOKEN';
 
 export default function KioskPage() {
-  const [step, setStep] = useState<KioskStep>('HOME');
+  const [step, setStep] = useState<KioskStep>('CHECKIN');
   const dispatch = useAppDispatch();
   const tokenData = useAppSelector((state) => state.token);
 
