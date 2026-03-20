@@ -185,17 +185,6 @@ export default function PaymentMethod({
             </button>
           </div>
         </footer>
-
-        {/* Help Button Floating */}
-        {/* <button
-          className="payment-method__help-btn"
-          onClick={handleHelp}
-          aria-label="Help"
-        >
-          <span className="material-symbols-outlined payment-method__help-icon">
-            help_outline
-          </span>
-        </button> */}
       </div>
     </div>
   );

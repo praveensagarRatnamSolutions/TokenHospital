@@ -66,7 +66,6 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
       {/* Bottom Section: Token Queue Progress */}
       <footer className="home-welcome__footer">
         <div className="home-welcome__queue">
-          {/* Progress Line */}
           <div className="home-welcome__progress-line">
             <div className="home-welcome__progress-line-fill"></div>
           </div>

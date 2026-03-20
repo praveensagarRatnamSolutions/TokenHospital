@@ -1,0 +1,241 @@
+/* Button.css */
+
+.patient-checkin__footer-btn {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition-transform), var(--transition-base);
+  font-family: var(--font-family);
+  position: relative;
+  overflow: hidden;
+}
+
+.patient-checkin__footer-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.patient-checkin__footer-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.patient-checkin__footer-btn--full-width {
+  width: 100%;
+}
+
+/* Size variants */
+.patient-checkin__footer-btn--small {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  gap: var(--spacing-sm);
+}
+
+.patient-checkin__footer-btn--medium {
+  padding: var(--spacing-md) var(--spacing-2xl);
+  gap: var(--spacing-md);
+}
+
+.patient-checkin__footer-btn--large {
+  padding: var(--spacing-xl) var(--spacing-3xl);
+  gap: var(--spacing-lg);
+}
+
+/* Variant styles */
+.patient-checkin__footer-btn--back {
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-secondary);
+}
+
+.patient-checkin__footer-btn--confirm {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    var(--shadow-2xl),
+    0 0 0 2px rgba(43, 157, 238, 0.4);
+}
+
+.patient-checkin__footer-btn--primary {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.patient-checkin__footer-btn--secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-on-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.patient-checkin__footer-btn--outline {
+  background-color: transparent;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: var(--radius-lg);
+}
+
+/* Hover effects */
+.patient-checkin__footer-btn--back:hover:not(:disabled) {
+  background-color: var(--color-surface-variant);
+  border-color: var(--color-outline);
+}
+
+.patient-checkin__footer-btn--confirm:hover:not(:disabled),
+.patient-checkin__footer-btn--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-2xl);
+}
+
+.patient-checkin__footer-btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-secondary-dark);
+}
+
+.patient-checkin__footer-btn--outline:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* Icon styles */
+.patient-checkin__footer-icon {
+  font-size: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.patient-checkin__footer-icon svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
+.patient-checkin__footer-icon--start {
+  margin-right: var(--spacing-xs);
+}
+
+.patient-checkin__footer-icon--end {
+  margin-left: var(--spacing-xs);
+}
+
+/* Icon sizes */
+.patient-checkin__footer-icon--small {
+  font-size: 1.5rem;
+}
+
+.patient-checkin__footer-icon--medium {
+  font-size: 2rem;
+}
+
+.patient-checkin__footer-icon--large {
+  font-size: 2.5rem;
+}
+
+/* Text styles */
+.patient-checkin__footer-text {
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Text sizes */
+.patient-checkin__footer-text--small {
+  font-size: var(--font-size-xl);
+}
+
+.patient-checkin__footer-text--medium {
+  font-size: var(--font-size-2xl);
+}
+
+.patient-checkin__footer-text--large {
+  font-size: var(--font-size-3xl);
+}
+
+/* Text colors based on variant */
+.patient-checkin__footer-text--back {
+  color: var(--color-secondary);
+}
+
+.patient-checkin__footer-text--confirm,
+.patient-checkin__footer-text--primary {
+  color: var(--color-on-primary);
+}
+
+.patient-checkin__footer-text--secondary {
+  color: var(--color-on-secondary);
+}
+
+.patient-checkin__footer-text--outline {
+  color: var(--color-primary);
+}
+
+.patient-checkin__footer-btn--outline:hover .patient-checkin__footer-text--outline {
+  color: var(--color-on-primary);
+}
+
+/* Loading state */
+.patient-checkin__footer-btn--loading {
+  position: relative;
+  cursor: wait;
+}
+
+.patient-checkin__footer-btn--loading .patient-checkin__footer-text,
+.patient-checkin__footer-btn--loading .patient-checkin__footer-icon {
+  opacity: 0;
+}
+
+.patient-checkin__footer-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient-checkin__footer-spinner {
+  width: 1.5em;
+  height: 1.5em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: button-spinner 0.8s linear infinite;
+}
+
+.patient-checkin__footer-loading--small .patient-checkin__footer-spinner {
+  width: 1.2em;
+  height: 1.2em;
+  border-width: 2px;
+}
+
+.patient-checkin__footer-loading--medium .patient-checkin__footer-spinner {
+  width: 1.5em;
+  height: 1.5em;
+  border-width: 2px;
+}
+
+.patient-checkin__footer-loading--large .patient-checkin__footer-spinner {
+  width: 2em;
+  height: 2em;
+  border-width: 3px;
+}
+
+@keyframes button-spinner {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

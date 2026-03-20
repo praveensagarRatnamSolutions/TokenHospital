@@ -623,49 +623,6 @@ body {
   font-size: var(--font-size-4xl);
 }
 
-/* Help Button */
-.payment-method__help-btn {
-  position: absolute;
-  bottom: 10rem;
-  right: var(--spacing-3xl);
-  width: 6rem;
-  height: 6rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-slate-900);
-  color: var(--color-white);
-  box-shadow: var(--shadow-2xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition-transform);
-  cursor: pointer;
-  border: none;
-  z-index: 10;
-}
-
-/* @media (prefers-color-scheme: dark) {
-  .payment-method__help-btn {
-    background-color: var(--color-primary);
-  }
-} */
-
-.payment-method__help-btn:active {
-  transform: scale(0.9);
-}
-
-.payment-method__help-btn:hover {
-  transform: scale(1.05);
-}
-
-.payment-method__help-btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.payment-method__help-icon {
-  font-size: var(--font-size-5xl);
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
   .payment-method__title {
@@ -678,17 +635,6 @@ body {
 
   .payment-method__card-icon {
     font-size: 6rem;
-  }
-
-  .payment-method__help-btn {
-    width: 5rem;
-    height: 5rem;
-    bottom: 8rem;
-    right: var(--spacing-2xl);
-  }
-
-  .payment-method__help-icon {
-    font-size: var(--font-size-4xl);
   }
 }
 
@@ -738,11 +684,6 @@ body {
     font-size: var(--font-size-2xl);
     padding: var(--spacing-xl);
   }
-
-  .payment-method__help-btn {
-    bottom: 6rem;
-    right: var(--spacing-lg);
-  }
 }
 
 @media (max-width: 480px) {
@@ -770,36 +711,23 @@ body {
   .payment-method__footer-btn {
     width: 100%;
   }
-
-  .payment-method__help-btn {
-    width: 4rem;
-    height: 4rem;
-    bottom: 4rem;
-  }
-
-  .payment-method__help-icon {
-    font-size: var(--font-size-3xl);
-  }
 }
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .payment-method__card,
   .payment-method__footer-btn,
-  .payment-method__help-btn,
   .payment-method__card-icon-overlay {
     transition: none;
     animation: none;
   }
 
-  .payment-method__card:hover,
-  .payment-method__help-btn:hover {
+  .payment-method__card:hover {
     transform: none;
   }
 
   .payment-method__card:active,
-  .payment-method__footer-btn:active,
-  .payment-method__help-btn:active {
+  .payment-method__footer-btn:active {
     transform: none;
   }
 }
@@ -818,7 +746,6 @@ body {
   }
 
   .payment-method__footer,
-  .payment-method__help-btn,
   .payment-method__card-icon-overlay {
     display: none;
   }
@@ -838,9 +765,5 @@ body {
 
   .payment-method__card--selected {
     border-color: var(--color-primary);
-  }
-
-  .payment-method__help-btn {
-    border: 2px solid var(--color-white);
   }
 }
