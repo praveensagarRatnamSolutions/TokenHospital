@@ -16,18 +16,18 @@ import CheckInDetails from '@/components/kiosk/CheckInDetails';
 type KioskStep = 'HOME' | 'CHECKIN' | 'DEPARTMENT' | 'DOCTOR' | 'PAYMENT' | 'TOKEN';
 
 export default function KioskPage() {
-  const [step, setStep] = useState<KioskStep>('HOME');
+  const [step, setStep] = useState<KioskStep>('PAYMENT');
   const dispatch = useAppDispatch();
   const tokenData = useAppSelector((state) => state.token);
 
   // Auto-reset to home after inactivity on Token screen
   useEffect(() => {
-    if (step === 'TOKEN') {
-      const timer = setTimeout(() => {
-        handleReset();
-      }, 30000); // 30 seconds
-      return () => clearTimeout(timer);
-    }
+    // if (step === 'TOKEN') {
+    //   const timer = setTimeout(() => {
+    //     handleReset();
+    //   }, 30000); // 30 seconds
+    //   return () => clearTimeout(timer);
+    // }
   }, [step]);
 
   const handleReset = () => {

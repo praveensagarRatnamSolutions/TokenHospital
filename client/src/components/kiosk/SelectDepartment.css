@@ -32,15 +32,6 @@
 }
 
 /* Header Section */
-.select-department__header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--spacing-4xl) var(--spacing-2xl) var(--spacing-3xl);
-  border-bottom: 1px solid var(--color-slate-200);
-  background-color: var(--color-white);
-  box-shadow: var(--shadow-sm);
-}
 
 .select-department__header-content {
   max-width: 42rem;
@@ -48,61 +39,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.select-department__icon-wrapper {
-  width: 6rem;
-  height: 6rem;
-  border-radius: var(--radius-lg);
-  background-color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-primary);
-  margin-bottom: var(--spacing-2xl);
-}
-
-@media (min-width: 768px) {
-  .select-department__icon-wrapper {
-    width: 7rem;
-    height: 7rem;
-  }
-}
-
-.select-department__icon {
-  color: var(--color-white);
-  font-size: var(--font-size-5xl);
-}
-
-@media (min-width: 768px) {
-  .select-department__icon {
-    font-size: var(--font-size-6xl);
-  }
-}
-
-.select-department__title {
-  font-size: var(--font-size-5xl);
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--color-slate-900);
-  margin-bottom: var(--spacing-md);
-  text-align: center;
-  line-height: 1.2;
-}
-
-@media (min-width: 768px) {
-  .select-department__title {
-    font-size: var(--font-size-6xl);
-  }
-}
-
-.select-department__subtitle {
-  font-size: var(--font-size-2xl);
-  color: var(--color-slate-500);
-  font-weight: 500;
-  text-align: center;
-  line-height: 1.4;
-  margin-bottom: var(--spacing-2xl);
 }
 
 /* Search Section */
@@ -352,72 +288,6 @@
 }
 
 /* Emergency Section */
-.select-department__emergency {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-}
-
-.select-department__emergency-info {
-  text-align: right;
-}
-
-.select-department__emergency-label {
-  color: var(--color-slate-400);
-  font-size: var(--font-size-lg);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  line-height: 1.4;
-  margin-bottom: var(--spacing-xs);
-}
-
-@media (min-width: 768px) {
-  .select-department__emergency-label {
-    font-size: var(--font-size-xl);
-  }
-}
-
-.select-department__emergency-number {
-  color: var(--color-primary);
-  font-size: var(--font-size-3xl);
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-@media (min-width: 768px) {
-  .select-department__emergency-number {
-    font-size: var(--font-size-4xl);
-  }
-}
-
-.select-department__emergency-icon {
-  width: 4rem;
-  height: 4rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-emergency-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-emergency);
-}
-
-@media (min-width: 768px) {
-  .select-department__emergency-icon {
-    width: 5rem;
-    height: 5rem;
-  }
-}
-
-.select-department__emergency-icon-symbol {
-  font-size: var(--font-size-4xl);
-}
-
-@media (min-width: 768px) {
-  .select-department__emergency-icon-symbol {
-    font-size: var(--font-size-5xl);
-  }
-}
 
 /* Responsive Design */
 @media (max-width: 1024px) {
@@ -435,28 +305,6 @@
 }
 
 @media (max-width: 768px) {
-  .select-department__header {
-    padding: var(--spacing-2xl) var(--spacing-lg);
-  }
-
-  .select-department__icon-wrapper {
-    width: 5rem;
-    height: 5rem;
-    margin-bottom: var(--spacing-xl);
-  }
-
-  .select-department__icon {
-    font-size: var(--font-size-4xl);
-  }
-
-  .select-department__title {
-    font-size: var(--font-size-4xl);
-  }
-
-  .select-department__subtitle {
-    font-size: var(--font-size-xl);
-  }
-
   .select-department__search-input {
     height: 4.5rem;
     font-size: var(--font-size-xl);
@@ -487,23 +335,9 @@
     height: 5rem;
     font-size: var(--font-size-2xl);
   }
-
-  .select-department__emergency {
-    width: 100%;
-    justify-content: space-between;
-  }
 }
 
 @media (max-width: 480px) {
-  .select-department__emergency {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .select-department__emergency-info {
-    text-align: center;
-  }
-
   .select-department__card {
     padding: var(--spacing-xl);
   }
@@ -545,11 +379,6 @@
     background-color: var(--color-white);
   }
 
-  .select-department__header {
-    border-bottom: 1px solid var(--color-slate-300);
-    box-shadow: none;
-  }
-
   .select-department__card {
     box-shadow: none;
     border: 1px solid var(--color-slate-300);
@@ -561,8 +390,7 @@
   }
 
   .select-department__back-button,
-  .select-department__search,
-  .select-department__emergency-icon {
+  .select-department__search {
     display: none;
   }
 }
@@ -575,13 +403,5 @@
 
   .select-department__card:hover {
     border-color: var(--color-primary);
-  }
-
-  .select-department__icon-wrapper {
-    border: 2px solid var(--color-white);
-  }
-
-  .select-department__emergency-icon {
-    border: 2px solid var(--color-emergency);
   }
 }

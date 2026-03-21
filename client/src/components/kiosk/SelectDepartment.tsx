@@ -17,6 +17,11 @@ import {
   Vaccines,
   ArrowBack,
 } from '../icons';
+import KioskCustomHeader from '../common/KioskCustomHeader';
+import InputField from '../common/InputField';
+import Footer from '../common/Footer';
+import KioskButton from '../common/KioskButton';
+import DepartmentCard from './common/departmentCard/DepartmentCard';
 
 interface SelectDepartmentProps {
   onNext: () => void;
@@ -89,34 +94,33 @@ export default function SelectDepartment({ onNext, onBack }: SelectDepartmentPro
   return (
     <div className="select-department">
       {/* Top Bar / Header Section */}
-      <header className="select-department__header">
-        <div className="select-department__header-content">
-          <div className="select-department__icon-wrapper">
-            <span className="material-symbols-outlined select-department__icon">
+      <KioskCustomHeader.Root>
+        <KioskCustomHeader.Content>
+          <KioskCustomHeader.IconWrapper>
+            <KioskCustomHeader.Icon>
               <MedicalServices />
-            </span>
-          </div>
-          <h1 className="select-department__title">Select Department</h1>
-          <p className="select-department__subtitle">
+            </KioskCustomHeader.Icon>
+          </KioskCustomHeader.IconWrapper>
+          <KioskCustomHeader.Title>Select Department</KioskCustomHeader.Title>
+          <KioskCustomHeader.SubTitle>
             Please choose the department you want to visit.
-          </p>
-
-          <div className="select-department__search">
-            <div className="select-department__search-icon">
-              <span className="material-symbols-outlined select-department__search-icon-symbol">
+          </KioskCustomHeader.SubTitle>
+          <InputField.Root>
+            <InputField.Wrapper>
+              <InputField.LeadingIcon>
                 <Search />
-              </span>
-            </div>
-            <input
-              className="select-department__search-input"
-              placeholder="Search department..."
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-      </header>
+              </InputField.LeadingIcon>
+              <InputField.Input
+                className="select-department__search-input"
+                placeholder="Search department..."
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </InputField.Wrapper>
+          </InputField.Root>
+        </KioskCustomHeader.Content>
+      </KioskCustomHeader.Root>
 
       {/* Main Content: Grid of Department Cards */}
       <main className="select-department__main">
@@ -125,48 +129,45 @@ export default function SelectDepartment({ onNext, onBack }: SelectDepartmentPro
             <div className="select-department__loading">Loading departments...</div>
           ) : (
             filtered?.map((dept: any) => (
-              <button
-                key={dept._id}
-                onClick={() => handleSelect(dept)}
-                className="select-department__card"
-              >
-                <div className="select-department__card-icon">
-                  <span className="material-symbols-outlined select-department__card-icon-symbol">
-                    {dept.icon || 'stethoscope'}
-                  </span>
-                </div>
-                <div className="select-department__card-content">
-                  <h2 className="select-department__card-title">{dept.name}</h2>
-                  <p className="select-department__card-description">
-                    {dept.description}
-                  </p>
-                </div>
-              </button>
+              <>
+                <DepartmentCard.Root
+                  key={dept._id}
+                  onSelect={handleSelect}
+                  department={dept}
+                >
+                  <DepartmentCard.Content>
+                    <DepartmentCard.Icon />
+                    <DepartmentCard.Title>{dept.name}</DepartmentCard.Title>
+                    <DepartmentCard.Description>
+                      {dept.description}
+                    </DepartmentCard.Description>
+                  </DepartmentCard.Content>
+                </DepartmentCard.Root>
+              </>
             ))
           )}
         </div>
       </main>
-
       {/* Footer Navigation Section */}
-      <footer className="select-department__footer">
+      <Footer.Root variant="sticky">
+        <Footer.Actions align="space-between">
+          <KioskButton.Root variant="back" onClick={onBack} size="large">
+            <KioskButton.StartIcon>
+              <ArrowBack />
+            </KioskButton.StartIcon>
+            <KioskButton.Text>Back</KioskButton.Text>
+          </KioskButton.Root>
+        </Footer.Actions>
+      </Footer.Root>
+
+      {/* <footer className="select-department__footer">
         <button onClick={onBack} className="select-department__back-button">
           <span className="material-symbols-outlined select-department__back-icon">
             <ArrowBack />
           </span>
           <span>Back</span>
         </button>
-        {/* <div className="select-department__emergency">
-          <div className="select-department__emergency-info">
-            <p className="select-department__emergency-label">Emergency</p>
-            <p className="select-department__emergency-number">Dial 911</p>
-          </div>
-          <div className="select-department__emergency-icon">
-            <span className="material-symbols-outlined select-department__emergency-icon-symbol">
-              emergency
-            </span>
-          </div>
-        </div> */}
-      </footer>
+      </footer> */}
     </div>
   );
 }

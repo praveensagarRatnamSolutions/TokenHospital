@@ -12,6 +12,9 @@ import {
   OutlinePerson,
   Print,
 } from '../icons';
+import KioskCustomHeader from '../common/KioskCustomHeader';
+import Footer from '../common/Footer';
+import KioskButton from '../common/KioskButton';
 
 interface TokenGeneratedProps {
   onFinish: () => void;
@@ -44,15 +47,19 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
   return (
     <div className="token-generated">
       {/* TopAppBar Area */}
-      <header className="token-generated__header">
-        <div className="token-generated__header-icon">
-          <span className="material-symbols-outlined token-generated__header-icon-symbol">
-            <LocalHospital />
-          </span>
-        </div>
-        <h1 className="token-generated__title">Your Token is Ready</h1>
-        <p className="token-generated__subtitle">Please take your printed slip</p>
-      </header>
+      <KioskCustomHeader.Root>
+        <KioskCustomHeader.Content>
+          <KioskCustomHeader.IconWrapper>
+            <KioskCustomHeader.Icon>
+              <LocalHospital />
+            </KioskCustomHeader.Icon>
+          </KioskCustomHeader.IconWrapper>
+          <KioskCustomHeader.Title>Your Token is Ready</KioskCustomHeader.Title>
+          <KioskCustomHeader.SubTitle>
+            Please take your printed slip
+          </KioskCustomHeader.SubTitle>
+        </KioskCustomHeader.Content>
+      </KioskCustomHeader.Root>
 
       {/* Center Token Card */}
       <main className="token-generated__main">
@@ -143,29 +150,19 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
         </div>
       </main>
 
-      <footer className="token-generated__footer">
-        <div className="token-generated__footer-content">
-          <button onClick={handlePrint} className="token-generated__print-btn">
-            <span className="material-symbols-outlined token-generated__print-icon">
+      <Footer.Root>
+        <Footer.Actions align="space-between" className="token-generated__footer-actions">
+          <KioskButton.Root variant="confirm" size="large" fullWidth>
+            <KioskButton.StartIcon>
               <Print />
-            </span>
-            Print Token
-          </button>
+            </KioskButton.StartIcon>
+            <KioskButton.Text>Print Token</KioskButton.Text>
+          </KioskButton.Root>
           <p className="token-generated__print-instruction">
             Please collect your printed token below.
           </p>
-        </div>
-        {/* <div className="token-generated__countdown">
-          <div className="token-generated__countdown-badge">
-            <span className="material-symbols-outlined token-generated__countdown-icon">
-              refresh
-            </span>
-            <span className="token-generated__countdown-text">
-              Returning to home in {countdown}s...
-            </span>
-          </div>
-        </div> */}
-      </footer>
+        </Footer.Actions>
+      </Footer.Root>
     </div>
   );
 }

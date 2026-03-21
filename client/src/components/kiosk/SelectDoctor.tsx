@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -8,6 +8,11 @@ import { setSelectedDoctor } from '@/store/slices/tokenSlice';
 import './SelectDoctor.css';
 
 import { ArrowBack, ArrowForward, MedicalServices, Search } from '../icons';
+import DoctorCard from './common/doctorCard/DoctorCard';
+import Footer from '../common/Footer';
+import KioskButton from '../common/KioskButton';
+import KioskCustomHeader from '../common/KioskCustomHeader';
+import InputField from '../common/InputField';
 
 interface SelectDoctorProps {
   onNext: () => void;
@@ -83,45 +88,38 @@ export default function SelectDoctor({ onNext, onBack }: SelectDoctorProps) {
   return (
     <div className="select-doctor">
       {/* Top Bar / Header Section */}
-      <header className="select-doctor__header">
+      {/* <header className="select-doctor__header">
         <h1 className="select-doctor__title">Choose Your Doctor</h1>
         <p className="select-doctor__subtitle">
           Select a doctor or let the system assign one automatically.
         </p>
-      </header>
+      </header> */}
+      <KioskCustomHeader.Root>
+        <KioskCustomHeader.Content>
+          <KioskCustomHeader.Title>Choose Your Doctor</KioskCustomHeader.Title>
+          <KioskCustomHeader.SubTitle>
+            Select a doctor or let the system assign one automatically.
+          </KioskCustomHeader.SubTitle>
+          <InputField.Root>
+            <InputField.Wrapper>
+              <InputField.LeadingIcon>
+                <Search />
+              </InputField.LeadingIcon>
+              <InputField.Input
+                className="select-department__search-input"
+                placeholder="Search department..."
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </InputField.Wrapper>
+          </InputField.Root>
+        </KioskCustomHeader.Content>
+      </KioskCustomHeader.Root>
 
       {/* Main Content Area (Scrollable) */}
       <main className="select-doctor__main">
         {/* Search Bar Section */}
-        <div className="select-doctor__search-section">
-          <div className="select-doctor__search-container">
-            <span className="material-symbols-outlined select-doctor__search-icon">
-              <Search />
-            </span>
-            <input
-              className="select-doctor__search-input"
-              placeholder="Search doctor by name..."
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Auto Assign Button */}
-        {/* <div className="select-doctor__auto-assign-section">
-          <button
-            onClick={() => handleSelect({ _id: 'auto', name: 'Auto Assign' })}
-            className="select-doctor__auto-assign-btn"
-          >
-            <span className="material-symbols-outlined select-doctor__auto-assign-icon">
-              magic_button
-            </span>
-            <span className="select-doctor__auto-assign-text">
-              Auto Assign Best Available Doctor
-            </span>
-          </button>
-        </div> */}
 
         {/* Section Header with Status Indicators */}
         <div className="select-doctor__section-header">
@@ -149,62 +147,41 @@ export default function SelectDoctor({ onNext, onBack }: SelectDoctorProps) {
             <div className="select-doctor__loading">Loading doctors...</div>
           ) : (
             filtered?.map((doctor: any) => (
-              <div
-                key={doctor._id}
-                onClick={() => handleSelect(doctor)}
-                className="select-doctor__card"
-              >
-                <div
-                  className="select-doctor__card-image"
-                  style={{
-                    backgroundImage: `url(${doctor.image || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop'})`,
-                  }}
-                ></div>
-                <div className="select-doctor__card-content">
-                  <div className="select-doctor__card-header">
-                    <h3 className="select-doctor__card-name">{doctor.name}</h3>
-                    <span
-                      className={`select-doctor__card-status ${doctor.available ? 'select-doctor__card-status--available' : 'select-doctor__card-status--busy'}`}
-                    >
-                      {doctor.available ? 'Available' : 'Busy'}
-                    </span>
-                  </div>
-                  <p className="select-doctor__card-specialty">{doctor.specialty}</p>
-                  <div className="select-doctor__card-waiting">
-                    <span className="material-symbols-outlined select-doctor__card-waiting-icon">
-                      group
-                    </span>
-                    <span className="select-doctor__card-waiting-text">
-                      Waiting: <strong>{doctor.waiting || 0} Patients</strong>
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <>
+                <DoctorCard.Root key={doctor._id} doctor={doctor} onSelect={handleSelect}>
+                  <DoctorCard.Image />
+                  <DoctorCard.Content>
+                    <DoctorCard.Header>
+                      <DoctorCard.Name>{doctor.name}</DoctorCard.Name>
+                      <DoctorCard.Status />
+                    </DoctorCard.Header>
+                    <DoctorCard.Specialty>{doctor.specialty}</DoctorCard.Specialty>
+                    <DoctorCard.Waiting />
+                  </DoctorCard.Content>
+                </DoctorCard.Root>
+              </>
             ))
           )}
         </div>
       </main>
 
       {/* Bottom Navigation */}
-      <footer className="select-doctor__footer">
-        <button
-          onClick={onBack}
-          className="select-doctor__footer-btn select-doctor__footer-btn--back"
-        >
-          <span className="material-symbols-outlined select-doctor__footer-icon">
-            <ArrowBack />
-          </span>
-          <span className="select-doctor__footer-text">Back</span>
-        </button>
-        <div className="select-doctor__footer-btn select-doctor__footer-btn--confirm">
-          <span className="select-doctor__footer-text select-doctor__footer-text--large">
-            Confirm Selection
-          </span>
-          <span className="material-symbols-outlined select-doctor__footer-icon select-doctor__footer-icon--large">
-            <ArrowForward />
-          </span>
-        </div>
-      </footer>
+      <Footer.Root>
+        <Footer.Actions>
+          <KioskButton.Root variant="back" onClick={onBack}>
+            <KioskButton.StartIcon>
+              <ArrowBack />
+            </KioskButton.StartIcon>
+            <KioskButton.Text>Back</KioskButton.Text>
+          </KioskButton.Root>
+          <KioskButton.Root onClick={onNext}>
+            <KioskButton.Text>Confirm Selection</KioskButton.Text>
+            <KioskButton.EndIcon>
+              <ArrowForward />
+            </KioskButton.EndIcon>
+          </KioskButton.Root>
+        </Footer.Actions>
+      </Footer.Root>
     </div>
   );
 }

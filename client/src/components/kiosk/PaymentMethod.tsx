@@ -13,6 +13,7 @@ import {
   QrCode,
   Stethoscope,
 } from '../icons';
+import KioskCustomHeader from '../common/KioskCustomHeader';
 
 interface PaymentMethodProps {
   onNext?: () => void;
@@ -81,22 +82,23 @@ export default function PaymentMethod({
       {/* Main Container */}
       <div className="payment-method__container">
         {/* TopAppBar Section */}
-        <header className="payment-method__header">
-          <div className="payment-method__hospital-info">
-            <div className="payment-method__hospital-icon-wrapper">
-              <span className="material-symbols-outlined payment-method__hospital-icon">
-                <MedicalServices />
-              </span>
+        <KioskCustomHeader.Root>
+          <KioskCustomHeader.Content>
+            <div className="payment-method__hospital-info">
+              <KioskCustomHeader.IconWrapper className="payment-method__hospital-icon-wrapper">
+                <KioskCustomHeader.Icon className="payment-method__hospital-icon-wrapper">
+                  <MedicalServices />
+                </KioskCustomHeader.Icon>
+              </KioskCustomHeader.IconWrapper>
+              <h2 className="payment-method__hospital-name">City General Hospital</h2>
             </div>
-            <h2 className="payment-method__hospital-name">City General Hospital</h2>
-          </div>
-          <div className="payment-method__title-section">
-            <h1 className="payment-method__title">Select Payment Method</h1>
-            <p className="payment-method__subtitle">
+            <KioskCustomHeader.Title>Select Payment Method</KioskCustomHeader.Title>
+            <KioskCustomHeader.SubTitle>
+              {' '}
               Please choose how you would like to pay for the consultation.
-            </p>
-          </div>
-        </header>
+            </KioskCustomHeader.SubTitle>
+          </KioskCustomHeader.Content>
+        </KioskCustomHeader.Root>
 
         {/* Patient Summary Section */}
         <section className="payment-method__summary">
