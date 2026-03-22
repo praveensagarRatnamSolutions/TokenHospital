@@ -47,9 +47,17 @@
   border: none;
   font-size: var(--font-size-4xl);
   font-weight: 700;
-  padding: var(--spacing-2xl) 0;
+  padding: var(--spacing-lg) 0;
   outline: none;
+  box-shadow: none;
   color: var(--color-on-surface);
+}
+
+.input-field__input:focus,
+.input-field__input:focus-visible,
+.input-field__input:focus-within {
+  border: none;
+  outline: none;
 }
 
 .input-field__input::placeholder {
@@ -82,19 +90,4 @@
 
 .input-field__clear-icon {
   font-size: 2.5rem;
-}
-
-.material-symbols-outlined {
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
 }

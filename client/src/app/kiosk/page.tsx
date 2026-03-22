@@ -16,7 +16,7 @@ import CheckInDetails from '@/components/kiosk/CheckInDetails';
 type KioskStep = 'HOME' | 'CHECKIN' | 'DEPARTMENT' | 'DOCTOR' | 'PAYMENT' | 'TOKEN';
 
 export default function KioskPage() {
-  const [step, setStep] = useState<KioskStep>('PAYMENT');
+  const [step, setStep] = useState<KioskStep>('HOME');
   const dispatch = useAppDispatch();
   const tokenData = useAppSelector((state) => state.token);
 
@@ -59,7 +59,7 @@ export default function KioskPage() {
   };
 
   return (
-    <div className="kiosk-container overflow-hidden">
+    <>
       {step === 'HOME' && <HomeWelcome onStart={() => nextStep('CHECKIN')} />}
       {step === 'CHECKIN' && (
         <CheckInDetails onNext={() => nextStep('DEPARTMENT')} onBack={prevStep} />
@@ -74,6 +74,6 @@ export default function KioskPage() {
         <PaymentMethod onNext={() => nextStep('TOKEN')} onBack={prevStep} />
       )}
       {step === 'TOKEN' && <TokenGenerated onFinish={handleReset} />}
-    </div>
+    </>
   );
 }

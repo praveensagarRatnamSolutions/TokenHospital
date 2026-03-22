@@ -133,95 +133,95 @@ export default function PatientCheckin({ onNext, onBack }: IProps) {
       <main className="patient-checkin__main">
         <div className="patient-checkin__grid">
           {/* Left Column: Primary Forms */}
-          <div className="patient-checkin__left-column">
-            {/* Instruction Card */}
-            <div className="patient-checkin__instruction">
-              <h2 className="patient-checkin__instruction-title">Welcome</h2>
-              <p className="patient-checkin__instruction-text">
-                Please complete the check-in details below to proceed to your appointment.
-              </p>
-            </div>
-
-            {/* Input Fields Section */}
-            <div className="patient-checkin__form">
-              {/* Full Name */}
-              <InputField.Root>
-                <InputField.Label>Full Name</InputField.Label>
-                <InputField.Wrapper>
-                  <InputField.LeadingIcon>
-                    <OutlinePerson />
-                  </InputField.LeadingIcon>
-                  <InputField.Input
-                    className="patient-checkin__input"
-                    placeholder="e.g. John Doe"
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                  />
-                </InputField.Wrapper>
-                <InputField.Error />
-              </InputField.Root>
-
-              <div className="patient-checkin__row">
-                {/* Age */}
-                <InputField.Root>
-                  <InputField.Label>Age</InputField.Label>
-                  <InputField.Wrapper>
-                    <InputField.LeadingIcon>
-                      <Calendar />
-                    </InputField.LeadingIcon>
-                    <InputField.Input
-                      placeholder="00"
-                      type="number"
-                      name="age"
-                      value={formData.age}
-                      onChange={handleInputChange}
-                    />
-                  </InputField.Wrapper>
-                  <InputField.Error />
-                </InputField.Root>
-                {/* Weight */}
-                <InputField.Root>
-                  <InputField.Label>Weight</InputField.Label>
-                  <InputField.Wrapper>
-                    <InputField.LeadingIcon>
-                      <Monitor />
-                    </InputField.LeadingIcon>
-                    <InputField.Input
-                      placeholder="0.0"
-                      type="number"
-                      name="weight"
-                      value={formData.weight}
-                      onChange={handleInputChange}
-                    />
-                  </InputField.Wrapper>
-                  <InputField.Error />
-                </InputField.Root>
-              </div>
-
-              {/* Phone Number Display */}
-              <InputField.Root>
-                <InputField.Label>Phone Number</InputField.Label>
-                <InputField.Wrapper>
-                  <InputField.LeadingIcon>
-                    <Phone />
-                  </InputField.LeadingIcon>
-                  <InputField.Input
-                    placeholder="00000000000"
-                    type="number"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                  />
-                  <InputField.TrailingIcon showWhen="hasValue" onClick={handleClearPhone}>
-                    <Backspace />
-                  </InputField.TrailingIcon>
-                </InputField.Wrapper>
-                <InputField.Error />
-              </InputField.Root>
-            </div>
+          {/* <div className="patient-checkin__left-column"> */}
+          {/* Instruction Card */}
+          <div className="patient-checkin__instruction">
+            <h2 className="patient-checkin__instruction-title">Welcome</h2>
+            <p className="patient-checkin__instruction-text">
+              Please complete the check-in details below to proceed to your appointment.
+            </p>
           </div>
+
+          {/* Input Fields Section */}
+          <div className="patient-checkin__form">
+            {/* Full Name */}
+            <InputField.Root>
+              <InputField.Label>Full Name</InputField.Label>
+              <InputField.Wrapper>
+                <InputField.LeadingIcon>
+                  <OutlinePerson />
+                </InputField.LeadingIcon>
+                <InputField.Input
+                  // className="patient-checkin__input"
+                  placeholder="e.g. John Doe"
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                />
+              </InputField.Wrapper>
+              <InputField.Error />
+            </InputField.Root>
+
+            <div className="patient-checkin__row">
+              {/* Age */}
+              <InputField.Root>
+                <InputField.Label>Age</InputField.Label>
+                <InputField.Wrapper>
+                  <InputField.LeadingIcon>
+                    <Calendar />
+                  </InputField.LeadingIcon>
+                  <InputField.Input
+                    placeholder="00"
+                    type="number"
+                    name="age"
+                    value={formData.age}
+                    onChange={handleInputChange}
+                  />
+                </InputField.Wrapper>
+                <InputField.Error />
+              </InputField.Root>
+              {/* Weight */}
+              <InputField.Root>
+                <InputField.Label>Weight</InputField.Label>
+                <InputField.Wrapper>
+                  <InputField.LeadingIcon>
+                    <Monitor />
+                  </InputField.LeadingIcon>
+                  <InputField.Input
+                    placeholder="0.0"
+                    type="number"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                  />
+                </InputField.Wrapper>
+                <InputField.Error />
+              </InputField.Root>
+            </div>
+
+            {/* Phone Number Display */}
+            <InputField.Root>
+              <InputField.Label>Phone Number</InputField.Label>
+              <InputField.Wrapper>
+                <InputField.LeadingIcon>
+                  <Phone />
+                </InputField.LeadingIcon>
+                <InputField.Input
+                  placeholder="00000000000"
+                  type="number"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                />
+                <InputField.TrailingIcon showWhen="hasValue" onClick={handleClearPhone}>
+                  <Backspace />
+                </InputField.TrailingIcon>
+              </InputField.Wrapper>
+              <InputField.Error />
+            </InputField.Root>
+          </div>
+          {/* </div> */}
 
           {/* Right Column: Numpad for Phone */}
           {/* <div className="patient-checkin__right-column">

@@ -111,7 +111,6 @@ export default function SelectDepartment({ onNext, onBack }: SelectDepartmentPro
                 <Search />
               </InputField.LeadingIcon>
               <InputField.Input
-                className="select-department__search-input"
                 placeholder="Search department..."
                 type="text"
                 value={search}

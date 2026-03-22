@@ -1,9 +1,10 @@
 /* PatientCheckin.css - Industry Standard CSS with BEM methodology */
 
 /* CSS Variables */
+
 :root {
   /* Colors from the Tailwind config */
-  --color-primary: #2b9dee;
+  /* --color-primary: #2b9dee;
   --color-primary-container: #d7edff;
   --color-on-primary: #ffffff;
   --color-on-primary-container: #001e30;
@@ -25,20 +26,20 @@
   --color-outline-variant: #e2e8f0;
   --color-inverse-surface: #1e293b;
   --color-inverse-on-surface: #f8fafc;
-  --color-inverse-primary: #90ccff;
+  --color-inverse-primary: #90ccff; */
 
   /* Spacing */
-  --spacing-xs: 0.25rem;
+  /* --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
   --spacing-3xl: 4rem;
-  --spacing-4xl: 6rem;
+  --spacing-4xl: 6rem; */
 
   /* Typography */
-  --font-family: 'Inter', sans-serif;
+  /* --font-family: 'Inter', sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-md: 1rem;
@@ -48,24 +49,24 @@
   --font-size-3xl: 1.875rem;
   --font-size-4xl: 2.25rem;
   --font-size-5xl: 3rem;
-  --font-size-6xl: 3.75rem;
+  --font-size-6xl: 3.75rem; */
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  /* --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25); */
 
   /* Border Radius */
-  --radius-md: 1rem;
+  /* --radius-md: 1rem;
   --radius-lg: 2rem;
   --radius-xl: 3rem;
-  --radius-full: 9999px;
+  --radius-full: 9999px; */
 
   /* Transitions */
-  --transition-base: all 0.3s ease;
-  --transition-transform: transform 0.2s ease;
+  /* --transition-base: all 0.3s ease;
+  --transition-transform: transform 0.2s ease; */
 }
 
 /* Base Styles */
@@ -84,7 +85,7 @@
 /* Header Styles */
 .patient-checkin__header {
   background-color: var(--color-surface);
-  box-shadow: var(--shadow-xl);
+  /* box-shadow: var(--shadow-xl); */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -150,21 +151,22 @@
 }
 
 .patient-checkin__grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  display: flex;
+  flex-direction: column;
+  /* grid-template-columns: repeat(12, 1fr); */
   gap: var(--spacing-2xl);
   height: 100%;
 }
 
 /* Left Column */
-.patient-checkin__left-column {
+/* .patient-checkin__left-column {
   grid-column: span 7;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xl);
   overflow-y: auto;
   padding-right: var(--spacing-md);
-}
+} */
 
 /* Instruction Card */
 .patient-checkin__instruction {
@@ -348,7 +350,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1536px) {
+/* @media (max-width: 1536px) {
   .patient-checkin__title {
     font-size: 2rem;
   }
@@ -356,9 +358,9 @@
   .patient-checkin__phone-display {
     font-size: 3rem;
   }
-}
+} */
 
-@media (max-width: 1280px) {
+/* @media (max-width: 1280px) {
   .patient-checkin__grid {
     gap: var(--spacing-lg);
   }
@@ -379,9 +381,9 @@
   .patient-checkin__phone-display {
     font-size: 2.5rem;
   }
-}
+} */
 
-@media (max-width: 1024px) {
+/* @media (max-width: 1024px) {
   .patient-checkin__header {
     padding: 0 var(--spacing-xl);
     height: 6rem;
@@ -443,9 +445,9 @@
   .patient-checkin__fab-icon {
     font-size: 3rem;
   }
-}
+} */
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .patient-checkin__row {
     grid-template-columns: 1fr;
     gap: var(--spacing-xl);
@@ -471,7 +473,7 @@
   .patient-checkin__footer-text--large {
     font-size: 1.75rem;
   }
-}
+} */
 
 /* Dark Mode Support */
 /* @media (prefers-color-scheme: dark) {

@@ -1,4 +1,5 @@
 'use client';
+import { cn } from '@/lib/utils';
 
 // InputField.tsx - Composition Model with Refs and Close Icon
 import React, {
@@ -63,7 +64,7 @@ const InputFieldRoot: React.FC<InputFieldRootProps> = ({
         setHasValue,
       }}
     >
-      <div className={`input-field__field ${className}`}>{children}</div>
+      <div className={cn('input-field__field', className)}>{children}</div>
     </InputFieldContext.Provider>
   );
 };
@@ -87,7 +88,7 @@ const InputFieldLabel: React.FC<InputFieldLabelProps> = ({
   return (
     <Component
       htmlFor={Component === 'label' ? id : undefined}
-      className={`input-field__label ${className}`}
+      className={cn('input-field__label', className)}
     >
       {children}
       {required && <span className="required-asterisk">*</span>}
@@ -109,11 +110,11 @@ const InputFieldWrapper: React.FC<InputFieldWrapperProps> = ({
 
   return (
     <div
-      className={`
-      input-field__input-wrapper 
-      ${error ? 'input-field__input-wrapper--error' : ''} 
-      ${className}
-    `}
+      className={cn(
+        'input-field__input-wrapper',
+        error ? 'input-field__input-wrapper--error' : '',
+        className,
+      )}
     >
       {children}
     </div>
@@ -138,14 +139,14 @@ const InputFieldLeadingIcon: React.FC<InputFieldLeadingIconProps> = ({
 
   return (
     <span
-      className={`
-        material-symbols-outlined 
-        input-field__input-icon
-        input-field__input-icon--leading
-        ${hasValue || isFocused ? activeClassName : ''}
-        ${onClick ? 'input-field__input-icon--clickable' : ''}
-        ${className}
-      `}
+      className={cn(
+        'material-symbols-outlined',
+        'input-field__input-icon',
+        'input-field__input-icon--leading',
+        hasValue || isFocused ? activeClassName : '',
+        onClick ? 'input-field__input-icon--clickable' : '',
+        className,
+      )}
       onClick={onClick}
     >
       {children}
@@ -190,15 +191,14 @@ const InputFieldTrailingIcon: React.FC<InputFieldTrailingIconProps> = ({
 
   return (
     <span
-      className={`
-        material-symbols-outlined 
-       
-        input-field__clear-button
-        input-field__clear-icon
-        ${hasValue || isFocused ? activeClassName : ''}
-        ${onClick ? 'input-field__input-icon--clickable' : ''}
-        ${className}
-      `}
+      className={cn(
+        'material-symbols-outlined',
+        'input-field__clear-button',
+        'input-field__clear-icon',
+        hasValue || isFocused ? activeClassName : '',
+        onClick ? 'input-field__input-icon--clickable' : '',
+        className,
+      )}
       onClick={onClick}
     >
       {children}
@@ -239,7 +239,7 @@ const InputFieldInput = forwardRef<HTMLInputElement, InputFieldInputProps>(
       <input
         ref={ref}
         id={id}
-        className={`input-field__input ${className}`}
+        className={cn('input-field__input', className)}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onChange={handleChange}
@@ -268,7 +268,9 @@ const InputFieldError: React.FC<InputFieldErrorProps> = ({
   if (!error || typeof error !== 'string') return null;
 
   return (
-    <span className={`input-field__error-message ${className}`}>{children || error}</span>
+    <span className={cn('input-field__error-message', className)}>
+      {children || error}
+    </span>
   );
 };
 
@@ -282,7 +284,7 @@ const InputFieldHelper: React.FC<InputFieldHelperProps> = ({
   children,
   className = '',
 }) => {
-  return <span className={`input-field__helper-text ${className}`}>{children}</span>;
+  return <span className={cn(`input-field__helper-text`, className)}>{children}</span>;
 };
 
 // ===== Compose and export =====

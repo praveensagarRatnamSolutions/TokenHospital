@@ -1,6 +1,7 @@
 // Footer.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import './Footer.css';
+import { cn } from '@/lib/utils';
 
 // ===== Context for sharing footer state =====
 interface FooterContextValue {
@@ -67,12 +68,12 @@ const FooterRoot: React.FC<FooterRootProps> = ({
       value={{ variant, breakpoint: responsive ? breakpoint : 'desktop' }}
     >
       <Component
-        className={`
-        custom-footer__footer
-        custom-footer__footer--${variant}
-        custom-footer__footer--${responsive ? breakpoint : 'desktop'}
-        ${className}
-      `}
+        className={cn(
+          'custom-footer__footer',
+          `custom-footer__footer--${variant}`,
+          `custom-footer__footer--${responsive ? breakpoint : 'desktop'}`,
+          className,
+        )}
       >
         {children}
       </Component>
@@ -101,14 +102,14 @@ const FooterActions: React.FC<FooterActionsProps> = ({
 
   return (
     <div
-      className={`
-      custom-footer__footer-actions
-      custom-footer__footer-actions--${align}
-      ${wrap ? 'custom-footer__footer-actions--wrap' : ''}
-      ${isStacked ? 'custom-footer__footer-actions--stacked' : ''}
-      custom-footer__footer-actions--${breakpoint}
-      ${className}
-    `}
+      className={cn(
+        `custom-footer__footer-actions`,
+        `custom-footer__footer-actions--${align}`,
+        `${wrap ? 'custom-footer__footer-actions--wrap' : ''}`,
+        `${isStacked ? 'custom-footer__footer-actions--stacked' : ''}`,
+        `custom-footer__footer-actions--${breakpoint}`,
+        className,
+      )}
     >
       {children}
     </div>
@@ -140,11 +141,11 @@ const FooterLeft: React.FC<FooterLeftProps> = ({
 
   return (
     <div
-      className={`
-      custom-footer__footer-left
-      custom-footer__footer-left--${breakpoint}
-      ${className}
-    `}
+      className={cn(
+        `custom-footer__footer-left`,
+        `custom-footer__footer-left--${breakpoint}`,
+        className,
+      )}
     >
       {children}
     </div>
@@ -212,11 +213,11 @@ const FooterCenter: React.FC<FooterCenterProps> = ({
 
   return (
     <div
-      className={`
-      custom-footer__footer-center
-      custom-footer__footer-center--${breakpoint}
-      ${className}
-    `}
+      className={cn(
+        `custom-footer__footer-center`,
+        `custom-footer__footer-center--${breakpoint}`,
+        className,
+      )}
     >
       {children}
     </div>
@@ -248,12 +249,12 @@ const FooterDivider: React.FC<FooterDividerProps> = ({
 
   return (
     <div
-      className={`
-      custom-footer__footer-divider
-      custom-footer__footer-divider--${orientation}
-      custom-footer__footer-divider--${breakpoint}
-      ${className}
-    `}
+      className={cn(
+        `custom-footer__footer-divider`,
+        `custom-footer__footer-divider--${orientation}`,
+        `custom-footer__footer-divider--${breakpoint}`,
+        className,
+      )}
     />
   );
 };
@@ -285,12 +286,12 @@ const FooterInfo: React.FC<FooterInfoProps> = ({
 
   return (
     <div
-      className={`
-      custom-footer__footer-info
-      custom-footer__footer-info--${size}
-      custom-footer__footer-info--${breakpoint}
-      ${className}
-    `}
+      className={cn(
+        `custom-footer__footer-info`,
+        `custom-footer__footer-info--${size}`,
+        `custom-footer__footer-info--${breakpoint}`,
+        className,
+      )}
     >
       {children}
     </div>
@@ -316,13 +317,13 @@ const FooterButtonGroup: React.FC<FooterButtonGroupProps> = ({
 
   return (
     <div
-      className={`
-      custom-footer__footer-button-group
-      custom-footer__footer-button-group--${responsiveDirection}
-      custom-footer__footer-button-group--gap-${gap}
-      custom-footer__footer-button-group--${breakpoint}
-      ${className}
-    `}
+      className={cn(
+        `custom-footer__footer-button-group`,
+        `custom-footer__footer-button-group--${responsiveDirection}`,
+        `custom-footer__footer-button-group--gap-${gap}`,
+        `custom-footer__footer-button-group--${breakpoint}`,
+        className,
+      )}
     >
       {children}
     </div>
@@ -350,12 +351,12 @@ const FooterProgress: React.FC<FooterProgressProps> = ({
 
   return (
     <div
-      className={`
-      custom-footer__footer-progress
-      custom-footer__footer-progress--${size}
-      custom-footer__footer-progress--${breakpoint}
-      ${className}
-    `}
+      className={cn(
+        `custom-footer__footer-progress`,
+        `custom-footer__footer-progress--${size}`,
+        `custom-footer__footer-progress--${breakpoint}`,
+        className,
+      )}
     >
       {showLabel && (
         <span className="custom-footer__footer-progress-label">

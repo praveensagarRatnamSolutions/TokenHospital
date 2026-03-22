@@ -3,7 +3,7 @@
 /* CSS Variables */
 :root {
   /* Colors */
-  --color-primary: #3b82f6;
+  /* --color-primary: #3b82f6;
   --color-primary-light: #60a5fa;
   --color-primary-dark: #2563eb;
   --color-primary-rgb: 59, 130, 246;
@@ -23,10 +23,10 @@
   --color-slate-600: #475569;
   --color-slate-700: #334155;
   --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
+  --color-slate-900: #0f172a; */
 
   /* Spacing */
-  --spacing-xs: 0.25rem;
+  /* --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
@@ -34,10 +34,10 @@
   --spacing-2xl: 2.5rem;
   --spacing-3xl: 3rem;
   --spacing-4xl: 4rem;
-  --spacing-5xl: 5rem;
+  --spacing-5xl: 5rem; */
 
   /* Typography */
-  --font-family:
+  /* --font-family:
     system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
@@ -47,27 +47,27 @@
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 1.875rem;
   --font-size-4xl: 2.25rem;
-  --font-size-5xl: 3rem;
+  --font-size-5xl: 3rem; */
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  /* --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  --shadow-primary: 0 10px 15px -3px rgba(var(--color-primary-rgb), 0.2);
+  --shadow-primary: 0 10px 15px -3px rgba(var(--color-primary-rgb), 0.2); */
 
   /* Border Radius */
-  --radius-sm: 0.5rem;
+  /* --radius-sm: 0.5rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
   --radius-xl: 2rem;
-  --radius-full: 9999px;
+  --radius-full: 9999px; */
 
   /* Transitions */
-  --transition-base: all 0.3s ease;
+  /* --transition-base: all 0.3s ease;
   --transition-transform: transform 0.2s ease;
   --transition-colors:
-    background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; */
 }
 
 /* Base Styles */
@@ -75,22 +75,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-/* Material Symbols */
-.material-symbols-outlined {
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
 }
 
 /* Main Container */
@@ -125,11 +109,11 @@
   line-height: 1.2;
 }
 
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .select-doctor__title {
     font-size: 3.75rem;
   }
-}
+} */
 
 .select-doctor__subtitle {
   font-size: var(--font-size-2xl);
@@ -218,12 +202,12 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
+/* @media (max-width: 1024px) {
   .select-doctor__grid {
     gap: var(--spacing-lg);
   }
-}
-
+} */
+/* 
 @media (max-width: 768px) {
   .select-doctor__header {
     padding: var(--spacing-xl) var(--spacing-lg);
@@ -261,7 +245,7 @@
     flex-direction: column;
     gap: var(--spacing-xs);
   }
-}
+} */
 
 /* Print Styles */
 @media print {

@@ -106,7 +106,6 @@ export default function SelectDoctor({ onNext, onBack }: SelectDoctorProps) {
                 <Search />
               </InputField.LeadingIcon>
               <InputField.Input
-                className="select-department__search-input"
                 placeholder="Search department..."
                 type="text"
                 value={search}
@@ -167,7 +166,7 @@ export default function SelectDoctor({ onNext, onBack }: SelectDoctorProps) {
 
       {/* Bottom Navigation */}
       <Footer.Root>
-        <Footer.Actions>
+        <Footer.Actions align="space-between">
           <KioskButton.Root variant="back" onClick={onBack}>
             <KioskButton.StartIcon>
               <ArrowBack />

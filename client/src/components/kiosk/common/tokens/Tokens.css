@@ -1,0 +1,107 @@
+.queue {
+  /* width: 100%; */
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  /* gap: var(--spacing-lg); */
+  /* padding: var(--spacing-xl); */
+  /* background: var(--color-background); */
+}
+
+/* Base Card */
+.token {
+  border-radius: var(--radius-full);
+  padding: var(--spacing-lg);
+  text-align: center;
+  font-family: var(--font-family);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-base);
+  aspect-ratio: 1/1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70%;
+  margin: auto;
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 8px rgba(234, 179, 8, 0.12);
+}
+
+/* Labels */
+.token__label {
+  font-size: var(--font-size-sm);
+  color: inherit;
+  opacity: 0.9;
+  margin-bottom: var(--spacing-sm);
+}
+
+.token__number {
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+}
+
+.token__meta {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+/* ================= STATUS STYLES ================= */
+
+/* 🔴 Emergency */
+.token--emergency {
+  background: var(--color-emergency);
+  color: var(--color-on-error);
+  animation: pulse 1.2s infinite;
+}
+
+/* 🔵 Current */
+.token--current {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-primary);
+}
+
+/* 🟡 Next */
+.token--next {
+  background: var(--color-amber-500);
+  color: var(--color-slate-900);
+}
+
+/* 🟢 Completed */
+.token--completed {
+  background: var(--color-emerald-500);
+  color: var(--color-white);
+  opacity: 0.85;
+}
+
+/* ⭐ Highlight current */
+.token.is-current {
+  transform: scale(1.18);
+  box-shadow:
+    var(--shadow-xl),
+    0 0 0 8px #0d948833;
+}
+
+.token.is-emergency {
+  box-shadow: 0 0 0 8px #f43f5e1a;
+}
+
+.token.is-completed {
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 8px rgba(34, 197, 94, 0.12);
+}
+
+/* 🔥 Emergency animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
