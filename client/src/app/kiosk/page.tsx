@@ -16,18 +16,18 @@ import CheckInDetails from '@/components/kiosk/CheckInDetails';
 type KioskStep = 'HOME' | 'CHECKIN' | 'DEPARTMENT' | 'DOCTOR' | 'PAYMENT' | 'TOKEN';
 
 export default function KioskPage() {
-  const [step, setStep] = useState<KioskStep>('CHECKIN');
+  const [step, setStep] = useState<KioskStep>('HOME');
   const dispatch = useAppDispatch();
   const tokenData = useAppSelector((state) => state.token);
 
   // Auto-reset to home after inactivity on Token screen
   useEffect(() => {
-    if (step === 'TOKEN') {
-      const timer = setTimeout(() => {
-        handleReset();
-      }, 30000); // 30 seconds
-      return () => clearTimeout(timer);
-    }
+    // if (step === 'TOKEN') {
+    //   const timer = setTimeout(() => {
+    //     handleReset();
+    //   }, 30000); // 30 seconds
+    //   return () => clearTimeout(timer);
+    // }
   }, [step]);
 
   const handleReset = () => {
@@ -51,7 +51,8 @@ export default function KioskPage() {
         setStep('DEPARTMENT');
         break;
       case 'PAYMENT':
-        setStep('DOCTOR');
+        // setStep('DOCTOR');
+        setStep('CHECKIN');
         break;
       default:
         setStep('HOME');
@@ -59,10 +60,11 @@ export default function KioskPage() {
   };
 
   return (
-    <div className="kiosk-container overflow-hidden">
+    <>
       {step === 'HOME' && <HomeWelcome onStart={() => nextStep('CHECKIN')} />}
       {step === 'CHECKIN' && (
-        <CheckInDetails onNext={() => nextStep('DEPARTMENT')} onBack={prevStep} />
+        // <CheckInDetails onNext={() => nextStep('DEPARTMENT')} onBack={prevStep} />
+        <CheckInDetails onNext={() => nextStep('PAYMENT')} onBack={prevStep} />
       )}
       {step === 'DEPARTMENT' && (
         <SelectDepartment onNext={() => nextStep('DOCTOR')} onBack={prevStep} />
@@ -74,6 +76,6 @@ export default function KioskPage() {
         <PaymentMethod onNext={() => nextStep('TOKEN')} onBack={prevStep} />
       )}
       {step === 'TOKEN' && <TokenGenerated onFinish={handleReset} />}
-    </div>
+    </>
   );
 }

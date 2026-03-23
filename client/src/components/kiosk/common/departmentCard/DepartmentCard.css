@@ -1,0 +1,421 @@
+/* Root Variables (if not already defined in your project) */
+
+/* Base Card Styles */
+.select-department__card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  border: 2px solid var(--color-slate-100);
+  box-shadow: var(--shadow-xl);
+  transition: var(--transition-base);
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Remove duplicate border property */
+.select-department__card {
+  border: 2px solid var(--color-slate-100);
+}
+
+/* Hover State */
+.select-department__card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* Active State */
+.select-department__card:active {
+  transform: scale(0.98);
+}
+
+/* Focus Visible for Accessibility */
+.select-department__card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Disabled State */
+.select-department__card--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.select-department__card--disabled:hover {
+  transform: none;
+  border-color: var(--color-slate-100);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Icon Container */
+.select-department__card-icon {
+  width: 5rem;
+  height: 5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-slate-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-lg);
+  transition: var(--transition-colors);
+  flex-shrink: 0;
+}
+
+/* Hover effect for icon */
+.select-department__card:hover .select-department__card-icon {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* Icon Symbol */
+.select-department__card-icon-symbol {
+  font-size: var(--font-size-4xl);
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Content Container */
+.select-department__card-content {
+  width: 100%;
+}
+
+/* Title Styles */
+.select-department__card-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.3;
+}
+
+/* Description Styles */
+.select-department__card-description {
+  font-size: var(--font-size-xl);
+  color: var(--color-slate-500);
+  line-height: 1.4;
+}
+
+/* ======================== */
+/* VARIANTS */
+/* ======================== */
+
+/* Compact Variant */
+.select-department__card--compact {
+  padding: var(--spacing-xl);
+}
+
+.select-department__card--compact .select-department__card-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.select-department__card--compact .select-department__card-icon-symbol {
+  font-size: var(--font-size-2xl);
+}
+
+.select-department__card--compact .select-department__card-title {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-xs);
+}
+
+.select-department__card--compact .select-department__card-description {
+  font-size: var(--font-size-md);
+}
+
+/* Large Variant */
+.select-department__card--large {
+  padding: var(--spacing-3xl);
+}
+
+.select-department__card--large .select-department__card-icon {
+  width: 7rem;
+  height: 7rem;
+  margin-bottom: var(--spacing-xl);
+}
+
+.select-department__card--large .select-department__card-icon-symbol {
+  font-size: var(--font-size-5xl);
+}
+
+.select-department__card--large .select-department__card-title {
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.select-department__card--large .select-department__card-description {
+  font-size: var(--font-size-2xl);
+}
+
+/* ======================== */
+/* RESPONSIVE DESIGN */
+/* ======================== */
+
+/* Tablet Styles (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .select-department__card {
+    padding: var(--spacing-xl);
+  }
+
+  .select-department__card-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .select-department__card-description {
+    font-size: var(--font-size-lg);
+  }
+
+  .select-department__card--large .select-department__card-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .select-department__card--large .select-department__card-description {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* Desktop Styles (min-width: 1024px) */
+@media (min-width: 1024px) {
+  .select-department__card-icon {
+    width: 6rem;
+    height: 6rem;
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .select-department__card-icon-symbol {
+    font-size: var(--font-size-5xl);
+  }
+
+  .select-department__card-title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .select-department__card-description {
+    font-size: var(--font-size-2xl);
+  }
+
+  .select-department__card--compact .select-department__card-icon {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .select-department__card--compact .select-department__card-title {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* Mobile Styles (max-width: 480px) */
+@media (max-width: 480px) {
+  .select-department__card {
+    padding: var(--spacing-xl);
+  }
+
+  .select-department__card-icon {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .select-department__card-icon-symbol {
+    font-size: var(--font-size-3xl);
+  }
+
+  .select-department__card-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .select-department__card-description {
+    font-size: var(--font-size-md);
+  }
+
+  /* Compact variant on mobile */
+  .select-department__card--compact {
+    padding: var(--spacing-lg);
+  }
+
+  .select-department__card--compact .select-department__card-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .select-department__card--compact .select-department__card-title {
+    font-size: var(--font-size-lg);
+  }
+
+  /* Large variant on mobile */
+  .select-department__card--large {
+    padding: var(--spacing-xl);
+  }
+
+  .select-department__card--large .select-department__card-icon {
+    width: 5rem;
+    height: 5rem;
+  }
+}
+
+/* ======================== */
+/* REDUCED MOTION */
+/* ======================== */
+@media (prefers-reduced-motion: reduce) {
+  .select-department__card,
+  .select-department__card-icon,
+  .select-department__card-icon-symbol {
+    transition: none;
+    animation: none;
+  }
+
+  .select-department__card:hover {
+    transform: none;
+  }
+
+  .select-department__card:active {
+    transform: none;
+  }
+}
+
+/* ======================== */
+/* MATERIAL SYMBOLS OUTLINED */
+/* ======================== */
+
+/* ======================== */
+/* ANIMATIONS (Optional) */
+/* ======================== */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.select-department__card {
+  animation: cardAppear 0.3s ease-out;
+}
+
+/* ======================== */
+/* UTILITY CLASSES */
+/* ======================== */
+
+/* Custom focus styles for better accessibility */
+.select-department__card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Active state without transform for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .select-department__card:active {
+    transform: none;
+  }
+}
+
+/* Loading/Skeleton state (optional) */
+.select-department__card--loading {
+  pointer-events: none;
+  position: relative;
+}
+
+.select-department__card--loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ======================== */
+/* GRID LAYOUT HELPERS (Optional) */
+/* ======================== */
+.departments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+}
+
+/* For 2-column layout on larger screens */
+@media (min-width: 768px) {
+  .departments-grid {
+    gap: var(--spacing-xl);
+  }
+}
+
+/* For 3-column layout on desktop */
+@media (min-width: 1200px) {
+  .departments-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ======================== */
+/* CUSTOM ICON STYLES */
+/* ======================== */
+.select-department__card-icon img,
+.select-department__card-icon svg {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+
+/* For custom icon wrappers */
+.custom-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Badge styles for composition pattern */
+.badge {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-full);
+  margin-left: var(--spacing-sm);
+  vertical-align: middle;
+}
+
+/* More info button in custom description */
+.more-info {
+  display: inline-block;
+  margin-left: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: var(--transition-base);
+}
+
+.more-info:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}

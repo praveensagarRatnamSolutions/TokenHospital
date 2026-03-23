@@ -1,0 +1,117 @@
+.select-department__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-2xl) var(--spacing-2xl) var(--spacing-3xl);
+  /* border-bottom: 1px solid var(--color-slate-200); */
+  /* background-color: var(--color-white); */
+  /* box-shadow: var(--shadow-sm); */
+}
+
+/* @media (max-width: 768px) {
+  .select-department__header {
+    padding: var(--spacing-xl) var(--spacing-lg);
+  }
+} */
+
+@media print {
+  .select-department__header {
+    border-bottom: 1px solid var(--color-slate-300);
+    box-shadow: none;
+  }
+}
+
+.select-department__header-content {
+  max-width: 42rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.select-department__icon-wrapper {
+  width: 6rem;
+  height: 6rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-primary);
+  /* margin-bottom: var(--spacing-2xl); */
+}
+
+/* @media (min-width: 768px) {
+  .select-department__icon-wrapper {
+    width: 7rem;
+    height: 7rem;
+  }
+} */
+
+/* @media (max-width: 768px) {
+  .select-department__icon-wrapper {
+    width: 5rem;
+    height: 5rem;
+    margin-bottom: var(--spacing-xl);
+  }
+} */
+
+@media (prefers-contrast: high) {
+  .select-department__icon-wrapper {
+    border: 2px solid var(--color-white);
+  }
+}
+
+.select-department__icon {
+  color: var(--color-white);
+  font-size: var(--font-size-5xl);
+}
+/* 
+@media (min-width: 768px) {
+  .select-department__icon {
+    font-size: var(--font-size-6xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .select-department__icon {
+    font-size: var(--font-size-4xl);
+  }
+} */
+
+.select-department__title {
+  font-size: var(--font-size-5xl);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--color-slate-900);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+  line-height: 1.2;
+}
+/* 
+@media (min-width: 768px) {
+  .select-department__title {
+    font-size: var(--font-size-6xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .select-department__title {
+    font-size: var(--font-size-4xl);
+  }
+} */
+
+.select-department__subtitle {
+  font-size: var(--font-size-2xl);
+  color: var(--color-slate-500);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: var(--spacing-2xl);
+}
+
+/* @media (max-width: 768px) {
+  .select-department__subtitle {
+    font-size: var(--font-size-xl);
+  }
+} */

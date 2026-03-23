@@ -1,0 +1,280 @@
+/* Add to existing CSS */
+
+/* Variants */
+
+.select-doctor__card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  border: 2px solid var(--color-slate-100);
+  cursor: pointer;
+  transition: var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 1024px) {
+  .select-doctor__card {
+    padding: var(--spacing-xl);
+  }
+}
+
+.select-doctor__card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.select-doctor__card:active {
+  transform: scale(0.98);
+}
+
+.select-doctor__card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.select-doctor__card-image {
+  width: 100%;
+  aspect-ratio: 1;
+  background-color: var(--color-slate-200);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-lg);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .select-doctor__card-image {
+    margin-bottom: var(--spacing-xl);
+  }
+}
+
+.select-doctor__card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.select-doctor__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xs);
+}
+
+.select-doctor__card-name {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-slate-900);
+  line-height: 1.3;
+  flex: 1;
+  margin-right: var(--spacing-sm);
+}
+
+@media (min-width: 1024px) {
+  .select-doctor__card-name {
+    font-size: var(--font-size-3xl);
+  }
+}
+
+.select-doctor__card-status {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .select-doctor__card-status {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-md);
+  }
+}
+
+.select-doctor__card-status--available {
+  background-color: var(--color-emerald-100);
+  color: var(--color-emerald-700);
+}
+
+.select-doctor__card-status--busy {
+  background-color: var(--color-amber-100);
+  color: var(--color-amber-700);
+}
+
+.select-doctor__card-specialty {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+@media (min-width: 1024px) {
+  .select-doctor__card-specialty {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+.select-doctor__card-waiting {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-slate-600);
+  font-size: var(--font-size-lg);
+  line-height: 1.4;
+}
+
+@media (min-width: 1024px) {
+  .select-doctor__card-waiting {
+    font-size: var(--font-size-xl);
+  }
+}
+
+.select-doctor__card-waiting-icon {
+  font-size: var(--font-size-2xl);
+}
+
+.select-doctor__card-waiting-text strong {
+  color: var(--color-slate-900);
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .select-doctor__card-header {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .select-doctor__card-status {
+    align-self: flex-start;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .select-doctor__card {
+    transition: none;
+    animation: none;
+  }
+
+  .select-doctor__card:hover {
+    transform: none;
+  }
+
+  .select-doctor__card:active {
+    transform: none;
+  }
+}
+.select-doctor__card--compact {
+  padding: var(--spacing-md);
+}
+
+.select-doctor__card--compact .select-doctor__card-image {
+  margin-bottom: var(--spacing-md);
+}
+
+.select-doctor__card--compact .select-doctor__card-name {
+  font-size: var(--font-size-xl);
+}
+
+.select-doctor__card--compact .select-doctor__card-specialty {
+  font-size: var(--font-size-lg);
+}
+
+.select-doctor__card--compact .select-doctor__card-waiting {
+  font-size: var(--font-size-md);
+}
+
+.select-doctor__card--large {
+  padding: var(--spacing-2xl);
+}
+
+.select-doctor__card--large .select-doctor__card-image {
+  margin-bottom: var(--spacing-xl);
+}
+
+.select-doctor__card--large .select-doctor__card-name {
+  font-size: var(--font-size-3xl);
+}
+
+/* Disabled State */
+.select-doctor__card--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.select-doctor__card--disabled:hover {
+  transform: none;
+  border-color: var(--color-slate-100);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Grid Layout Helper */
+.doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .doctors-grid {
+    gap: var(--spacing-xl);
+  }
+}
+
+/* Selected Indicator */
+.selected-indicator {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Badge for custom content */
+.badge {
+  display: inline-block;
+  margin-left: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-full);
+  vertical-align: middle;
+}
+
+/* Experience text */
+.experience {
+  font-size: var(--font-size-sm);
+  color: var(--color-slate-500);
+  font-weight: normal;
+  margin-left: var(--spacing-xs);
+}
+
+/* Rating */
+.doctor-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-slate-100);
+  font-size: var(--font-size-md);
+  color: var(--color-slate-600);
+}
+
+.doctor-rating .material-symbols-outlined {
+  color: #fbbf24;
+  font-size: var(--font-size-lg);
+}
