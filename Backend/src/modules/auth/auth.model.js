@@ -7,7 +7,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    profilePic: {
+      type: String, // S3 URL or Key
+    },
     email: {
+
       type: String,
       required: true,
       unique: true,

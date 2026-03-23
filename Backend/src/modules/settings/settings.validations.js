@@ -63,6 +63,33 @@ const validateCreateSettings = [
     .withMessage(
       'tokenResetTime must be a valid cron expression (e.g., "0 0 * * *" for midnight)',
     ),
+  body("paymentConfig")
+    .optional()
+    .isObject()
+    .withMessage("paymentConfig must be an object"),
+  body("paymentConfig.razorpay")
+    .optional()
+    .isObject()
+    .withMessage("razorpay config must be an object"),
+  body("paymentConfig.razorpay.keyId")
+    .optional()
+    .trim()
+    .isString()
+    .withMessage("keyId must be a string"),
+  body("paymentConfig.razorpay.keySecret")
+    .optional()
+    .trim()
+    .isString()
+    .withMessage("keySecret must be a string"),
+  body("paymentConfig.razorpay.webhookSecret")
+    .optional()
+    .trim()
+    .isString()
+    .withMessage("webhookSecret must be a string"),
+  body("paymentConfig.razorpay.enabled")
+    .optional()
+    .isBoolean()
+    .withMessage("enabled must be a boolean"),
 ];
 
 /**
@@ -110,6 +137,33 @@ const validateUpdateSettings = [
     .withMessage(
       'tokenResetTime must be a valid cron expression (e.g., "0 0 * * *" for midnight)',
     ),
+  body("paymentConfig")
+    .optional()
+    .isObject()
+    .withMessage("paymentConfig must be an object"),
+  body("paymentConfig.razorpay")
+    .optional()
+    .isObject()
+    .withMessage("razorpay config must be an object"),
+  body("paymentConfig.razorpay.keyId")
+    .optional()
+    .trim()
+    .isString()
+    .withMessage("keyId must be a string"),
+  body("paymentConfig.razorpay.keySecret")
+    .optional()
+    .trim()
+    .isString()
+    .withMessage("keySecret must be a string"),
+  body("paymentConfig.razorpay.webhookSecret")
+    .optional()
+    .trim()
+    .isString()
+    .withMessage("webhookSecret must be a string"),
+  body("paymentConfig.razorpay.enabled")
+    .optional()
+    .isBoolean()
+    .withMessage("enabled must be a boolean"),
 ];
 
 module.exports = {

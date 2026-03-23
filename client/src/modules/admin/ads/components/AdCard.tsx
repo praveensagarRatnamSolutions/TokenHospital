@@ -9,7 +9,9 @@ import {
   Clock,
   Image as ImageIcon,
   Video,
+  Play,
 } from 'lucide-react';
+
 import type { Ad } from '../types';
 
 interface AdCardProps {
@@ -17,6 +19,7 @@ interface AdCardProps {
   onEdit: (ad: Ad) => void;
   onDelete: (ad: Ad) => void;
   onToggleActive?: (ad: Ad) => void;
+  onPreview?: (ad: Ad) => void;
   isDarkMode?: boolean;
 }
 
@@ -25,8 +28,10 @@ export const AdCard: React.FC<AdCardProps> = ({
   onEdit,
   onDelete,
   onToggleActive,
+  onPreview,
   isDarkMode = false,
 }) => {
+
   const cardBg = isDarkMode ? 'bg-slate-900' : 'bg-white';
   const cardBorder = isDarkMode ? 'border-slate-700' : 'border-slate-200';
   const textColor = isDarkMode ? 'text-white' : 'text-slate-900';
@@ -42,16 +47,37 @@ export const AdCard: React.FC<AdCardProps> = ({
     >
       {/* Preview Section */}
       <div
-        className={`w-full aspect-video ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'} flex items-center justify-center overflow-hidden relative group`}
+        onClick={() => onPreview?.(ad)}
+        className={`w-full aspect-video ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'} flex items-center justify-center overflow-hidden relative group cursor-zoom-in`}
       >
+
         {ad.fileKey ? (
           ad.type === 'video' ? (
-            <video src={mediaUrl} className="w-full h-full object-cover" muted />
+            <>
+              <video
+                src={mediaUrl}
+                className="w-full h-full object-cover"
+                muted
+                playsInline
+                onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
+                onMouseLeave={(e) => {
+                  const v = e.target as HTMLVideoElement;
+                  v.pause();
+                  v.currentTime = 0;
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:opacity-0 transition-opacity">
+                <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform">
+                  <Play size={24} className="text-black fill-black ml-1" />
+                </div>
+              </div>
+
+            </>
           ) : (
-            <img 
-              src={mediaUrl} 
-              alt={ad.title} 
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+            <img
+              src={mediaUrl}
+              alt={ad.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           )
         ) : (
@@ -60,6 +86,7 @@ export const AdCard: React.FC<AdCardProps> = ({
             <span className="text-xs">No preview available</span>
           </div>
         )}
+
 
         {/* Floating Badges */}
         <div className="absolute top-2 left-2 flex gap-1.5">

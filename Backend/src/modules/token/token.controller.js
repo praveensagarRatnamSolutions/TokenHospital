@@ -99,10 +99,30 @@ const callNextToken = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Cancel a token
+ * @route   PATCH /api/token/:id/cancel
+ * @access  Private (Admin, Receptionist)
+ */
+const cancelToken = async (req, res, next) => {
+    try {
+        const token = await tokenService.cancelToken(req.params.id, req.hospitalId);
+        logger.info(`Token canceled: ${token.tokenNumber}`);
+        res.status(200).json({ success: true, data: token });
+    } catch (error) {
+        if (error.message === 'Token not found or already completed') {
+            return res.status(404).json({ success: false, message: error.message });
+        }
+        next(error);
+    }
+};
+
 module.exports = {
     createToken,
     getCurrentToken,
     getTokens,
     completeToken,
     callNextToken,
+    cancelToken,
 };
+
