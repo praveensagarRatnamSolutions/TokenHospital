@@ -33,16 +33,25 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *               doctorId:
  *                 type: string
  *                 description: Optional - auto-assigned if not provided
+ *               appointmentDate:
+ *                 type: string
+ *                 description: Optional - defaults to today (YYYY-MM-DD)
  *               patientDetails:
  *                 type: object
- *                 required: [name]
+ *                 required: [name, phone]
  *                 properties:
  *                   name:
  *                     type: string
+ *                   phone:
+ *                     type: string
  *                   age:
  *                     type: number
+ *                   gender:
+ *                     type: string
+ *                     enum: [Male, Female, Other]
  *                   problem:
  *                     type: string
+
  *     responses:
  *       201:
  *         description: Token created
@@ -151,4 +160,27 @@ router.patch('/:id/complete', protect, authorize('admin', 'doctor'), tokenContro
  */
 router.post('/next', protect, authorize('admin', 'doctor'), tokenController.callNextToken);
 
+/**
+ * @swagger
+ * /api/token/{id}/cancel:
+ *   patch:
+ *     summary: Cancel a token
+ *     tags: [Token]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Token canceled
+ *       404:
+ *         description: Token not found or already completed
+ */
+router.patch('/:id/cancel', protect, authorize('admin', 'doctor'), tokenController.cancelToken);
+
 module.exports = router;
+

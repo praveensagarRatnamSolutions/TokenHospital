@@ -48,7 +48,11 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs, {
+  swaggerOptions: {
+    persistAuthorization: true,
+  },
+}));
 
 // Root route
 app.get("/", (req, res) => {
@@ -62,10 +66,13 @@ app.use("/api/auth", require("./modules/auth/auth.routes"));
 app.use("/api/hospital", require("./modules/hospital/hospital.routes"));
 app.use("/api/doctor", require("./modules/doctor/doctor.routes"));
 app.use("/api/department", require("./modules/department/department.routes"));
+app.use("/api/patient", require("./modules/patient/patient.routes"));
 app.use("/api/token", require("./modules/token/token.routes"));
+
 app.use("/api/ads", require("./modules/ads/ads.routes"));
 app.use("/api/reports", require("./modules/reports/reports.routes"));
 app.use("/api/settings", require("./modules/settings/settings.routes"));
+app.use("/api/payment", require("./modules/payment/payment.routes"));
 
 // Global Error Handler
 app.use(errorHandler);

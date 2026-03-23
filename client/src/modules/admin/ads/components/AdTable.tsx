@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Edit, Trash2, Eye, EyeOff, Clock, Layers, Image as ImageIcon } from 'lucide-react';
+import { Edit, Trash2, Eye, EyeOff, Clock, Layers, Image as ImageIcon, Play } from 'lucide-react';
+
 import type { Ad } from '../types';
 
 interface AdTableProps {
@@ -9,7 +10,9 @@ interface AdTableProps {
   onEdit: (ad: Ad) => void;
   onDelete: (ad: Ad) => void;
   onToggleActive?: (ad: Ad) => void;
+  onPreview?: (ad: Ad) => void;
   isLoading?: boolean;
+
   isDarkMode?: boolean;
 }
 
@@ -18,9 +21,11 @@ export const AdTable: React.FC<AdTableProps> = ({
   onEdit,
   onDelete,
   onToggleActive,
+  onPreview,
   isLoading = false,
   isDarkMode = false,
 }) => {
+
   const tableHeaderBg = isDarkMode ? 'bg-slate-800' : 'bg-slate-100';
   const tableHeaderText = isDarkMode ? 'text-slate-300' : 'text-slate-700';
   const tableRowBg = isDarkMode ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50';
@@ -74,22 +79,51 @@ export const AdTable: React.FC<AdTableProps> = ({
               <tr key={ad._id} className={`${tableRowBg} transition-colors`}>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-14 h-10 rounded-md overflow-hidden flex-shrink-0 bg-slate-200 border ${tableBorderColor}`}>
+                    <div 
+                      onClick={() => onPreview?.(ad)}
+                      className={`relative w-14 h-10 rounded-md overflow-hidden flex-shrink-0 bg-slate-200 border ${tableBorderColor} group/thumb cursor-zoom-in`}
+                    >
+
                       {ad.fileKey ? (
-                        <img
-                          src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_URL}/${ad.fileKey}`}
-                          alt={ad.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as any).src = 'https://via.placeholder.com/150?text=No+Image';
-                          }}
-                        />
+                        ad.type === 'video' ? (
+                          <>
+                            <video
+                              src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_URL}/${ad.fileKey}`}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                              onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
+                              onMouseLeave={(e) => {
+                                const v = e.target as HTMLVideoElement;
+                                v.pause();
+                                v.currentTime = 0;
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/thumb:opacity-0 transition-opacity">
+                              <div className="w-5 h-5 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                                <Play size={10} className="text-black fill-black" />
+                              </div>
+                            </div>
+
+                          </>
+                        ) : (
+                          <img
+                            src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_URL}/${ad.fileKey}`}
+                            alt={ad.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as any).src = 'https://via.placeholder.com/150?text=No+Image';
+                            }}
+                          />
+                        )
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <ImageIcon className="h-4 w-4 text-slate-400" />
                         </div>
                       )}
                     </div>
+
+
                     <div>
                       <div className={`text-sm font-medium ${textColor}`}>{ad.title}</div>
                       <div className={`text-xs ${mutedText}`}>{ad.fileName}</div>

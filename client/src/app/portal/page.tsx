@@ -79,7 +79,7 @@ const dispatch = useAppDispatch();
               <button
                 key={app.id}
                 onClick={() => router.push(app.path)}
-                className={`group relative flex flex-col text-left p-10 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:border-[#0091DD]/50`}
+                className={`group relative flex flex-col text-left p-10 rounded-3xl border border-[#0091DD]/50 dark:border-slate-800 bg-white dark:bg-slate-900/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:border-[#0091DD]/50`}
               >
                 {/* Gradient Icon Box */}
                 <div

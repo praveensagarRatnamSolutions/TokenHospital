@@ -20,6 +20,14 @@ const getSettings = async (hospitalId) => {
         autoAssign: true,
       },
       tokenResetTime: "0 0 * * *",
+      paymentConfig: {
+        razorpay: {
+          keyId: "",
+          keySecret: "",
+          webhookSecret: "",
+          enabled: false,
+        },
+      },
     };
   }
   return settings;

@@ -2,17 +2,47 @@ const Token = require('./token.model');
 const TokenCounter = require('./tokenCounter.model');
 const Department = require('../department/department.model');
 const Doctor = require('../doctor/doctor.model');
+const Patient = require('../patient/patient.model');
 const { getIo } = require('../../socket/socketHandler');
+
+/**
+ * Resolve/Create Patient
+ */
+const resolvePatient = async (hospitalId, patientData) => {
+    const { name, phone, age, gender } = patientData;
+
+    let patient = await Patient.findOne({ hospitalId, phone });
+
+    if (!patient) {
+        patient = await Patient.create({
+            name,
+            phone,
+            age,
+            gender,
+            hospitalId
+        });
+    } else {
+        // Optionally update details if they are provided and different
+        let needsUpdate = false;
+        if (age && patient.age !== age) { patient.age = age; needsUpdate = true; }
+        if (gender && patient.gender !== gender) { patient.gender = gender; needsUpdate = true; }
+        if (name && patient.name !== name) { patient.name = name; needsUpdate = true; }
+        
+        if (needsUpdate) await patient.save();
+    }
+
+    return patient;
+};
 
 /**
  * Generate next token number for a department.
  * Uses atomic findOneAndUpdate to prevent race conditions.
  */
-const getNextTokenNumber = async (hospitalId, departmentId) => {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+const getNextTokenNumber = async (hospitalId, departmentId, date) => {
+    const targetDate = date || new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
     const counter = await TokenCounter.findOneAndUpdate(
-        { hospitalId, departmentId, date: today },
+        { hospitalId, departmentId, date: targetDate },
         { $inc: { lastSequence: 1 } },
         { new: true, upsert: true }
     );
@@ -23,13 +53,17 @@ const getNextTokenNumber = async (hospitalId, departmentId) => {
     }
 
     const tokenNumber = `${department.prefix}${counter.lastSequence}`;
-    return { tokenNumber, sequenceNumber: counter.lastSequence };
+    return { tokenNumber, sequenceNumber: counter.lastSequence, appointmentDate: targetDate };
 };
+
+
 
 /**
  * Auto-assign doctor with least queue in the department.
  */
-const autoAssignDoctor = async (hospitalId, departmentId) => {
+const autoAssignDoctor = async (hospitalId, departmentId, date) => {
+    const targetDate = date || new Date().toISOString().split('T')[0];
+
     // Get all available doctors in this department
     const doctors = await Doctor.find({
         hospitalId,
@@ -41,13 +75,22 @@ const autoAssignDoctor = async (hospitalId, departmentId) => {
         return null; // No available doctor; token stays unassigned
     }
 
-    // Count waiting + current tokens per doctor
-    const doctorIds = doctors.map((d) => d._id);
+    // Filter by availability for this specific day of the week
+    const dayOfWeek = new Date(targetDate).toLocaleDateString('en-US', { weekday: 'long' });
+    const availableToday = doctors.filter(doctor => 
+        doctor.availability?.some(a => a.day === dayOfWeek)
+    );
+
+    if (!availableToday.length) return null;
+
+    // Count waiting + current tokens per doctor for this specific date
+    const doctorIds = availableToday.map((d) => d._id);
     const queueCounts = await Token.aggregate([
         {
             $match: {
                 hospitalId: hospitalId,
                 doctorId: { $in: doctorIds },
+                appointmentDate: targetDate,
                 status: { $in: ['waiting', 'current'] },
             },
         },
@@ -65,50 +108,84 @@ const autoAssignDoctor = async (hospitalId, departmentId) => {
         countMap[q._id.toString()] = q.count;
     });
 
-    // Find the doctor with the least queue
-    let minDoctor = doctors[0];
-    let minCount = countMap[minDoctor._id.toString()] || 0;
+    // Find the doctor with the least queue who hasn't reached maxPerDay
+    let minDoctor = null;
+    let minCount = Infinity;
 
-    for (const doctor of doctors) {
+    for (const doctor of availableToday) {
         const count = countMap[doctor._id.toString()] || 0;
-        if (count < minCount) {
+        const maxTokens = doctor.tokenConfig?.maxPerDay || 50;
+
+        if (count < maxTokens && count < minCount) {
             minCount = count;
             minDoctor = doctor;
         }
     }
 
-    return minDoctor._id;
+    return minDoctor ? minDoctor._id : null;
 };
+
 
 /**
  * Create a new token
  */
 const createToken = async (tokenData) => {
-    const { departmentId, hospitalId, patientDetails, doctorId } = tokenData;
+    const { departmentId, hospitalId, patientDetails, doctorId, appointmentDate } = tokenData;
+    const targetDate = appointmentDate || new Date().toISOString().split('T')[0];
 
-    // Generate token number
-    const { tokenNumber, sequenceNumber } = await getNextTokenNumber(hospitalId, departmentId);
+    // 1. Resolve Patient
+    const patient = await resolvePatient(hospitalId, patientDetails);
 
-    // Auto-assign doctor if not specified
+    // 2. Resolve Doctor
     let assignedDoctorId = doctorId || null;
     if (!assignedDoctorId) {
-        assignedDoctorId = await autoAssignDoctor(hospitalId, departmentId);
+        assignedDoctorId = await autoAssignDoctor(hospitalId, departmentId, targetDate);
+        if (!assignedDoctorId) {
+            throw new Error('No available doctors for this department on the selected date or capacity full');
+        }
+    } else {
+        // Validate specific doctor's availability and capacity
+        const doctor = await Doctor.findById(assignedDoctorId).lean();
+        if (!doctor || !doctor.isAvailable) throw new Error('Doctor not available');
+
+        const dayOfWeek = new Date(targetDate).toLocaleDateString('en-US', { weekday: 'long' });
+        const hasSchedule = doctor.availability?.some(a => a.day === dayOfWeek);
+        if (!hasSchedule) throw new Error(`Doctor does not work on ${dayOfWeek}s`);
+
+        const currentQueue = await Token.countDocuments({
+            hospitalId,
+            doctorId: assignedDoctorId,
+            appointmentDate: targetDate,
+            status: { $in: ['waiting', 'current'] }
+        });
+
+        if (currentQueue >= (doctor.tokenConfig?.maxPerDay || 50)) {
+            throw new Error('Doctor has reached maximum token capacity for the day');
+        }
     }
 
+    // 3. Generate token number
+    const { tokenNumber, sequenceNumber } = await getNextTokenNumber(hospitalId, departmentId, targetDate);
+
+    // 4. Create Token
     const token = await Token.create({
         tokenNumber,
         sequenceNumber,
         departmentId,
         doctorId: assignedDoctorId,
         hospitalId,
+        appointmentDate: targetDate,
         status: 'waiting',
-        patientDetails,
+        patientId: patient._id,
+        problem: patientDetails.problem,
     });
 
     const populatedToken = await Token.findById(token._id)
         .populate('departmentId', 'name prefix')
         .populate('doctorId', 'name')
+        .populate('patientId', 'name phone age gender')
         .lean();
+
 
     // Emit socket event
     try {
@@ -121,6 +198,7 @@ const createToken = async (tokenData) => {
     return populatedToken;
 };
 
+
 /**
  * Get current token for a doctor
  */
@@ -132,7 +210,9 @@ const getCurrentToken = async (hospitalId, doctorId) => {
     })
         .populate('departmentId', 'name prefix')
         .populate('doctorId', 'name')
+        .populate('patientId', 'name phone age gender')
         .lean();
+
 
     return token;
 };
@@ -155,10 +235,12 @@ const getTokens = async (hospitalId, filters = {}) => {
         Token.find(query)
             .populate('departmentId', 'name prefix')
             .populate('doctorId', 'name')
+            .populate('patientId', 'name phone age gender')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean(),
+
         Token.countDocuments(query),
     ]);
 
@@ -182,7 +264,9 @@ const completeToken = async (tokenId, hospitalId) => {
         { new: true }
     )
         .populate('departmentId', 'name prefix')
-        .populate('doctorId', 'name');
+        .populate('doctorId', 'name')
+        .populate('patientId', 'name phone age gender');
+
 
     if (!token) {
         throw new Error('Token not found or not currently active');
@@ -219,7 +303,9 @@ const callNextToken = async (doctorId, hospitalId) => {
         { new: true, sort: { createdAt: 1 } }
     )
         .populate('departmentId', 'name prefix')
-        .populate('doctorId', 'name');
+        .populate('doctorId', 'name')
+        .populate('patientId', 'name phone age gender');
+
 
     if (!nextToken) {
         return null; // No more tokens in queue
@@ -236,10 +322,40 @@ const callNextToken = async (doctorId, hospitalId) => {
     return nextToken;
 };
 
+/**
+ * Cancel a token
+ */
+const cancelToken = async (tokenId, hospitalId) => {
+    const token = await Token.findOneAndUpdate(
+        { _id: tokenId, hospitalId, status: { $ne: 'completed' } },
+        { status: 'canceled', canceledAt: new Date() },
+        { new: true }
+    ).populate('departmentId', 'name prefix')
+     .populate('doctorId', 'name')
+     .populate('patientId', 'name phone age gender');
+
+
+    if (!token) {
+        throw new Error('Token not found or already completed');
+    }
+
+    // Emit socket event
+    try {
+        const io = getIo();
+        io.emit('tokenUpdated', token);
+    } catch (e) {
+        // skip
+    }
+
+    return token;
+};
+
 module.exports = {
     createToken,
     getCurrentToken,
     getTokens,
     completeToken,
     callNextToken,
+    cancelToken,
 };
+

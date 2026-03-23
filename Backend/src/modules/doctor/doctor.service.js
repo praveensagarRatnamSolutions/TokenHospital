@@ -1,9 +1,10 @@
 const Doctor = require('./doctor.model');
 
-const createDoctor = async (doctorData) => {
-    const doctor = await Doctor.create(doctorData);
-    return doctor;
+const createDoctor = async (doctorData, options = {}) => {
+    const doctor = await Doctor.create([doctorData], options);
+    return doctor[0];
 };
+
 
 const getDoctors = async (hospitalId, filters = {}) => {
     const query = { hospitalId };
@@ -22,9 +23,11 @@ const getDoctors = async (hospitalId, filters = {}) => {
     const [doctors, total] = await Promise.all([
         Doctor.find(query)
             .populate('departmentId', 'name prefix')
+            .populate('userId', 'profilePic')
             .skip(skip)
             .limit(limit)
             .lean(),
+
         Doctor.countDocuments(query),
     ]);
 
@@ -41,7 +44,9 @@ const getDoctors = async (hospitalId, filters = {}) => {
 const getDoctorById = async (doctorId, hospitalId) => {
     const doctor = await Doctor.findOne({ _id: doctorId, hospitalId })
         .populate('departmentId', 'name prefix')
+        .populate('userId', 'profilePic')
         .lean();
+
     if (!doctor) {
         throw new Error('Doctor not found');
     }

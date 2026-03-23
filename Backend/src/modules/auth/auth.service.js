@@ -76,7 +76,30 @@ const loginUser = async (email, password) => {
     }
 };
 
+const createUser = async (userData, session = null) => {
+    const { name, email, password, role, hospitalId, profilePic } = userData;
+
+    const userExists = await User.findOne({ email }).session(session);
+    if (userExists) {
+        throw new Error("User with this email already exists");
+    }
+
+    const [user] = await User.create([{
+        name,
+        email,
+        password,
+        role,
+        hospitalId,
+        profilePic
+    }], { session });
+
+    return user;
+};
+
+
 module.exports = {
     registerUser,
     loginUser,
+    createUser,
 };
+

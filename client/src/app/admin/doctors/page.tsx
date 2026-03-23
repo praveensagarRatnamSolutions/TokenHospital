@@ -4,16 +4,18 @@ import { Plus, Search, Edit2, Trash2, CheckCircle2, XCircle } from 'lucide-react
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { doctorApi } from '@/modules/admin/doctors';
 
 export default function AdminDoctors() {
   const { data: doctors, isLoading } = useQuery({
     queryKey: ['doctors'],
     queryFn: async () => {
-      // For now, mock or fetch if backend is up
       try {
-        const response = await api.get('/api/doctor');
-        return response.data.data;
-      } catch {
+        const response = await doctorApi.getAll();
+        return response.data.doctors || [];
+      } catch (error) {
+        console.error('Failed to fetch doctors:', error);
         return [
           {
             _id: '1',
@@ -41,10 +43,12 @@ export default function AdminDoctors() {
             Manage hospital medical staff and availability.
           </p>
         </div>
-        <Button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors w-full sm:w-auto">
-          <Plus className="w-5 h-5" />
-          Add Doctor
-        </Button>
+        <Link href="/admin/doctors/add">
+          <Button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors w-full sm:w-auto">
+            <Plus className="w-5 h-5" />
+            Add Doctor
+          </Button>
+        </Link>
       </div>
 
       {/* Search Bar */}
@@ -83,7 +87,25 @@ export default function AdminDoctors() {
                   key={doctor._id}
                   className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors"
                 >
-                  <td className="px-6 py-4 font-semibold">{doctor.name}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                        {doctor.profilePic ? (
+                          <img 
+                            src={`https://d2rxrksscpnnty.cloudfront.net/${doctor.profilePic}`} 
+                            alt={doctor.name} 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <span className="text-[10px] font-bold uppercase">{doctor.name.charAt(0)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <span className="font-semibold">{doctor.name}</span>
+                    </div>
+                  </td>
+
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
                     {doctor.departmentId?.name || 'Unassigned'}
                   </td>
@@ -100,13 +122,15 @@ export default function AdminDoctors() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-colors border"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
+                      <Link href={`/admin/doctors/${doctor._id}/edit`}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-colors border"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                      </Link>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -133,28 +157,48 @@ export default function AdminDoctors() {
               key={doctor._id}
               className="p-4 bg-white dark:bg-slate-950 border rounded-lg shadow-sm"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-base">{doctor.name}</h3>
-                  <p className="text-sm text-slate-500">
-                    {doctor.departmentId?.name || 'Unassigned'}
-                  </p>
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                  {doctor.profilePic ? (
+                    <img 
+                      src={`https://d2rxrksscpnnty.cloudfront.net/${doctor.profilePic}`} 
+                      alt={doctor.name} 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      <span className="text-sm font-bold uppercase">{doctor.name.charAt(0)}</span>
+                    </div>
+                  )}
                 </div>
-                {doctor.isAvailable ? (
-                  <span className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
-                    <CheckCircle2 className="w-4 h-4" /> Online
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
-                    <XCircle className="w-4 h-4" /> Offline
-                  </span>
-                )}
+                <div className="flex-1">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold text-base">{doctor.name}</h3>
+                      <p className="text-sm text-slate-500">
+                        {doctor.departmentId?.name || 'Unassigned'}
+                      </p>
+                    </div>
+                    {doctor.isAvailable ? (
+                      <span className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+                        <CheckCircle2 className="w-4 h-4" /> Online
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
+                        <XCircle className="w-4 h-4" /> Offline
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
+
               <div className="flex items-center justify-end gap-2 pt-3 border-t">
-                <Button variant="outline" size="sm" className="flex-1 h-8 text-xs">
-                  <Edit2 className="w-3 h-3 mr-1" />
-                  Edit
-                </Button>
+                <Link href={`/admin/doctors/${doctor._id}/edit`} className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full h-8 text-xs">
+                    <Edit2 className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
+                </Link>
                 <Button
                   variant="outline"
                   size="sm"

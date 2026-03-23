@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, AlertCircle, Loader, LayoutGrid, LayoutList, Filter, CheckCircle2 } from 'lucide-react';
+import { Plus, AlertCircle, Loader, LayoutGrid, LayoutList, Filter, CheckCircle2, Clock, Layers, X } from 'lucide-react';
+
+
 import { AdTable } from './AdTable';
 import { AdCard } from './AdCard';
 import { AdModal } from './AdModal';
@@ -20,6 +22,8 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Ad | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [previewAd, setPreviewAd] = useState<Ad | null>(null);
+
 
   // Hooks
   const { ads, loading: loadingAds, error: adsError, refetch } = useAds();
@@ -177,13 +181,15 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
       ) : (
         <div className="min-h-[400px]">
           {viewMode === 'table' ? (
-            <AdTable 
-              ads={filteredAds} 
-              onEdit={handleEditClick} 
-              onDelete={setShowDeleteConfirm} 
-              onToggleActive={handleToggleActive} 
-              isDarkMode={isDarkMode} 
-            />
+              <AdTable 
+                ads={filteredAds} 
+                onEdit={handleEditClick} 
+                onDelete={setShowDeleteConfirm} 
+                onToggleActive={handleToggleActive} 
+                onPreview={setPreviewAd}
+                isDarkMode={isDarkMode} 
+              />
+
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredAds.map(ad => (
@@ -193,8 +199,10 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
                   onEdit={handleEditClick} 
                   onDelete={setShowDeleteConfirm} 
                   onToggleActive={handleToggleActive}
+                  onPreview={setPreviewAd}
                   isDarkMode={isDarkMode} 
                 />
+
               ))}
             </div>
           )}
@@ -234,6 +242,50 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
         uploadProgress={uploadProgress}
         isDarkMode={isDarkMode}
       />
+
+      {/* Media Preview Lightbox */}
+      {previewAd && (
+        <div 
+          className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[200] flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in"
+          onClick={() => setPreviewAd(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors bg-white/10 hover:bg-white/20 p-2 rounded-full"
+            onClick={() => setPreviewAd(null)}
+          >
+            <X size={32} />
+          </button>
+
+          
+          <div className="max-w-5xl w-full h-full flex flex-col items-center justify-center gap-6" onClick={e => e.stopPropagation()}>
+             <div className="w-full relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black">
+                {previewAd.type === 'video' ? (
+                  <video 
+                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_URL}/${previewAd.fileKey}`} 
+                    className="w-full max-h-[70vh] object-contain"
+                    controls
+                    autoPlay
+                  />
+                ) : (
+                  <img 
+                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_URL}/${previewAd.fileKey}`} 
+                    className="w-full max-h-[70vh] object-contain"
+                    alt={previewAd.title}
+                  />
+                )}
+             </div>
+             
+             <div className="text-center space-y-2">
+                <h2 className="text-2xl font-bold text-white">{previewAd.title}</h2>
+                <div className="flex items-center justify-center gap-4 text-white/60 text-sm">
+                   <span className="flex items-center gap-1.5 capitalize"><Layers size={14}/> {previewAd.displayArea}</span>
+                   <span className="flex items-center gap-1.5"><Clock size={14}/> {previewAd.duration}s Playtime</span>
+                </div>
+             </div>
+          </div>
+        </div>
+      )}
     </div>
+
   );
 };

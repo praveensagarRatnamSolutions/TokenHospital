@@ -89,6 +89,33 @@ router.get('/', protect, doctorController.getDoctors);
  *       404:
  *         description: Doctor not found
  */
+/**
+ * @swagger
+ * /api/doctor/upload-url:
+ *   get:
+ *     summary: Get a presigned URL for uploading doctor-related files
+ *     tags: [Doctor]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Presigned URL generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uploadUrl:
+ *                   type: string
+ *                   description: The URL to upload the file to
+ *                 key:
+ *                   type: string
+ *                   description: The key (path) of the uploaded file in the storage bucket
+ *       500:
+ *         description: Server error
+ */
+router.get('/upload-url', protect, authorize('admin', 'doctor'), doctorController.getPresignedUrl);
+
 router.get('/:id', protect, doctorController.getDoctorById);
 
 /**
@@ -142,3 +169,5 @@ router.put('/:id', protect, authorize('admin'), updateDoctorValidation, validate
 router.patch('/:id/status', protect, authorize('admin', 'doctor'), doctorController.toggleDoctorStatus);
 
 module.exports = router;
+
+

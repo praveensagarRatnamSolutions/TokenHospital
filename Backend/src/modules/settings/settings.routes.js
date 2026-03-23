@@ -42,6 +42,20 @@ const {
  *                 type: object
  *               tokenResetTime:
  *                 type: string
+ *               paymentConfig:
+ *                 type: object
+ *                 properties:
+ *                   razorpay:
+ *                     type: object
+ *                     properties:
+ *                       keyId:
+ *                         type: string
+ *                       keySecret:
+ *                         type: string
+ *                       webhookSecret:
+ *                         type: string
+ *                       enabled:
+ *                         type: boolean
  *     responses:
  *       201:
  *         description: Settings created successfully
@@ -93,6 +107,20 @@ router.get("/", protect, settingsController.getSettings);
  *                 type: object
  *               tokenResetTime:
  *                 type: string
+ *               paymentConfig:
+ *                 type: object
+ *                 properties:
+ *                   razorpay:
+ *                     type: object
+ *                     properties:
+ *                       keyId:
+ *                         type: string
+ *                       keySecret:
+ *                         type: string
+ *                       webhookSecret:
+ *                         type: string
+ *                       enabled:
+ *                         type: boolean
  *     responses:
  *       200:
  *         description: Settings updated

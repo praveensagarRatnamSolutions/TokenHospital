@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { encrypt, decrypt } = require('../../utils/crypto');
 
 const settingsSchema = new mongoose.Schema(
     {
@@ -24,6 +25,24 @@ const settingsSchema = new mongoose.Schema(
             reports: { type: Boolean, default: true },
             autoAssign: { type: Boolean, default: true },
         },
+        paymentConfig: {
+            razorpay: {
+                keyId: { type: String, trim: true },
+                keySecret: { 
+                    type: String, 
+                    trim: true,
+                    set: encrypt,
+                    get: decrypt
+                },
+                webhookSecret: { 
+                    type: String, 
+                    trim: true,
+                    set: encrypt,
+                    get: decrypt
+                },
+                enabled: { type: Boolean, default: false }
+            }
+        },
         tokenResetTime: {
             type: String, // Cron expression, default midnight
             default: '0 0 * * *',
@@ -31,6 +50,8 @@ const settingsSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
+        toJSON: { getters: true },
+        toObject: { getters: true },
     }
 );
 
