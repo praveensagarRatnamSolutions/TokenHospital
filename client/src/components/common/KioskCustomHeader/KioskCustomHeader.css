@@ -38,7 +38,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-primary);
-  margin-bottom: var(--spacing-2xl);
+  /* margin-bottom: var(--spacing-2xl); */
 }
 
 /* @media (min-width: 768px) {

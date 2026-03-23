@@ -1,78 +1,5 @@
 /* PatientCheckin.css - Industry Standard CSS with BEM methodology */
 
-/* CSS Variables */
-
-:root {
-  /* Colors from the Tailwind config */
-  /* --color-primary: #2b9dee;
-  --color-primary-container: #d7edff;
-  --color-on-primary: #ffffff;
-  --color-on-primary-container: #001e30;
-  --color-secondary: #475569;
-  --color-error: #ef4444;
-  --color-error-container: #fee2e2;
-  --color-on-error: #ffffff;
-  --color-on-error-container: #991b1b;
-  --color-background: #f6f7f8;
-  --color-surface: #ffffff;
-  --color-surface-variant: #f1f5f9;
-  --color-surface-container: #f1f5f9;
-  --color-surface-container-low: #f8fafc;
-  --color-surface-container-high: #e2e8f0;
-  --color-surface-container-highest: #cbd5e1;
-  --color-on-surface: #0f172a;
-  --color-on-surface-variant: #475569;
-  --color-outline: #cbd5e1;
-  --color-outline-variant: #e2e8f0;
-  --color-inverse-surface: #1e293b;
-  --color-inverse-on-surface: #f8fafc;
-  --color-inverse-primary: #90ccff; */
-
-  /* Spacing */
-  /* --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  --spacing-3xl: 4rem;
-  --spacing-4xl: 6rem; */
-
-  /* Typography */
-  /* --font-family: 'Inter', sans-serif;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  --font-size-4xl: 2.25rem;
-  --font-size-5xl: 3rem;
-  --font-size-6xl: 3.75rem; */
-
-  /* Shadows */
-  /* --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25); */
-
-  /* Border Radius */
-  /* --radius-md: 1rem;
-  --radius-lg: 2rem;
-  --radius-xl: 3rem;
-  --radius-full: 9999px; */
-
-  /* Transitions */
-  /* --transition-base: all 0.3s ease;
-  --transition-transform: transform 0.2s ease; */
-}
-
-/* Base Styles */
-
-/* Material Symbols */
-
 /* Main Container */
 .patient-checkin {
   display: flex;
@@ -80,12 +7,13 @@
   height: 100vh;
   width: 100vw;
   color: var(--color-on-surface);
+  background-color: inherit;
 }
 
 /* Header Styles */
 .patient-checkin__header {
   background-color: var(--color-surface);
-  /* box-shadow: var(--shadow-xl); */
+  box-shadow: var(--shadow-xl);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -109,14 +37,14 @@
 }
 
 .patient-checkin__brand-icon {
-  font-size: 3rem;
+  font-size: var(--font-size-5xl);
   color: var(--color-primary);
 }
 
 .patient-checkin__title {
   font-family: var(--font-family);
   font-weight: 800;
-  font-size: 2.25rem;
+  font-size: var(--font-size-4xl);
   letter-spacing: -0.025em;
   color: var(--color-primary);
   line-height: 1.2;
@@ -125,12 +53,12 @@
 .patient-checkin__subtitle {
   color: var(--color-secondary);
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   line-height: 1.4;
 }
 
 .patient-checkin__help-icon {
-  font-size: 2.5rem;
+  font-size: var(--font-size-4xl);
   color: var(--color-outline);
   cursor: pointer;
   transition: var(--transition-base);
@@ -232,7 +160,7 @@
 }
 
 .patient-checkin__clear-icon {
-  font-size: 2.5rem;
+  font-size: var(--font-size-4xl);
 }
 
 /* Right Column */
@@ -295,7 +223,7 @@
 }
 
 .patient-checkin__numpad-icon {
-  font-size: 2.5rem;
+  font-size: var(--font-size-4xl);
 }
 
 /* Privacy Card */
@@ -348,207 +276,6 @@
   font-size: var(--font-size-xl);
   line-height: 1.4;
 }
-
-/* Responsive Design */
-/* @media (max-width: 1536px) {
-  .patient-checkin__title {
-    font-size: 2rem;
-  }
-
-  .patient-checkin__phone-display {
-    font-size: 3rem;
-  }
-} */
-
-/* @media (max-width: 1280px) {
-  .patient-checkin__grid {
-    gap: var(--spacing-lg);
-  }
-
-  .patient-checkin__instruction-title {
-    font-size: 2rem;
-  }
-
-  .patient-checkin__instruction-text {
-    font-size: 1.5rem;
-  }
-
-  .patient-checkin__input {
-    font-size: 2rem;
-    padding: var(--spacing-xl) 0;
-  }
-
-  .patient-checkin__phone-display {
-    font-size: 2.5rem;
-  }
-} */
-
-/* @media (max-width: 1024px) {
-  .patient-checkin__header {
-    padding: 0 var(--spacing-xl);
-    height: 6rem;
-  }
-
-  .patient-checkin__brand-icon {
-    font-size: 2.5rem;
-  }
-
-  .patient-checkin__title {
-    font-size: 1.75rem;
-  }
-
-  .patient-checkin__subtitle {
-    font-size: 1rem;
-  }
-
-  .patient-checkin__main {
-    padding: var(--spacing-xl);
-  }
-
-  .patient-checkin__grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-xl);
-  }
-
-  .patient-checkin__left-column,
-  .patient-checkin__right-column {
-    grid-column: span 1;
-  }
-
-  .patient-checkin__right-column {
-    padding: var(--spacing-xl);
-  }
-
-  .patient-checkin__footer {
-    height: auto;
-    min-height: 8rem;
-    padding: var(--spacing-lg) var(--spacing-xl);
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-
-  .patient-checkin__footer-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .patient-checkin__fab {
-    bottom: 2rem;
-    right: 1rem;
-  }
-
-  .patient-checkin__fab-btn {
-    width: 72px;
-    height: 72px;
-  }
-
-  .patient-checkin__fab-icon {
-    font-size: 3rem;
-  }
-} */
-
-/* @media (max-width: 768px) {
-  .patient-checkin__row {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-xl);
-  }
-
-  .patient-checkin__numpad-btn {
-    height: 80px;
-    font-size: 2rem;
-  }
-
-  .patient-checkin__footer-btn--back {
-    padding: var(--spacing-lg) var(--spacing-xl);
-  }
-
-  .patient-checkin__footer-btn--confirm {
-    padding: var(--spacing-lg) var(--spacing-2xl);
-  }
-
-  .patient-checkin__footer-text {
-    font-size: 1.5rem;
-  }
-
-  .patient-checkin__footer-text--large {
-    font-size: 1.75rem;
-  }
-} */
-
-/* Dark Mode Support */
-/* @media (prefers-color-scheme: dark) {
-  .patient-checkin {
-    color-scheme: dark;
-  }
-
-  .patient-checkin__header {
-    background-color: var(--color-inverse-surface);
-  }
-
-  .patient-checkin__brand-icon-wrapper {
-    background-color: rgba(43, 157, 238, 0.2);
-  }
-
-  .patient-checkin__title {
-    color: var(--color-inverse-primary);
-  }
-
-  .patient-checkin__subtitle {
-    color: var(--color-outline);
-  }
-
-  .patient-checkin__help-icon {
-    color: var(--color-outline);
-  }
-
-  .patient-checkin__main {
-    background-color: var(--color-background);
-  }
-
-  .patient-checkin__input-wrapper {
-    background-color: var(--color-surface-container-low);
-    border-color: var(--color-outline);
-  }
-
-  .patient-checkin__input {
-    color: var(--color-inverse-on-surface);
-  }
-
-  .patient-checkin__instruction {
-    background-color: rgba(43, 157, 238, 0.1);
-  }
-
-  .patient-checkin__instruction-title {
-    color: var(--color-inverse-on-surface);
-  }
-
-  .patient-checkin__instruction-text {
-    color: var(--color-outline);
-  }
-
-  .patient-checkin__numpad-btn {
-    background-color: var(--color-surface-container);
-    color: var(--color-inverse-on-surface);
-  }
-
-  .patient-checkin__footer {
-    background-color: rgba(30, 41, 59, 0.95);
-  }
-
-  .patient-checkin__footer-btn--back {
-    background-color: var(--color-surface-container);
-    border-color: var(--color-outline);
-    color: var(--color-inverse-on-surface);
-  }
-
-  .patient-checkin__footer-btn--language {
-    color: var(--color-outline);
-  }
-
-  .patient-checkin__footer-btn--language:hover {
-    background-color: var(--color-surface-container-high);
-  }
-} */
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {

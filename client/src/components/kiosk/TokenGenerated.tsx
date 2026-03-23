@@ -49,7 +49,7 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
       {/* TopAppBar Area */}
       <KioskCustomHeader.Root>
         <KioskCustomHeader.Content>
-          <KioskCustomHeader.IconWrapper>
+          <KioskCustomHeader.IconWrapper className="token-generated__icon-wrapper">
             <KioskCustomHeader.Icon>
               <LocalHospital />
             </KioskCustomHeader.Icon>
@@ -150,17 +150,19 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
         </div>
       </main>
 
-      <Footer.Root>
-        <Footer.Actions align="space-between" className="token-generated__footer-actions">
-          <KioskButton.Root variant="confirm" size="large" fullWidth>
-            <KioskButton.StartIcon>
-              <Print />
-            </KioskButton.StartIcon>
-            <KioskButton.Text>Print Token</KioskButton.Text>
-          </KioskButton.Root>
-          <p className="token-generated__print-instruction">
-            Please collect your printed token below.
-          </p>
+      <Footer.Root className="token-generated__footer">
+        <Footer.Actions align="space-between">
+          <div className="token-generated__footer-actions">
+            <KioskButton.Root variant="confirm" size="large" fullWidth>
+              <KioskButton.StartIcon>
+                <Print />
+              </KioskButton.StartIcon>
+              <KioskButton.Text>Print Token</KioskButton.Text>
+            </KioskButton.Root>
+            <p className="token-generated__print-instruction">
+              Please collect your printed token below.
+            </p>
+          </div>
         </Footer.Actions>
       </Footer.Root>
     </div>

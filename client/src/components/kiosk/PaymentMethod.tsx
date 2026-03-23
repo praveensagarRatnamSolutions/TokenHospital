@@ -14,6 +14,8 @@ import {
   Stethoscope,
 } from '../icons';
 import KioskCustomHeader from '../common/KioskCustomHeader';
+import Footer from '../common/Footer';
+import KioskButton from '../common/KioskButton';
 
 interface PaymentMethodProps {
   onNext?: () => void;
@@ -85,7 +87,7 @@ export default function PaymentMethod({
         <KioskCustomHeader.Root>
           <KioskCustomHeader.Content>
             <div className="payment-method__hospital-info">
-              <KioskCustomHeader.IconWrapper className="payment-method__hospital-icon-wrapper">
+              <KioskCustomHeader.IconWrapper>
                 <KioskCustomHeader.Icon className="payment-method__hospital-icon-wrapper">
                   <MedicalServices />
                 </KioskCustomHeader.Icon>
@@ -159,34 +161,27 @@ export default function PaymentMethod({
         </main>
 
         {/* Bottom Navigation Section */}
-        <footer className="payment-method__footer">
-          <div className="payment-method__footer-container">
-            {/* Back Button */}
-            <button
-              onClick={onBack}
-              className="payment-method__footer-btn payment-method__footer-btn--back"
-            >
-              <span className="material-symbols-outlined payment-method__footer-icon">
+        <Footer.Root>
+          <Footer.Actions align="space-between">
+            <KioskButton.Root variant="back" size="large" onClick={onBack}>
+              <KioskButton.StartIcon>
                 <ArrowBack />
-              </span>
-              <span>Back</span>
-            </button>
-
-            {/* Continue Button */}
-            <button
-              onClick={handleContinue}
-              className={`payment-method__footer-btn payment-method__footer-btn--continue ${
-                !selectedMethod ? 'payment-method__footer-btn--disabled' : ''
-              }`}
+              </KioskButton.StartIcon>
+              <KioskButton.Text>Back</KioskButton.Text>
+            </KioskButton.Root>
+            <KioskButton.Root
               disabled={!selectedMethod}
+              variant="confirm"
+              size="large"
+              onClick={handleContinue}
             >
-              <span>Continue</span>
-              <span className="material-symbols-outlined payment-method__footer-icon">
+              <KioskButton.Text>Continue</KioskButton.Text>
+              <KioskButton.EndIcon>
                 <ArrowForward />
-              </span>
-            </button>
-          </div>
-        </footer>
+              </KioskButton.EndIcon>
+            </KioskButton.Root>
+          </Footer.Actions>
+        </Footer.Root>
       </div>
     </div>
   );

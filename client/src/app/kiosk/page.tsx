@@ -51,7 +51,8 @@ export default function KioskPage() {
         setStep('DEPARTMENT');
         break;
       case 'PAYMENT':
-        setStep('DOCTOR');
+        // setStep('DOCTOR');
+        setStep('CHECKIN');
         break;
       default:
         setStep('HOME');
@@ -62,7 +63,8 @@ export default function KioskPage() {
     <>
       {step === 'HOME' && <HomeWelcome onStart={() => nextStep('CHECKIN')} />}
       {step === 'CHECKIN' && (
-        <CheckInDetails onNext={() => nextStep('DEPARTMENT')} onBack={prevStep} />
+        // <CheckInDetails onNext={() => nextStep('DEPARTMENT')} onBack={prevStep} />
+        <CheckInDetails onNext={() => nextStep('PAYMENT')} onBack={prevStep} />
       )}
       {step === 'DEPARTMENT' && (
         <SelectDepartment onNext={() => nextStep('DOCTOR')} onBack={prevStep} />

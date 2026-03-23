@@ -50,7 +50,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 6rem 3rem 4rem 3rem;
+  padding: var(--spacing-4xl) var(--spacing-2xl) var(--spacing-3xl) var(--spacing-2xl);
   color: var(--color-white);
 }
 
@@ -58,12 +58,12 @@
 .home-welcome__brand {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .home-welcome__brand-icon {
-  font-size: 3rem;
+  font-size: var(--font-size-5xl);
   line-height: 1;
 }
 
@@ -71,21 +71,21 @@
   height: 0.25rem;
   width: 6rem;
   background-color: rgba(255, 255, 255, 0.4);
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
 }
 
 /* Title */
 .home-welcome__title {
-  font-size: 3.75rem;
+  font-size: var(--font-size-6xl);
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.025em;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
 /* Subtitle */
 .home-welcome__subtitle {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   max-width: 42rem;
