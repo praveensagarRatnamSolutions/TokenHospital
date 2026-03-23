@@ -1,84 +1,86 @@
+const mongoose = require("mongoose");
+const path = require("path");
+const mime = require("mime-types");
 const Ad = require("./ads.model");
 const {
   getUploadPresignedUrl,
   getDownloadPresignedUrl,
   deleteS3Object,
 } = require("../../utils/s3");
-const { v4: uuidv4 } = require("crypto");
 
 /**
- * Generate a unique S3 key for an ad file.
+ * Logic: Generates S3 key and identifies the correct MIME type for AWS.
+ * Sec: Uses 'mime-types' to prevent incorrect 'image' or 'video' generic strings.
  */
-const generateS3Key = (hospitalId, type, originalName) => {
-  const ext = originalName
-    ? originalName.split(".").pop()
-    : type === "image"
-      ? "png"
-      : "mp4";
-  const uniqueId = Date.now() + "-" + Math.round(Math.random() * 1e9);
-  return `ads/${hospitalId}/${uniqueId}.${ext}`;
+const getFileMetadata = (hospitalId, fileName) => {
+  const ext = path.extname(fileName).toLowerCase();
+  const uniqueId = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+  const fileKey = `ads/${hospitalId}/${uniqueId}${ext}`;
+  const contentType = mime.lookup(fileName) || "application/octet-stream";
+
+  return { fileKey, contentType };
 };
 
 /**
- * Create ad and return a presigned upload URL.
+ * Create ad with Atomic Transaction.
+ * Sec: Ensures DB record only exists if S3 URL generation succeeds.
  */
 const createAd = async (adData) => {
-  const {
-    hospitalId,
-    title,
-    type,
-    displayArea,
-    departmentId,
-    startTime,
-    endTime,
-    priority,
-    fileName,
-  } = adData;
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  // Generate S3 key and presigned upload URL
-  const fileKey = generateS3Key(hospitalId, type, fileName);
-  const contentType = type;
-  const uploadUrl = await getUploadPresignedUrl(fileKey, contentType);
+  try {
+    const { hospitalId, fileName, type, ...rest } = adData;
 
-  const ad = await Ad.create({
-    title,
-    type,
-    fileKey,
-    displayArea: displayArea || "carousel",
-    hospitalId,
-    departmentId: departmentId || null,
-    startTime,
-    endTime,
-    priority: priority || 0,
-    isActive: true,
-  });
+    const { fileKey, contentType } = getFileMetadata(hospitalId, fileName);
 
-  return { ad, uploadUrl };
+    // Get presigned URL with the EXACT Content-Type for S3 headers
+    const uploadUrl = await getUploadPresignedUrl(fileKey, contentType);
+
+    const ad = await Ad.create(
+      [
+        {
+          ...rest,
+          hospitalId,
+          type,
+          fileName,
+          fileKey,
+          contentType,
+          isActive: true,
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    return { ad: ad[0], uploadUrl };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 /**
- * Get active ads (for kiosk display).
+ * Get active ads for kiosk.
+ * Logic: Filters by isActive and priority.
  */
 const getActiveAds = async (hospitalId, departmentId) => {
-  const now = new Date();
   const query = {
     hospitalId,
     isActive: true,
-    startTime: { $lte: now },
-    endTime: { $gte: now },
   };
 
   if (departmentId) {
-    query.$or = [
-      { departmentId },
-      { departmentId: null }, // Also include global ads
-    ];
+    query.$or = [{ departmentId }, { departmentId: null }];
   }
 
+  // Use the compound index: { hospitalId: 1, isActive: 1, priority: -1 }
   const ads = await Ad.find(query).sort({ priority: -1 }).lean();
 
-  // Generate presigned download URLs for each ad
-  const adsWithUrls = await Promise.all(
+  // Logic: Parallelize URL generation for speed
+  return Promise.all(
     ads.map(async (ad) => {
       try {
         const fileUrl = await getDownloadPresignedUrl(ad.fileKey);
@@ -86,62 +88,46 @@ const getActiveAds = async (hospitalId, departmentId) => {
       } catch (err) {
         return { ...ad, fileUrl: null };
       }
-    }),
+    })
   );
-
-  return adsWithUrls;
 };
 
 /**
- * Get all ads for management.
- */
-const getAllAds = async (hospitalId) => {
-  const ads = await Ad.find({ hospitalId })
-    .populate("departmentId", "name")
-    .sort({ createdAt: -1 })
-    .lean();
-  return ads;
-};
-
-/**
- * Update ad.
- */
-const updateAd = async (adId, hospitalId, updateData) => {
-  const ad = await Ad.findOneAndUpdate({ _id: adId, hospitalId }, updateData, {
-    new: true,
-    runValidators: true,
-  }).populate("departmentId", "name");
-
-  if (!ad) {
-    throw new Error("Ad not found");
-  }
-  return ad;
-};
-
-/**
- * Delete ad and its S3 file.
+ * Delete ad with cleanup logic.
  */
 const deleteAd = async (adId, hospitalId) => {
-  const ad = await Ad.findOne({ _id: adId, hospitalId });
-  if (!ad) {
-    throw new Error("Ad not found");
-  }
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  // Delete from S3
   try {
-    await deleteS3Object(ad.fileKey);
-  } catch (err) {
-    // Log but don't fail the deletion
-  }
+    const ad = await Ad.findOne({ _id: adId, hospitalId }).session(session);
+    if (!ad) throw new Error("Ad not found");
 
-  await Ad.deleteOne({ _id: adId });
-  return { message: "Ad deleted successfully" };
+    // 1. Delete DB record first
+    await Ad.deleteOne({ _id: adId }).session(session);
+
+    // 2. Cleanup S3 - Logic: If S3 fails, we log it for manual cleanup 
+    // but don't roll back the DB deletion to avoid "ghost" records.
+    deleteS3Object(ad.fileKey).catch((err) =>
+      console.error(`S3 Orphaned File Alert: ${ad.fileKey}`, err)
+    );
+
+    await session.commitTransaction();
+    return { message: "Ad deleted successfully" };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 module.exports = {
   createAd,
   getActiveAds,
-  getAllAds,
-  updateAd,
+  getAllAds: async (hospitalId) => 
+    Ad.find({ hospitalId }).sort({ createdAt: -1 }).lean(),
+  updateAd: async (adId, hospitalId, updateData) => 
+    Ad.findOneAndUpdate({ _id: adId, hospitalId }, updateData, { new: true, runValidators: true }),
   deleteAd,
 };

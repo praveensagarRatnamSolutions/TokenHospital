@@ -3,7 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/store/hooks';
-import { setCredentials, setError as setAuthError, setLoading as setAuthLoading } from '@/store/slices/authSlice';
+import {
+  setCredentials,
+  setError as setAuthError,
+  setLoading as setAuthLoading,
+} from '@/store/slices/authSlice';
 import { authApi, LoginRequest } from '@/services/authApi';
 import { Eye, EyeOff, Loader } from 'lucide-react';
 
@@ -30,7 +34,7 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -38,12 +42,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
       setError('Please fill in all fields');
       return;
     }
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -52,31 +56,33 @@ export default function LoginPage() {
       console.log('Sending login request with:', formData);
       const userData = await authApi.login(formData);
       console.log('Login response:', userData);
-      
+
       // authApi already returns the data object directly
       if (!userData || !userData._id) {
         throw new Error('Invalid response from server');
       }
-      
+
       // Store credentials in Redux
-      dispatch(setCredentials({
-        user: {
-          _id: userData._id,
-          name: userData.name,
-          email: userData.email,
-          role: userData.role,
-          hospitalId: userData.hospitalId,
-        },
-        accessToken: userData.token,
-        refreshToken: userData.token,
-      }));
+      dispatch(
+        setCredentials({
+          user: {
+            _id: userData._id,
+            name: userData.name,
+            email: userData.email,
+            role: userData.role,
+            hospitalId: userData.hospitalId,
+          },
+          accessToken: userData.token,
+          refreshToken: userData.token,
+        }),
+      );
 
       // Redirect based on role
       const role = userData.role;
       if (role === 'superadmin') {
         router.push('/superadmin');
       } else if (role === 'admin') {
-        router.push('/admin');
+        router.push('/portal');
       } else if (role === 'doctor') {
         router.push('/doctor');
       } else {
@@ -84,7 +90,10 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Login failed. Please check your credentials.';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        'Login failed. Please check your credentials.';
       setError(errorMessage);
       dispatch(setAuthError(errorMessage));
     } finally {
@@ -150,7 +159,11 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -178,19 +191,22 @@ export default function LoginPage() {
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          {/* <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-xs font-medium text-blue-900 mb-2">Demo Credentials:</p>
             <div className="text-xs text-blue-800 space-y-1">
               <p><strong>SuperAdmin:</strong> superadmin@hospital.com / password</p>
               <p><strong>Admin:</strong> admin@hospital.com / password</p>
               <p><strong>Doctor:</strong> doctor@hospital.com / password</p>
             </div>
-          </div>
+          </div> */}
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center text-sm text-gray-600">
             Don't have an account?{' '}
-            <a href="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <a
+              href="/register"
+              className="text-blue-600 hover:text-blue-700 font-semibold"
+            >
               Sign up here
             </a>
           </div>

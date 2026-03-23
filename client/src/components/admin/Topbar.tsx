@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Bell, User, LogOut } from 'lucide-react';
+import { Search, Bell, User, LogOut, Settings } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logout } from '@/store/slices/authSlice';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -12,6 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup, // Added this
 } from '@/components/ui/dropdown-menu';
 
 export function Topbar() {
@@ -32,7 +33,6 @@ export function Topbar() {
       </div>
 
       <div className="flex items-center gap-2 md:gap-4 ml-auto">
-        {/* Mobile search button */}
         <Button variant="ghost" size="icon" className="md:hidden">
           <Search className="h-5 w-5" />
         </Button>
@@ -46,33 +46,39 @@ export function Topbar() {
 
         <div className="hidden sm:block h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
 
-        {/* User Dropdown Menu */}
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <button className="flex items-center gap-2 h-auto p-0 hover:bg-transparent">
-              <div className="h-8 w-8 bg-primary/20 text-primary rounded-full flex items-center justify-center">
-                <User className="w-4 h-4" />
-              </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-sm font-semibold">{user?.name || 'Administrator'}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {user?.email || 'admin@hospital.com'}
-                </p>
-              </div>
-            </button>
+          {/* FIX 1: Style the Trigger directly. 
+            Removed the internal <button> tag to prevent nesting.
+          */}
+          <DropdownMenuTrigger className="flex items-center gap-2 h-auto p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors outline-none">
+            <div className="h-8 w-8 bg-primary/20 text-primary rounded-full flex items-center justify-center">
+              <User className="w-4 h-4" />
+            </div>
+            <div className="hidden sm:block text-left">
+              <p className="text-sm font-semibold leading-none">{user?.name || 'Administrator'}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {user?.email || 'admin@hospital.com'}
+              </p>
+            </div>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Account</DropdownMenuLabel>
+            {/* FIX 2: Added DropdownMenuGroup to resolve the Context error if needed */}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            
             <DropdownMenuItem
               onClick={() => dispatch(logout())}
               className="text-red-600 dark:text-red-400 focus:bg-red-50 dark:focus:bg-red-950"
@@ -86,5 +92,3 @@ export function Topbar() {
     </header>
   );
 }
-
-import { Settings } from 'lucide-react';
