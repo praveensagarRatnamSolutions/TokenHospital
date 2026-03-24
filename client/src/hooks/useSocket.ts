@@ -22,13 +22,8 @@ export const useSocket = () => {
       console.log('Socket connected:', socket.id);
     });
 
-    socket.on('tokenUpdated', (data) => {
-      console.log('Token updated:', data);
-      dispatch(setQueueStatus(data));
-    });
-
-    socket.on('queueUpdate', (data) => {
-      console.log('Queue updated:', data);
+    socket.on('queue-updated', (data) => {
+      console.log('Real-time Queue Update:', data);
       dispatch(setQueueStatus(data));
     });
 
@@ -41,9 +36,13 @@ export const useSocket = () => {
     };
   }, [dispatch]);
 
+  const joinHospital = (hospitalId: string) => {
+    socketRef.current?.emit('join-hospital', hospitalId);
+  };
+
   const emit = (event: string, data: any) => {
     socketRef.current?.emit(event, data);
   };
 
-  return { emit, socket: socketRef.current };
+  return { emit, joinHospital, socket: socketRef.current };
 };

@@ -1,0 +1,61 @@
+export interface TokenPatientDetails {
+  _id?: string;
+  name: string;
+  phone: string;
+  age?: number;
+  gender?: 'Male' | 'Female' | 'Other';
+}
+
+export interface Token {
+  _id: string;
+  tokenNumber: string;
+  sequenceNumber: number;
+  departmentId: { _id: string; name: string; prefix: string; } | string;
+  doctorId: { _id: string; name: string; } | string | null;
+  hospitalId: string;
+  patientId: TokenPatientDetails | string;
+  status: 'PROVISIONAL' | 'WAITING' | 'CALLED' | 'COMPLETED' | 'CANCELED';
+  paymentId?: string;
+  appointmentDate: string;
+  paymentType?: 'CASH' | 'UPI' | 'CARD';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTokenPayload {
+  departmentId: string;
+  doctorId?: string;
+  appointmentDate: string;
+  paymentType?: 'CASH' | 'UPI' | 'CARD';
+  patientId?: string;
+  patientDetails?: TokenPatientDetails;
+}
+
+export interface CreatePaymentPayload {
+  amount: number;
+  tokenId: string;
+  patientId?: string;
+  method: 'CASH' | 'UPI' | 'CARD';
+  metadata?: any;
+}
+
+export interface VerifyPaymentPayload {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+export interface TokenListResponse {
+  success: boolean;
+  tokens: Token[];
+  pagination: {
+    total: number;
+    page: number;
+    pages: number;
+  };
+}
+
+export interface SingleTokenResponse {
+  success: boolean;
+  data: Token;
+}

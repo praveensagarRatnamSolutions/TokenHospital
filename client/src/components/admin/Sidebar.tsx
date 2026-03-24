@@ -22,7 +22,7 @@ const adminNavItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Doctors', href: '/admin/doctors', icon: Users },
   { name: 'Departments', href: '/admin/departments', icon: Building2 },
-  { name: 'Tokens', href: '/admin/tokens', icon: Ticket },
+  { name: 'Tokens', href: '/admin/token', icon: Ticket },
   { name: 'Ads', href: '/admin/ads', icon: MonitorPlay },
   { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
@@ -105,7 +105,7 @@ export function Sidebar() {
             <Menu className="h-6 w-6 text-slate-600 dark:text-slate-400" />
             <span className="sr-only">Open menu</span>
           </SheetTrigger>
-          
+
           <div className="ml-4 font-bold text-primary">Hospital System</div>
 
           <SheetContent side="left" className="w-64 p-0 border-none">
@@ -113,7 +113,7 @@ export function Sidebar() {
           </SheetContent>
         </Sheet>
       </div>
-      
+
       {/* Spacer for Mobile so content doesn't go under the fixed header */}
       <div className="h-16 md:hidden" />
     </>

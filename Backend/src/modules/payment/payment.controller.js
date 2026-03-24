@@ -8,15 +8,18 @@ const logger = require("../../config/logger");
  */
 const createOrder = async (req, res, next) => {
   try {
-    const { amount, metadata } = req.body;
+    const { amount, metadata, tokenId, patientId, method } = req.body;
     // Assuming hospitalId is available in req (from auth middleware)
     const hospitalId = req.hospitalId; 
 
     if (!amount) {
       return res.status(400).json({ success: false, message: "Amount is required" });
     }
+    if (!tokenId || !method) {
+      return res.status(400).json({ success: false, message: "tokenId and method are required" });
+    }
 
-    const order = await paymentService.createOrder(hospitalId, amount, metadata);
+    const order = await paymentService.createOrder(hospitalId, amount, metadata, tokenId, patientId, method);
     res.status(201).json({ success: true, data: order });
   } catch (error) {
     logger.error(`Error creating Razorpay order: ${error.message}`);

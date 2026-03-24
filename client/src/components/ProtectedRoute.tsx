@@ -33,9 +33,14 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     }
 
     // Check role authorization
-    if (requiredRoles && user && !requiredRoles.includes(user.role)) {
-      router.push('/unauthorized');
-      return;
+    if (requiredRoles && user) {
+      const userRole = user.role.toUpperCase();
+      const upperRequiredRoles = requiredRoles.map(r => r.toUpperCase());
+      
+      if (!upperRequiredRoles.includes(userRole)) {
+        router.push('/unauthorized');
+        return;
+      }
     }
   }, [isChecking, isAuthenticated, user, requiredRoles, router]);
 

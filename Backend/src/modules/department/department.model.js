@@ -12,7 +12,7 @@ const departmentSchema = new mongoose.Schema(
             required: [true, 'Token prefix is required (e.g. A, B, C)'],
             uppercase: true,
             trim: true,
-            maxlength: 3,
+            maxlength: 5,
         },
         hospitalId: {
             type: mongoose.Schema.Types.ObjectId,

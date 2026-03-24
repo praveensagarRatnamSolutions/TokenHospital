@@ -13,28 +13,16 @@ cron.schedule('0 0 * * *', async () => {
     try {
         const today = new Date().toISOString().split('T')[0];
         
-        // Wait, the TokenCounter already uses 'date' for isolation.
-        // But for performance, we might want to archive completed tokens older than 24h.
+        // In our current implementation, TokenCounter is scoped by 'date',
+        // so it naturally starts from 1 for each new date.
+        // However, we can perform cleanup of old counters here if needed.
         
-        // We can archive old tokens if needed, but for now we just reset logic is handled
-        // by the fact that TokenCounter is daily (date field).
-        
-        // Let's log how many tokens were processed yesterday
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-        const tokenCount = await Token.countDocuments({
-            createdAt: { 
-                $gte: new Date(yesterday.setHours(0, 0, 0, 0)),
-                $lte: new Date(yesterday.setHours(23, 59, 59, 999))
-            }
+        const result = await TokenCounter.deleteMany({
+            date: { $lt: today }
         });
 
-        logger.info(`Token reset summary: ${tokenCount} tokens were generated on ${yesterdayStr}`);
+        logger.info(`Daily Reset: Cleared ${result.deletedCount} old token counters. New tokens will start from 1 for ${today}.`);
         
-        // Optional: Move tokens to an 'Archive' collection to keep 'tokens' table slim
-        // This is a production optimization
     } catch (error) {
         logger.error(`Cron Job Error: ${error.message}`);
     }

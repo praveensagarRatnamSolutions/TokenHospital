@@ -14,14 +14,26 @@ const initSocket = (server) => {
     io.on('connection', (socket) => {
         logger.info(`Socket connected: ${socket.id}`);
 
+        // Join a specific hospital room
+        socket.on('join-hospital', (hospitalId) => {
+            socket.join(hospitalId);
+            logger.info(`Socket ${socket.id} joined hospital room: ${hospitalId}`);
+        });
+
         socket.on('disconnect', () => {
             logger.info(`Socket disconnected: ${socket.id}`);
         });
-
-        // Add additional event listeners here as needed
     });
 
     return io;
+};
+
+/**
+ * Broadcast an event to a specific hospital room
+ */
+const broadcastToHospital = (hospitalId, eventName, data) => {
+    if (!io) return;
+    io.to(hospitalId).emit(eventName, data);
 };
 
 const getIo = () => {
@@ -34,4 +46,5 @@ const getIo = () => {
 module.exports = {
     initSocket,
     getIo,
+    broadcastToHospital,
 };

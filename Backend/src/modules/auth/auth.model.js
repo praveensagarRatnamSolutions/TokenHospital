@@ -25,13 +25,18 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["superadmin", "admin", "doctor"],
+      enum: ["ADMIN", "DOCTOR", "SUPERADMIN"],
       required: true,
     },
     hospitalId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Hospital", // Required for admin/doctor, not required for superadmin
-     
+      ref: "Hospital",
+      required: function() { return this.role !== 'SUPERADMIN'; }
+    },
+    doctorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Doctor",
+      default: null,
     },
   },
   {

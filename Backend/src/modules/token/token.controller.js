@@ -27,7 +27,7 @@ const createToken = async (req, res, next) => {
  */
 const getCurrentToken = async (req, res, next) => {
     try {
-        const { doctorId } = req.query;
+        const doctorId = req.user.doctorId;
         if (!doctorId) {
             return res.status(400).json({ success: false, message: 'doctorId query param is required' });
         }
@@ -117,6 +117,24 @@ const cancelToken = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Verify cash payment for a provisional token
+ * @route   PATCH /api/token/:id/verify-cash
+ * @access  Private (Admin)
+ */
+const verifyCashPayment = async (req, res, next) => {
+    try {
+        const token = await tokenService.verifyCashPayment(req.params.id, req.hospitalId);
+        logger.info(`Cash payment verified for token: ${token.tokenNumber}`);
+        res.status(200).json({ success: true, data: token });
+    } catch (error) {
+        if (error.message === 'Token not found or not in PROVISIONAL status') {
+            return res.status(404).json({ success: false, message: error.message });
+        }
+        next(error);
+    }
+};
+
 module.exports = {
     createToken,
     getCurrentToken,
@@ -124,5 +142,6 @@ module.exports = {
     completeToken,
     callNextToken,
     cancelToken,
+    verifyCashPayment,
 };
 

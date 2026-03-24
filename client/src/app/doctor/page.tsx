@@ -4,19 +4,24 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/services/api';
 import { useSocket } from '@/hooks/useSocket';
-import { 
-  User, 
-  Users, 
-  ChevronRight, 
-  CheckCircle2, 
-  PhoneCall, 
-  ClipboardList 
+import {
+  User,
+  Users,
+  ChevronRight,
+  CheckCircle2,
+  PhoneCall,
+  ClipboardList
 } from 'lucide-react';
+import { useAppSelector } from '@/store/hooks';
+import { RootState } from '@/store/store';
 
 export default function DoctorDashboard() {
   const queryClient = useQueryClient();
   const { socket } = useSocket();
-  const [doctorId] = useState('doc_123'); // Assume logged in doctor ID
+  const { user } = useAppSelector((state: RootState) => state.auth);
+  const doctorId = user?.doctorId;
+
+  console.log(doctorId);
 
   const { data: currentToken, isLoading: loadingCurrent } = useQuery({
     queryKey: ['currentToken', doctorId],
@@ -28,26 +33,27 @@ export default function DoctorDashboard() {
 
   const { data: upcomingTokens, isLoading: loadingUpcoming } = useQuery({
     queryKey: ['upcomingTokens', doctorId],
+    enabled: !!doctorId,
     queryFn: async () => {
-      const response = await api.get('/api/token', { 
-        params: { doctorId, status: 'waiting', limit: 5 } 
+      const response = await api.get('/api/token', {
+        params: { doctorId, status: 'WAITING', limit: 5 }
       });
-      return response.data.data;
+      return response.data.tokens;
     }
   });
 
   const callNextMutation = useMutation({
     mutationFn: (data: any) => api.post('/api/token/next', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentToken'] });
-      queryClient.invalidateQueries({ queryKey: ['upcomingTokens'] });
+      queryClient.invalidateQueries({ queryKey: ['currentToken', doctorId] });
+      queryClient.invalidateQueries({ queryKey: ['upcomingTokens', doctorId] });
     }
   });
 
   const completeMutation = useMutation({
     mutationFn: (id: string) => api.patch(`/api/token/${id}/complete`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentToken'] });
+      queryClient.invalidateQueries({ queryKey: ['currentToken', doctorId] });
     }
   });
 
@@ -74,22 +80,22 @@ export default function DoctorDashboard() {
               In Consultation
             </span>
           </div>
-          
+
           <div className="p-8">
             {loadingCurrent ? (
               <div className="text-center py-20 text-slate-400 italic">Finding current patient...</div>
             ) : currentToken ? (
               <div className="space-y-8">
                 <div className="flex items-center gap-8">
-                  <div className="size-32 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-5xl font-black border-2 border-primary/20">
+                  <div className="size-auto p-5 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-5xl font-black border-2 border-primary/20">
                     {currentToken.tokenNumber || 'A-101'}
                   </div>
                   <div>
                     <h3 className="text-4xl font-bold text-slate-900 dark:text-white">
-                      {currentToken.patientDetails?.name || 'John Doe'}
+                      {currentToken.patientId?.name || 'John Doe'}
                     </h3>
                     <p className="text-xl text-slate-500 mt-1">
-                      {currentToken.patientDetails?.age || 25} years old • Male
+                      {currentToken.patientId?.age || 25} years old • Male
                     </p>
                   </div>
                 </div>
@@ -98,7 +104,7 @@ export default function DoctorDashboard() {
                   <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border">
                     <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Problem Description</p>
                     <p className="text-lg font-medium">
-                      {currentToken.patientDetails?.problem || 'General checkup and routine follow-up.'}
+                      {currentToken.patientId?.problem || 'General checkup and routine follow-up.'}
                     </p>
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border">
@@ -108,7 +114,7 @@ export default function DoctorDashboard() {
                 </div>
 
                 <div className="flex gap-4">
-                  <button 
+                  <button
                     onClick={handleComplete}
                     disabled={completeMutation.isPending}
                     className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
@@ -127,7 +133,7 @@ export default function DoctorDashboard() {
                 </div>
                 <h3 className="text-2xl font-bold text-slate-400">No active patient</h3>
                 <p className="text-slate-500 mt-2">Call the next patient from the queue to start.</p>
-                <button 
+                <button
                   onClick={handleCallNext}
                   disabled={callNextMutation.isPending}
                   className="mt-8 bg-primary text-white px-8 py-3 rounded-xl font-bold text-lg flex items-center gap-2 mx-auto hover:bg-primary/90 transition-colors disabled:opacity-50"
@@ -147,14 +153,14 @@ export default function DoctorDashboard() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-bold text-slate-500 mb-1">Diagnosis</label>
-              <textarea 
+              <textarea
                 className="w-full p-4 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none min-h-[120px]"
                 placeholder="Enter diagnosis here..."
               ></textarea>
             </div>
             <div>
               <label className="block text-sm font-bold text-slate-500 mb-1">Prescription</label>
-              <textarea 
+              <textarea
                 className="w-full p-4 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none min-h-[100px]"
                 placeholder="List medications..."
               ></textarea>
@@ -182,7 +188,7 @@ export default function DoctorDashboard() {
               upcomingTokens.map((token: any) => (
                 <div key={token._id} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border flex items-center justify-between group">
                   <div className="flex items-center gap-3">
-                    <div className="size-10 bg-white border font-bold text-slate-900 rounded-lg flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
+                    <div className="size-auto p-2 bg-white border font-bold text-slate-900 rounded-lg flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
                       {token.tokenNumber}
                     </div>
                     <div>
@@ -200,7 +206,7 @@ export default function DoctorDashboard() {
             )}
           </div>
 
-          <button 
+          <button
             onClick={handleCallNext}
             disabled={callNextMutation.isPending || !upcomingTokens?.length || currentToken}
             className="w-full mt-6 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-colors disabled:opacity-30 flex items-center justify-center gap-2"
@@ -225,7 +231,7 @@ export default function DoctorDashboard() {
 function Clock({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
     </svg>
   );
 }

@@ -134,7 +134,7 @@ router.get('/current', protect, tokenController.getCurrentToken);
  *       404:
  *         description: Token not found or not active
  */
-router.patch('/:id/complete', protect, authorize('admin', 'doctor'), tokenController.completeToken);
+router.patch('/:id/complete', protect, authorize('ADMIN', 'DOCTOR'), tokenController.completeToken);
 
 /**
  * @swagger
@@ -158,7 +158,7 @@ router.patch('/:id/complete', protect, authorize('admin', 'doctor'), tokenContro
  *       200:
  *         description: Next token called or no tokens in queue
  */
-router.post('/next', protect, authorize('admin', 'doctor'), tokenController.callNextToken);
+router.post('/next', protect, authorize('ADMIN', 'DOCTOR'), tokenController.callNextToken);
 
 /**
  * @swagger
@@ -180,7 +180,29 @@ router.post('/next', protect, authorize('admin', 'doctor'), tokenController.call
  *       404:
  *         description: Token not found or already completed
  */
-router.patch('/:id/cancel', protect, authorize('admin', 'doctor'), tokenController.cancelToken);
+router.patch('/:id/cancel', protect, authorize('ADMIN', 'DOCTOR'), tokenController.cancelToken);
+
+/**
+ * @swagger
+ * /api/token/{id}/verify-cash:
+ *   patch:
+ *     summary: Verify cash payment for a provisional token
+ *     tags: [Token]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Cash payment verified
+ *       404:
+ *         description: Token not found or not in PROVISIONAL status
+ */
+router.patch('/:id/verify-cash', protect, authorize('ADMIN'), tokenController.verifyCashPayment);
 
 module.exports = router;
 
