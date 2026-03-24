@@ -1,5 +1,6 @@
 const Patient = require('./patient.model');
 const Token = require('../token/token.model');
+const Consultation = require('./consultation.model');
 const logger = require('../../config/logger');
 
 /**
@@ -50,7 +51,49 @@ const getPatientHistory = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Create a consultation for a patient
+ * @route   POST /api/patient/:id/consultation
+ * @access  Private
+ */
+const createConsultation = async (req, res, next) => {
+    try {
+        const { id: patientId } = req.params;
+        const hospitalId = req.hospitalId;
+        const consultationData = { ...req.body, patientId, hospitalId };
+
+        const consultation = await Consultation.create(consultationData);
+        res.status(201).json({ success: true, data: consultation });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Get all consultations for a patient
+ * @route   GET /api/patient/:id/consultations
+ * @access  Private
+ */
+const getPatientConsultations = async (req, res, next) => {
+    try {
+        const { id: patientId } = req.params;
+        const hospitalId = req.hospitalId;
+
+        const consultations = await Consultation.find({ patientId, hospitalId })
+            .populate('doctorId', 'name')
+            .populate('tokenId', 'tokenNumber')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.status(200).json({ success: true, count: consultations.length, data: consultations });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     searchPatient,
     getPatientHistory,
+    createConsultation,
+    getPatientConsultations,
 };

@@ -40,7 +40,7 @@ const registerUser = async (userData) => {
 
     // Commit the changes
     await session.commitTransaction();
-    
+
     return {
       _id: admin._id,
       name: admin.name,
@@ -59,47 +59,48 @@ const registerUser = async (userData) => {
 };
 
 const loginUser = async (email, password) => {
-    // Find user and include password for checking
-    const user = await User.findOne({ email }).select('+password');
+  // Find user and include password for checking
+  const user = await User.findOne({ email }).select('+password');
 
-    if (user && (await user.matchPassword(password))) {
-        return {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            hospitalId: user.hospitalId,
-            token: generateToken(user._id, user.role, user.hospitalId),
-        };
-    } else {
-        throw new Error('Invalid email or password');
-    }
+  if (user && (await user.matchPassword(password))) {
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      hospitalId: user.hospitalId,
+      doctorId: user?.doctorId || null,
+      token: generateToken(user._id, user.role, user.hospitalId),
+    };
+  } else {
+    throw new Error('Invalid email or password');
+  }
 };
 
 const createUser = async (userData, session = null) => {
-    const { name, email, password, role, hospitalId, profilePic } = userData;
+  const { name, email, password, role, hospitalId, profilePic } = userData;
 
-    const userExists = await User.findOne({ email }).session(session);
-    if (userExists) {
-        throw new Error("User with this email already exists");
-    }
+  const userExists = await User.findOne({ email }).session(session);
+  if (userExists) {
+    throw new Error("User with this email already exists");
+  }
 
-    const [user] = await User.create([{
-        name,
-        email,
-        password,
-        role,
-        hospitalId,
-        profilePic
-    }], { session });
+  const [user] = await User.create([{
+    name,
+    email,
+    password,
+    role,
+    hospitalId,
+    profilePic
+  }], { session });
 
-    return user;
+  return user;
 };
 
 
 module.exports = {
-    registerUser,
-    loginUser,
-    createUser,
+  registerUser,
+  loginUser,
+  createUser,
 };
 

@@ -31,9 +31,12 @@ const getRazorpayClient = async (hospitalId) => {
  * @param {string} hospitalId 
  * @param {number} amount - Amount in INR
  * @param {Object} metadata - Optional metadata
+ * @param {string} tokenId
+ * @param {string} patientId
+ * @param {string} method
  * @returns {Promise<Object>} - Razorpay order object
  */
-const createOrder = async (hospitalId, amount, metadata = {}) => {
+const createOrder = async (hospitalId, amount, metadata = {}, tokenId, patientId, method) => {
   const razorpay = await getRazorpayClient(hospitalId);
 
   const options = {
@@ -48,9 +51,12 @@ const createOrder = async (hospitalId, amount, metadata = {}) => {
   // Save pending payment record
   await Payment.create({
     hospitalId,
+    tokenId,
+    patientId,
     amount,
     currency: "INR",
     razorpayOrderId: order.id,
+    method,
     status: "pending",
     metadata,
   });

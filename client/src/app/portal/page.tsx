@@ -37,7 +37,7 @@ const dispatch = useAppDispatch();
   ];
 
   return (
-    <ProtectedRoute requiredRoles={['admin', 'superadmin']}>
+    <ProtectedRoute requiredRoles={['ADMIN', 'SUPERADMIN']}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-500 font-medium">
         
         {/* Top Navigation */}

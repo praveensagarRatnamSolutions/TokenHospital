@@ -26,21 +26,15 @@ const tokenSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['waiting', 'current', 'completed', 'canceled'],
-            default: 'waiting',
+            enum: ['PROVISIONAL', 'WAITING', 'CALLED', 'COMPLETED', 'CANCELED'],
+            default: 'WAITING',
         },
-        appointmentDate: {
-            type: String, // YYYY-MM-DD
-            required: true,
-            default: () => new Date().toISOString().split('T')[0]
-        },
+        paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment' },
+
         patientId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Patient',
             required: true,
-        },
-        problem: {
-            type: String,
         },
         calledAt: {
             type: Date,

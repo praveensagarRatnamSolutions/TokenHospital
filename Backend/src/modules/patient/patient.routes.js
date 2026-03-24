@@ -46,4 +46,60 @@ router.get('/search', protect, patientController.searchPatient);
  */
 router.get('/:id/history', protect, patientController.getPatientHistory);
 
+/**
+ * @swagger
+ * /api/patient/{id}/consultation:
+ *   post:
+ *     summary: Create a consultation for a patient
+ *     tags: [Patient]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [doctorId]
+ *             properties:
+ *               doctorId:
+ *                 type: string
+ *               tokenId:
+ *                 type: string
+ *               diagnosis:
+ *                 type: string
+ *               symptoms:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Consultation created
+ */
+router.post('/:id/consultation', protect, patientController.createConsultation);
+
+/**
+ * @swagger
+ * /api/patient/{id}/consultations:
+ *   get:
+ *     summary: Get patient consultations
+ *     tags: [Patient]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of previous consultations
+ */
+router.get('/:id/consultations', protect, patientController.getPatientConsultations);
+
 module.exports = router;

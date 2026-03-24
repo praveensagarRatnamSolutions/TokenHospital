@@ -27,7 +27,7 @@ const resolvePatient = async (hospitalId, patientData) => {
         if (age && patient.age !== age) { patient.age = age; needsUpdate = true; }
         if (gender && patient.gender !== gender) { patient.gender = gender; needsUpdate = true; }
         if (name && patient.name !== name) { patient.name = name; needsUpdate = true; }
-        
+
         if (needsUpdate) await patient.save();
     }
 
@@ -77,7 +77,7 @@ const autoAssignDoctor = async (hospitalId, departmentId, date) => {
 
     // Filter by availability for this specific day of the week
     const dayOfWeek = new Date(targetDate).toLocaleDateString('en-US', { weekday: 'long' });
-    const availableToday = doctors.filter(doctor => 
+    const availableToday = doctors.filter(doctor =>
         doctor.availability?.some(a => a.day === dayOfWeek)
     );
 
@@ -91,7 +91,7 @@ const autoAssignDoctor = async (hospitalId, departmentId, date) => {
                 hospitalId: hospitalId,
                 doctorId: { $in: doctorIds },
                 appointmentDate: targetDate,
-                status: { $in: ['waiting', 'current'] },
+                status: { $in: ['WAITING', 'CALLED'] },
             },
         },
         {
@@ -130,11 +130,21 @@ const autoAssignDoctor = async (hospitalId, departmentId, date) => {
  * Create a new token
  */
 const createToken = async (tokenData) => {
-    const { departmentId, hospitalId, patientDetails, doctorId, appointmentDate } = tokenData;
+    const { departmentId, hospitalId, patientDetails, patientId, doctorId, appointmentDate } = tokenData;
     const targetDate = appointmentDate || new Date().toISOString().split('T')[0];
 
     // 1. Resolve Patient
-    const patient = await resolvePatient(hospitalId, patientDetails);
+    let patient;
+    if (patientId) {
+        patient = await Patient.findOne({ _id: patientId, hospitalId });
+        if (!patient) {
+            throw new Error('Patient not found');
+        }
+    } else if (patientDetails) {
+        patient = await resolvePatient(hospitalId, patientDetails);
+    } else {
+        throw new Error('Either patientId or patientDetails must be provided');
+    }
 
     // 2. Resolve Doctor
     let assignedDoctorId = doctorId || null;
@@ -156,7 +166,7 @@ const createToken = async (tokenData) => {
             hospitalId,
             doctorId: assignedDoctorId,
             appointmentDate: targetDate,
-            status: { $in: ['waiting', 'current'] }
+            status: { $in: ['WAITING', 'CALLED'] }
         });
 
         if (currentQueue >= (doctor.tokenConfig?.maxPerDay || 50)) {
@@ -168,6 +178,8 @@ const createToken = async (tokenData) => {
     const { tokenNumber, sequenceNumber } = await getNextTokenNumber(hospitalId, departmentId, targetDate);
 
     // 4. Create Token
+    const status = tokenData.paymentType === 'CASH' ? 'PROVISIONAL' : 'WAITING';
+
     const token = await Token.create({
         tokenNumber,
         sequenceNumber,
@@ -175,9 +187,10 @@ const createToken = async (tokenData) => {
         doctorId: assignedDoctorId,
         hospitalId,
         appointmentDate: targetDate,
-        status: 'waiting',
+        status,
+        paymentType: tokenData.paymentType || 'CASH',
         patientId: patient._id,
-        problem: patientDetails.problem,
+
     });
 
     const populatedToken = await Token.findById(token._id)
@@ -189,8 +202,8 @@ const createToken = async (tokenData) => {
 
     // Emit socket event
     try {
-        const io = getIo();
-        io.emit('tokenCreated', populatedToken);
+        const { broadcastToHospital } = require('../../socket/socketHandler');
+        broadcastToHospital(hospitalId, 'queue-updated', populatedToken);
     } catch (e) {
         // Socket not initialized yet, skip
     }
@@ -206,13 +219,13 @@ const getCurrentToken = async (hospitalId, doctorId) => {
     const token = await Token.findOne({
         hospitalId,
         doctorId,
-        status: 'current',
+        status: 'CALLED',
     })
         .populate('departmentId', 'name prefix')
         .populate('doctorId', 'name')
         .populate('patientId', 'name phone age gender')
         .lean();
-
+    console.log("current token", token);
 
     return token;
 };
@@ -223,7 +236,10 @@ const getCurrentToken = async (hospitalId, doctorId) => {
 const getTokens = async (hospitalId, filters = {}) => {
     const query = { hospitalId };
 
-    if (filters.status) query.status = filters.status;
+    if (filters.status) {
+        const statusArray = filters.status.split(',').map(s => s.trim().toUpperCase());
+        query.status = { $in: statusArray };
+    }
     if (filters.departmentId) query.departmentId = filters.departmentId;
     if (filters.doctorId) query.doctorId = filters.doctorId;
 
@@ -259,8 +275,8 @@ const getTokens = async (hospitalId, filters = {}) => {
  */
 const completeToken = async (tokenId, hospitalId) => {
     const token = await Token.findOneAndUpdate(
-        { _id: tokenId, hospitalId, status: 'current' },
-        { status: 'completed', completedAt: new Date() },
+        { _id: tokenId, hospitalId, status: 'CALLED' },
+        { status: 'COMPLETED', completedAt: new Date() },
         { new: true }
     )
         .populate('departmentId', 'name prefix')
@@ -274,8 +290,8 @@ const completeToken = async (tokenId, hospitalId) => {
 
     // Emit socket event
     try {
-        const io = getIo();
-        io.emit('tokenCompleted', token);
+        const { broadcastToHospital } = require('../../socket/socketHandler');
+        broadcastToHospital(hospitalId, 'queue-updated', token);
     } catch (e) {
         // Socket not initialized yet, skip
     }
@@ -292,14 +308,14 @@ const completeToken = async (tokenId, hospitalId) => {
 const callNextToken = async (doctorId, hospitalId) => {
     // Complete any current token for this doctor
     await Token.updateMany(
-        { doctorId, hospitalId, status: 'current' },
-        { status: 'completed', completedAt: new Date() }
+        { doctorId, hospitalId, status: 'CALLED' },
+        { status: 'COMPLETED', completedAt: new Date() }
     );
 
     // Find the oldest waiting token for this doctor
     const nextToken = await Token.findOneAndUpdate(
-        { doctorId, hospitalId, status: 'waiting' },
-        { status: 'current', calledAt: new Date() },
+        { doctorId, hospitalId, status: 'WAITING' },
+        { status: 'CALLED', calledAt: new Date() },
         { new: true, sort: { createdAt: 1 } }
     )
         .populate('departmentId', 'name prefix')
@@ -308,13 +324,18 @@ const callNextToken = async (doctorId, hospitalId) => {
 
 
     if (!nextToken) {
-        return null; // No more tokens in queue
+        // Broadcast update even if no more tokens (to clear UI)
+        try {
+            const { broadcastToHospital } = require('../../socket/socketHandler');
+            broadcastToHospital(hospitalId, 'queue-updated', { doctorId, status: 'EMPTY' });
+        } catch (e) { }
+        return null;
     }
 
     // Emit socket event
     try {
-        const io = getIo();
-        io.emit('tokenUpdated', nextToken);
+        const { broadcastToHospital } = require('../../socket/socketHandler');
+        broadcastToHospital(hospitalId, 'queue-updated', nextToken);
     } catch (e) {
         // Socket not initialized yet, skip
     }
@@ -327,12 +348,12 @@ const callNextToken = async (doctorId, hospitalId) => {
  */
 const cancelToken = async (tokenId, hospitalId) => {
     const token = await Token.findOneAndUpdate(
-        { _id: tokenId, hospitalId, status: { $ne: 'completed' } },
-        { status: 'canceled', canceledAt: new Date() },
+        { _id: tokenId, hospitalId, status: { $nin: ['COMPLETED', 'CANCELED'] } },
+        { status: 'CANCELED', canceledAt: new Date() },
         { new: true }
     ).populate('departmentId', 'name prefix')
-     .populate('doctorId', 'name')
-     .populate('patientId', 'name phone age gender');
+        .populate('doctorId', 'name')
+        .populate('patientId', 'name phone age gender');
 
 
     if (!token) {
@@ -341,11 +362,37 @@ const cancelToken = async (tokenId, hospitalId) => {
 
     // Emit socket event
     try {
-        const io = getIo();
-        io.emit('tokenUpdated', token);
+        const { broadcastToHospital } = require('../../socket/socketHandler');
+        broadcastToHospital(hospitalId, 'queue-updated', token);
     } catch (e) {
         // skip
     }
+
+    return token;
+};
+
+/**
+ * Verify cash payment for a provisional token
+ */
+const verifyCashPayment = async (tokenId, hospitalId) => {
+    const token = await Token.findOneAndUpdate(
+        { _id: tokenId, hospitalId, status: 'PROVISIONAL' },
+        { status: 'WAITING' },
+        { new: true }
+    )
+        .populate('departmentId', 'name prefix')
+        .populate('doctorId', 'name')
+        .populate('patientId', 'name phone age gender');
+
+    if (!token) {
+        throw new Error('Token not found or not in PROVISIONAL status');
+    }
+
+    // Emit socket event
+    try {
+        const { broadcastToHospital } = require('../../socket/socketHandler');
+        broadcastToHospital(hospitalId, 'queue-updated', token);
+    } catch (e) { }
 
     return token;
 };
@@ -357,5 +404,6 @@ module.exports = {
     completeToken,
     callNextToken,
     cancelToken,
+    verifyCashPayment,
 };
 

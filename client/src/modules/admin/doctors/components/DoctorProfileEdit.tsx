@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/services/api';
 import { doctorApi } from '../api/doctorApi';
 import { Doctor } from '../types';
+import { Laugh, Pencil } from 'lucide-react';
 
 export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
     const router = useRouter();
@@ -226,7 +227,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                         {/* Section 1: Basic Info */}
                         <section className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/20">
                             <div className="flex items-center gap-3 mb-6">
-                                <span className="material-symbols-outlined text-primary">person</span>
+
                                 <h2 className="text-lg font-bold">Basic Info</h2>
                             </div>
                             <div className="flex flex-col md:flex-row gap-8 mb-8">
@@ -236,7 +237,8 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                                             <img src={formData.profilePic.startsWith('blob:') ? formData.profilePic : `https://d2rxrksscpnnty.cloudfront.net/${formData.profilePic}`} alt="Profile" className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                                                <span className="material-symbols-outlined text-3xl">add_a_photo</span>
+
+                                                <Laugh />
                                             </div>
                                         )}
                                     </div>
@@ -252,7 +254,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                                         htmlFor="profile-pic"
                                         className="absolute -bottom-2 -right-2 bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-transform"
                                     >
-                                        <span className="material-symbols-outlined text-sm">edit</span>
+                                        <span className="material-symbols-outlined text-sm"><Pencil size={16} /></span>
                                     </label>
                                     {uploading && (
                                         <div className="absolute inset-0 bg-surface-container-lowest/60 flex items-center justify-center rounded-2xl">
@@ -369,7 +371,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                         {/* Section 2: Weekly Availability */}
                         <section className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/20">
                             <div className="flex items-center gap-3 mb-6">
-                                <span className="material-symbols-outlined text-primary">calendar_month</span>
+
                                 <h2 className="text-lg font-bold">Weekly Availability</h2>
                             </div>
                             <div className="space-y-4">
@@ -410,7 +412,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                         {/* Section 3: Token Config */}
                         <section className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/20">
                             <div className="flex items-center gap-3 mb-6">
-                                <span className="material-symbols-outlined text-primary">confirmation_number</span>
+
                                 <h2 className="text-lg font-bold">Token Configuration</h2>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -448,7 +450,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                         <section className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/20">
                             <div className="flex justify-between items-center mb-6">
                                 <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined text-primary">coffee</span>
+
                                     <h2 className="text-lg font-bold">Break Times</h2>
                                 </div>
                                 <button
@@ -570,7 +572,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                                         <p className="text-sm font-bold text-primary">{formData.tokenConfig?.maxPerDay || 0} Tokens</p>
                                     </div>
                                     <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/20 flex flex-col justify-center">
-                                         <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1 text-center">Avg. Time</p>
+                                        <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1 text-center">Avg. Time</p>
                                         <p className="text-sm font-bold text-primary text-center">{formData.tokenConfig?.avgTimePerPatient || 0}m</p>
                                     </div>
                                 </div>

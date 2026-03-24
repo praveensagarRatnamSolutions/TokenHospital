@@ -7,8 +7,10 @@ const paymentSchema = new mongoose.Schema(
       ref: "Hospital",
       required: true,
     },
+    tokenId: { type: mongoose.Schema.Types.ObjectId, ref: 'Token', required: true },
     patientId: {
       type: String, // Or ObjectId if you have a Patient model
+      ref: "Patient",
       required: false,
     },
     amount: {
@@ -30,6 +32,7 @@ const paymentSchema = new mongoose.Schema(
     razorpaySignature: {
       type: String,
     },
+    method: { type: String, enum: ['CASH', 'UPI', 'CARD'], required: true },
     status: {
       type: String,
       enum: ["pending", "captured", "failed"],

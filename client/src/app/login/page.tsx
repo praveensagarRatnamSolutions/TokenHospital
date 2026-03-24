@@ -70,6 +70,7 @@ export default function LoginPage() {
             name: userData.name,
             email: userData.email,
             role: userData.role,
+            doctorId: userData?.doctorId || null,
             hospitalId: userData.hospitalId,
           },
           accessToken: userData.token,
@@ -79,11 +80,13 @@ export default function LoginPage() {
 
       // Redirect based on role
       const role = userData.role;
-      if (role === 'superadmin') {
+
+      console.log('Role:', role);
+      if (role === 'SUPERADMIN') {
         router.push('/superadmin');
-      } else if (role === 'admin') {
+      } else if (role === 'ADMIN') {
         router.push('/portal');
-      } else if (role === 'doctor') {
+      } else if (role === 'DOCTOR') {
         router.push('/doctor');
       } else {
         router.push('/kiosk');
@@ -191,14 +194,14 @@ export default function LoginPage() {
           </form>
 
           {/* Demo Credentials */}
-          {/* <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs font-medium text-blue-900 mb-2">Demo Credentials:</p>
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs font-medium text-blue-900 mb-2">Demo Credentials (Password: password123):</p>
             <div className="text-xs text-blue-800 space-y-1">
-              <p><strong>SuperAdmin:</strong> superadmin@hospital.com / password</p>
-              <p><strong>Admin:</strong> admin@hospital.com / password</p>
-              <p><strong>Doctor:</strong> doctor@hospital.com / password</p>
+              <p><strong>SuperAdmin:</strong> superadmin@system.com</p>
+              <p><strong>Hospital Admin:</strong> admin@anupama.com</p>
+              <p><strong>Doctor:</strong> smith@anupama.com</p>
             </div>
-          </div> */}
+          </div>
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center text-sm text-gray-600">
