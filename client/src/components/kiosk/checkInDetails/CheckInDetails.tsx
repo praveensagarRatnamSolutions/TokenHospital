@@ -12,17 +12,24 @@ import {
   Check,
   ArrowBack,
   Backspace,
-} from '../../icons';
+} from '../common/icons';
 
 import './CheckInDetails.css';
-import InputField from '../../common/InputField';
-import KioskButton from '../../common/KioskButton';
-import Footer from '../../common/Footer';
+import InputField from '../common/input/Input';
+import KioskButton from '../common/button';
 import useCheckDetails, { ICheckDetailsProps } from './useCheckDetails';
+import Footer from '../common/footer';
+import Select from '../common/select/Select';
 
 export default function PatientCheckin(props: ICheckDetailsProps) {
   const { errors, register, handleClearPhone, handleBack, handleConfirm, handleSubmit } =
     useCheckDetails(props);
+
+  const genderOptions = [
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'other', label: 'Other' },
+  ];
 
   return (
     <form onSubmit={handleSubmit(handleConfirm)} className="patient-checkin">
@@ -93,7 +100,7 @@ export default function PatientCheckin(props: ICheckDetailsProps) {
                 <InputField.Error />
               </InputField.Root>
               {/* Weight */}
-              <InputField.Root error={errors.weight?.message?.toString()}>
+              {/* <InputField.Root error={errors.weight?.message?.toString()}>
                 <InputField.Label>Weight</InputField.Label>
                 <InputField.Wrapper>
                   <InputField.LeadingIcon>
@@ -112,7 +119,18 @@ export default function PatientCheckin(props: ICheckDetailsProps) {
                   />
                 </InputField.Wrapper>
                 <InputField.Error />
-              </InputField.Root>
+              </InputField.Root> */}
+
+              {/* Gender */}
+              <Select
+                name="gender"
+                register={register('gender')}
+                options={genderOptions}
+                label="Gender"
+                placeholder="Select a gender"
+                size="md"
+                error={errors}
+              />
             </div>
 
             {/* Phone Number Display */}

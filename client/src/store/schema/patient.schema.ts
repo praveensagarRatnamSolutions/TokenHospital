@@ -35,6 +35,7 @@ export const patientSchema = z.object({
     .trim()
     .min(10, 'Phone is required')
     .regex(/^(\+91)?[6-9]\d{9}$/, 'Enter valid phone number'),
+  gender: z.string().trim().min(1, 'Gender is required'),
 });
 
 export type TypeCheckInDetailsFormInput = z.input<typeof patientSchema>;

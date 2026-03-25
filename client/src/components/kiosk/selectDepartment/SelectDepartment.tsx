@@ -16,12 +16,12 @@ import {
   Stethoscope,
   Vaccines,
   ArrowBack,
-} from '../icons';
-import KioskCustomHeader from '../common/KioskCustomHeader';
-import InputField from '../common/InputField';
-import Footer from '../common/Footer';
-import KioskButton from '../common/KioskButton';
-import DepartmentCard from './common/departmentCard/DepartmentCard';
+} from '../common/icons';
+import KioskCustomHeader from '../common/kioskCustomHeader/KioskCustomHeader';
+import InputField from '../common/input/Input';
+import KioskButton from '../common/button';
+import DepartmentCard from '../common/departmentCard/DepartmentCard';
+import Footer from '../common/footer';
 
 interface SelectDepartmentProps {
   onNext: () => void;

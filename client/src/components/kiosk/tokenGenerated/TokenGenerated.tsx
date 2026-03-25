@@ -11,11 +11,11 @@ import {
   MedicalServices,
   OutlinePerson,
   Print,
-} from '../../icons';
-import KioskCustomHeader from '../../common/KioskCustomHeader';
-import Footer from '../../common/Footer';
-import KioskButton from '../../common/KioskButton';
+} from '../common/icons';
+import KioskCustomHeader from '../common/kioskCustomHeader/KioskCustomHeader';
+import KioskButton from '../common/button';
 import useTokenGenerated, { TokenGeneratedProps } from './useTokenGenerated';
+import Footer from '../common/footer';
 
 export default function TokenGenerated(props: TokenGeneratedProps) {
   const { handlePrint, age, name, selectedDepartment, selectedDoctor, generatedToken } =

@@ -11,7 +11,7 @@ import React, {
   ForwardedRef,
   ReactElement,
 } from 'react';
-import './InputField.css';
+import './Input.css';
 
 // ===== Context for sharing state between components =====
 interface InputFieldContextValue {

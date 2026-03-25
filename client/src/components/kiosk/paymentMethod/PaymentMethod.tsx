@@ -12,12 +12,12 @@ import {
   Payments,
   QrCode,
   Stethoscope,
-} from '../../icons';
-import KioskCustomHeader from '../../common/KioskCustomHeader';
-import Footer from '../../common/Footer';
-import KioskButton from '../../common/KioskButton';
+} from '../common/icons';
+import KioskCustomHeader from '../common/kioskCustomHeader/KioskCustomHeader';
+import KioskButton from '../common/button';
 import usePaymentMethod, { PaymentMethodProps } from './usePaymentMethod';
 import { PaymentMethodType } from '@/modules/kiosk/api/kioskApis';
+import Footer from '../common/footer';
 
 type CardsType = {
   id: PaymentMethodType;

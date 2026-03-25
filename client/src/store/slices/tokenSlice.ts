@@ -20,6 +20,7 @@ const initialState: TokenState = {
     age: '',
     phone: '',
     weight: '',
+    gender: '',
   },
   generatedToken: null,
   queueStatus: null,

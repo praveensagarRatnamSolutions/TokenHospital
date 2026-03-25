@@ -7,12 +7,12 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedDoctor } from '@/store/slices/tokenSlice';
 import './SelectDoctor.css';
 
-import { ArrowBack, ArrowForward, MedicalServices, Search } from '../icons';
-import DoctorCard from './common/doctorCard/DoctorCard';
-import Footer from '../common/Footer';
-import KioskButton from '../common/KioskButton';
-import KioskCustomHeader from '../common/KioskCustomHeader';
-import InputField from '../common/InputField';
+import { ArrowBack, ArrowForward, MedicalServices, Search } from '../common/icons';
+import DoctorCard from '../common/doctorCard/DoctorCard';
+import KioskButton from '../common/button';
+import KioskCustomHeader from '../common/kioskCustomHeader/KioskCustomHeader';
+import InputField from '../common/input/Input';
+import Footer from '../common/footer';
 
 interface SelectDoctorProps {
   onNext: () => void;
