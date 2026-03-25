@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import './kiosk.css';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { resetKioskFlow } from '@/store/slices/tokenSlice';
 
@@ -11,7 +10,7 @@ import SelectDepartment from '@/components/kiosk/SelectDepartment';
 import SelectDoctor from '@/components/kiosk/SelectDoctor';
 import PaymentMethod from '@/components/kiosk/PaymentMethod';
 import TokenGenerated from '@/components/kiosk/TokenGenerated';
-import CheckInDetails from '@/components/kiosk/CheckInDetails';
+import CheckInDetails from '@/components/kiosk/checkInDetails/CheckInDetails';
 
 type KioskStep = 'HOME' | 'CHECKIN' | 'DEPARTMENT' | 'DOCTOR' | 'PAYMENT' | 'TOKEN';
 

@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  TypeCheckInDetailsFormInput,
+  TypeCheckInDetailsFormOutput,
+} from '../schema/patient.schema';
 
 export interface TokenState {
   selectedDepartment: any | null;
   selectedDoctor: any | null;
-  patientDetails: {
-    name: string;
-    age: string;
-    problem: string;
-  };
+  patientDetails: TypeCheckInDetailsFormInput;
   generatedToken: any | null;
   queueStatus: any | null;
 }
@@ -16,9 +16,10 @@ const initialState: TokenState = {
   selectedDepartment: null,
   selectedDoctor: null,
   patientDetails: {
-    name: '',
+    fullName: '',
     age: '',
-    problem: '',
+    phoneNumber: '',
+    weight: '',
   },
   generatedToken: null,
   queueStatus: null,
@@ -34,7 +35,10 @@ const tokenSlice = createSlice({
     setSelectedDoctor: (state, action: PayloadAction<any>) => {
       state.selectedDoctor = action.payload;
     },
-    setPatientDetails: (state, action: PayloadAction<Partial<TokenState['patientDetails']>>) => {
+    setPatientDetails: (
+      state,
+      action: PayloadAction<Partial<TokenState['patientDetails']>>,
+    ) => {
       state.patientDetails = { ...state.patientDetails, ...action.payload };
     },
     setGeneratedToken: (state, action: PayloadAction<any>) => {
