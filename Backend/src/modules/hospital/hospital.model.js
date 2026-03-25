@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const hospitalSchema = new mongoose.Schema(
   {
@@ -14,8 +14,23 @@ const hospitalSchema = new mongoose.Schema(
       lowercase: true,
     },
     phone: {
-      type: String,
-      required: true,
+      full: {
+        type: String,
+        required: true,
+        unique: true,
+      },
+      countryCode: {
+        type: String, // "+91"
+        required: true,
+      },
+      country: {
+        type: String, // "IN"
+        required: true,
+      },
+      nationalNumber: {
+        type: String,
+        required: true,
+      },
     },
     address: {
       street: String,
@@ -36,7 +51,7 @@ const hospitalSchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     isActive: {
@@ -46,7 +61,7 @@ const hospitalSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-module.exports = mongoose.model("Hospital", hospitalSchema);
+module.exports = mongoose.model('Hospital', hospitalSchema);

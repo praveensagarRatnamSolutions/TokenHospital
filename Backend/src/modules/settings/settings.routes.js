@@ -1,11 +1,11 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const settingsController = require("./settings.controller");
-const { protect, authorize } = require("../../middlewares/authMiddleware");
+const settingsController = require('./settings.controller');
+const { protect, authorize } = require('../../middlewares/authMiddleware');
 const {
   validateCreateSettings,
   validateUpdateSettings,
-} = require("./settings.validations");
+} = require('./settings.validations');
 
 /**
  * @swagger
@@ -63,11 +63,11 @@ const {
  *         description: Validation error
  */
 router.post(
-  "/",
+  '/',
   protect,
-  authorize("admin"),
+  authorize('ADMIN'),
   validateCreateSettings,
-  settingsController.createSettings,
+  settingsController.createSettings
 );
 
 /**
@@ -82,7 +82,7 @@ router.post(
  *       200:
  *         description: Hospital settings
  */
-router.get("/", protect, settingsController.getSettings);
+router.get('/', protect, settingsController.getSettings);
 
 /**
  * @swagger
@@ -128,11 +128,11 @@ router.get("/", protect, settingsController.getSettings);
  *         description: Validation error
  */
 router.put(
-  "/",
+  '/',
   protect,
-  authorize("admin"),
+  authorize('ADMIN'),
   validateUpdateSettings,
-  settingsController.updateSettings,
+  settingsController.updateSettings
 );
 
 module.exports = router;

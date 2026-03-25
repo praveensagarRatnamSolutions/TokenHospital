@@ -8,22 +8,60 @@ const logger = require("../../config/logger");
  */
 const createOrder = async (req, res, next) => {
   try {
-    const { amount, metadata, tokenId, patientId, method } = req.body;
-    // Assuming hospitalId is available in req (from auth middleware)
-    const hospitalId = req.hospitalId; 
+    const {
+      doctorId,
+      departmentId,
+      patientDetails,
+      method,
+      metadata
+    } = req.body;
 
-    if (!amount) {
-      return res.status(400).json({ success: false, message: "Amount is required" });
-    }
-    if (!tokenId || !method) {
-      return res.status(400).json({ success: false, message: "tokenId and method are required" });
+    const hospitalId = req.hospitalId;
+
+    // 1. Validations
+    if (!doctorId || !departmentId) {
+      return res.status(400).json({
+        success: false,
+        message: "doctorId and departmentId are required"
+      });
     }
 
-    const order = await paymentService.createOrder(hospitalId, amount, metadata, tokenId, patientId, method);
-    res.status(201).json({ success: true, data: order });
+    if (!patientDetails) {
+      return res.status(400).json({
+        success: false,
+        message: "Patient details are required"
+      });
+    }
+
+    if (!method) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment method is required"
+      });
+    }
+
+    // 2. Call service (amount comes from Doctor model internally)
+    const order = await paymentService.createOrder({
+      hospitalId,
+      doctorId,
+      departmentId,
+      patientDetails,
+      method,
+      metadata
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: order
+    });
+
   } catch (error) {
     logger.error(`Error creating Razorpay order: ${error.message}`);
-    res.status(500).json({ success: false, message: error.message });
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 

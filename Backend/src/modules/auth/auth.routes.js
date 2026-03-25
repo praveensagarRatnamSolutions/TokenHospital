@@ -42,7 +42,7 @@ const { protect, authorize } = require("../../middlewares/authMiddleware");
  *                 minLength: 6
  *               role:
  *                 type: string
- *                 enum: [superadmin, admin, doctor]
+ *                 enum: ["ADMIN", "DOCTOR", "SUPERADMIN"]
  *               hospitalId:
  *                 type: string
  *                 description: Required for admin and doctor roles, not required for superadmin

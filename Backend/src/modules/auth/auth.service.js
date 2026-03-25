@@ -23,7 +23,7 @@ const registerUser = async (userData) => {
       name,
       email,
       password,
-      role: "admin",
+      role: "ADMIN",
     }], { session });
 
     // 3. Create Hospital

@@ -34,7 +34,12 @@ export default function SignupForm() {
       email: '',
       password: '',
       hospitalName: '',
-      phone: '',
+      phone: {
+        full: '',
+        countryCode: '',
+        country: '',
+        nationalNumber: '',
+      },
     },
   });
 
@@ -56,20 +61,20 @@ export default function SignupForm() {
       {/* Admin Section */}
       <FieldGroup>
         <Field>
-          <FieldLabel>Name</FieldLabel>
-          <Input placeholder="Enter name" {...register('name')} />
+          <FieldLabel className='text-sm font-medium text-gray-700'>Name</FieldLabel>
+          <Input   className="border border-[#d1d5db]" placeholder="Enter name" {...register('name')} />
           {errors.name && <FieldError>{errors.name.message}</FieldError>}
         </Field>
 
         <Field>
-          <FieldLabel>Email</FieldLabel>
-          <Input placeholder="Enter email" {...register('email')} />
+          <FieldLabel className='text-sm font-medium text-gray-700'>Email</FieldLabel>
+          <Input className="border border-[#d1d5db]"  placeholder="Enter email" {...register('email')} />
           {errors.email && <FieldError>{errors.email.message}</FieldError>}
         </Field>
 
         <Field>
-          <FieldLabel>Password</FieldLabel>
-          <Input type="password" placeholder="Enter password" {...register('password')} />
+          <FieldLabel className='text-sm font-medium text-gray-700'>Password</FieldLabel>
+          <Input className="border border-[#d1d5db]"  type="password" placeholder="Enter password" {...register('password')} />
           {errors.password && <FieldError>{errors.password.message}</FieldError>}
         </Field>
       </FieldGroup>
@@ -77,15 +82,15 @@ export default function SignupForm() {
       {/* Hospital Section */}
       <FieldGroup>
         <Field>
-          <FieldLabel>Hospital Name</FieldLabel>
-          <Input placeholder="Hospital name" {...register('hospitalName')} />
+          <FieldLabel className='text-sm font-medium text-gray-700'>Hospital Name</FieldLabel>
+          <Input className="border border-[#d1d5db]"  placeholder="Hospital name" {...register('hospitalName')} />
           {errors.hospitalName && <FieldError>{errors.hospitalName.message}</FieldError>}
         </Field>
 
         <Field>
           <PhoneNumberInput
-            value={watch('phone')}
-            onChange={(val) => setValue('phone', val)}
+            value={watch('phone.full')} // ✅ string for UI
+            onChange={(val) => setValue('phone', val)} // ✅ full object
           />
           {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
         </Field>

@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const departmentController = require('./department.controller');
-const { createDepartmentValidation, updateDepartmentValidation } = require('./department.validations');
+const {
+  createDepartmentValidation,
+  updateDepartmentValidation,
+} = require('./department.validations');
 const { validateRequest } = require('../auth/auth.validations');
 const { protect, authorize } = require('../../middlewares/authMiddleware');
 
@@ -39,7 +42,14 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *       400:
  *         description: Duplicate prefix
  */
-router.post('/', protect, authorize('admin'), createDepartmentValidation, validateRequest, departmentController.createDepartment);
+router.post(
+  '/',
+  protect,
+  authorize('ADMIN'),
+  createDepartmentValidation,
+  validateRequest,
+  departmentController.createDepartment
+);
 
 /**
  * @swagger
@@ -85,6 +95,13 @@ router.get('/', protect, departmentController.getDepartments);
  *       404:
  *         description: Department not found
  */
-router.put('/:id', protect, authorize('admin'), updateDepartmentValidation, validateRequest, departmentController.updateDepartment);
+router.put(
+  '/:id',
+  protect,
+  authorize('ADMIN'),
+  updateDepartmentValidation,
+  validateRequest,
+  departmentController.updateDepartment
+);
 
 module.exports = router;

@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const doctorController = require('./doctor.controller');
-const { createDoctorValidation, updateDoctorValidation } = require('./doctor.validations');
+const {
+  createDoctorValidation,
+  updateDoctorValidation,
+} = require('./doctor.validations');
 const { validateRequest } = require('../auth/auth.validations');
 const { protect, authorize } = require('../../middlewares/authMiddleware');
 
@@ -36,7 +39,14 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *       201:
  *         description: Doctor created successfully
  */
-router.post('/', protect, authorize('admin'), createDoctorValidation, validateRequest, doctorController.createDoctor);
+router.post(
+  '/',
+  protect,
+  authorize('ADMIN'),
+  createDoctorValidation,
+  validateRequest,
+  doctorController.createDoctor
+);
 
 /**
  * @swagger
@@ -114,7 +124,12 @@ router.get('/', protect, doctorController.getDoctors);
  *       500:
  *         description: Server error
  */
-router.get('/upload-url', protect, authorize('admin', 'doctor'), doctorController.getPresignedUrl);
+router.get(
+  '/upload-url',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  doctorController.getPresignedUrl
+);
 
 router.get('/:id', protect, doctorController.getDoctorById);
 
@@ -146,7 +161,14 @@ router.get('/:id', protect, doctorController.getDoctorById);
  *       200:
  *         description: Doctor updated
  */
-router.put('/:id', protect, authorize('admin'), updateDoctorValidation, validateRequest, doctorController.updateDoctor);
+router.put(
+  '/:id',
+  protect,
+  authorize('ADMIN'),
+  updateDoctorValidation,
+  validateRequest,
+  doctorController.updateDoctor
+);
 
 /**
  * @swagger
@@ -166,8 +188,11 @@ router.put('/:id', protect, authorize('admin'), updateDoctorValidation, validate
  *       200:
  *         description: Doctor status toggled
  */
-router.patch('/:id/status', protect, authorize('admin', 'doctor'), doctorController.toggleDoctorStatus);
+router.patch(
+  '/:id/status',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  doctorController.toggleDoctorStatus
+);
 
 module.exports = router;
-
-
