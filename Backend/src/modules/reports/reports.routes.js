@@ -22,7 +22,12 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *       200:
  *         description: Daily summary report
  */
-router.get('/summary', protect, authorize('admin'), reportsController.getSummary);
+router.get(
+  '/summary',
+  protect,
+  authorize('ADMIN'),
+  reportsController.getSummary
+);
 
 /**
  * @swagger
@@ -36,7 +41,12 @@ router.get('/summary', protect, authorize('admin'), reportsController.getSummary
  *       200:
  *         description: Department report
  */
-router.get('/department', protect, authorize('admin'), reportsController.getDepartmentReport);
+router.get(
+  '/department',
+  protect,
+  authorize('ADMIN'),
+  reportsController.getDepartmentReport
+);
 
 /**
  * @swagger
@@ -50,6 +60,11 @@ router.get('/department', protect, authorize('admin'), reportsController.getDepa
  *       200:
  *         description: Doctor workload report
  */
-router.get('/doctor', protect, authorize('admin'), reportsController.getDoctorReport);
+router.get(
+  '/doctor',
+  protect,
+  authorize('ADMIN'),
+  reportsController.getDoctorReport
+);
 
 module.exports = router;

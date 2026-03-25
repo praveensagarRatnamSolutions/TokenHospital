@@ -61,7 +61,7 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
 router.post(
   '/',
   protect,
-  authorize('admin'),
+  authorize('ADMIN'),
   createAdValidation,
   validateRequest,
   adsController.createAd
@@ -138,7 +138,7 @@ router.get(
 router.put(
   '/:id',
   protect,
-  authorize('admin'),
+  authorize('ADMIN'),
   updateAdValidation,
   validateRequest,
   adsController.updateAd
@@ -162,6 +162,6 @@ router.put(
  *       200:
  *         description: Ad deleted
  */
-router.delete('/:id', protect, authorize('admin'), adsController.deleteAd);
+router.delete('/:id', protect, authorize('ADMIN'), adsController.deleteAd);
 
 module.exports = router;

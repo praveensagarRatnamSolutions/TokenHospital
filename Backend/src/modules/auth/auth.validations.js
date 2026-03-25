@@ -21,10 +21,18 @@ const registerValidation = [
   // ✅ Add hospital fields instead
   check('hospitalName', 'Hospital name is required').not().isEmpty(),
 
-  check('phone', 'Valid phone number is required')
-    .not()
-    .isEmpty()
+  check('phone.full', 'Valid phone number is required')
+    .notEmpty()
     .isLength({ min: 10 }),
+
+  // ✅ optional but recommended
+  check('phone.countryCode', 'Country code is required').notEmpty(),
+
+  check('phone.country', 'Country is required').notEmpty(),
+
+  check('phone.nationalNumber', 'Invalid phone number')
+    .notEmpty()
+    .isLength({ min: 5 }),
 ];
 
 const loginValidation = [

@@ -57,7 +57,7 @@ const createHospitalBySuperAdmin = async (hospitalData, superAdminId) => {
           name: `${adminName} Admin`, // Default name
           email,
           password, // Should be hashed by your pre-save hook
-          role: 'admin',
+          role: 'ADMIN',
         },
       ],
       { session }

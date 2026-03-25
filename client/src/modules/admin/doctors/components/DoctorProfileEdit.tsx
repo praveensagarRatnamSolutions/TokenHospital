@@ -332,7 +332,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                                         value={formData.experience}
                                         onChange={handleInputChange}
                                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none"
-                                        type="number"
+                                        type="text"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -342,7 +342,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                                         value={formData.consultationFee}
                                         onChange={handleInputChange}
                                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none"
-                                        type="number"
+                                        type="text"
                                         placeholder="0"
                                     />
                                 </div>
@@ -424,7 +424,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                                             value={formData.tokenConfig?.maxPerDay}
                                             onChange={handleInputChange}
                                             className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none"
-                                            type="number"
+                                            type="text"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -434,7 +434,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                                             value={formData.tokenConfig?.avgTimePerPatient}
                                             onChange={handleInputChange}
                                             className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none"
-                                            type="number"
+                                            type="text"
                                         />
                                     </div>
                                 </div>
