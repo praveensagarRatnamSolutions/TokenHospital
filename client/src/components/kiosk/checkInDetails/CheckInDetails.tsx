@@ -62,13 +62,13 @@ export default function PatientCheckin(props: ICheckDetailsProps) {
           {/* Input Fields Section */}
           <div className="patient-checkin__form">
             {/* Full Name */}
-            <InputField.Root error={errors.fullName?.message?.toString()}>
+            <InputField.Root error={errors.name?.message?.toString()}>
               <InputField.Label>Full Name</InputField.Label>
               <InputField.Wrapper>
                 <InputField.LeadingIcon>
                   <OutlinePerson />
                 </InputField.LeadingIcon>
-                <InputField.Input placeholder="e.g. John Doe" {...register('fullName')} />
+                <InputField.Input placeholder="e.g. John Doe" {...register('name')} />
               </InputField.Wrapper>
               <InputField.Error />
             </InputField.Root>
@@ -116,7 +116,7 @@ export default function PatientCheckin(props: ICheckDetailsProps) {
             </div>
 
             {/* Phone Number Display */}
-            <InputField.Root error={errors.phoneNumber?.message?.toString()}>
+            <InputField.Root error={errors.phone?.message?.toString()}>
               <InputField.Label>Phone Number</InputField.Label>
               <InputField.Wrapper>
                 <InputField.LeadingIcon>
@@ -124,7 +124,7 @@ export default function PatientCheckin(props: ICheckDetailsProps) {
                 </InputField.LeadingIcon>
                 <InputField.Input
                   placeholder="00000000000"
-                  {...register('phoneNumber')}
+                  {...register('phone')}
                   inputMode="numeric"
                   max={10}
                   onInput={(e) => {

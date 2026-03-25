@@ -11,38 +11,15 @@ import {
   MedicalServices,
   OutlinePerson,
   Print,
-} from '../icons';
-import KioskCustomHeader from '../common/KioskCustomHeader';
-import Footer from '../common/Footer';
-import KioskButton from '../common/KioskButton';
+} from '../../icons';
+import KioskCustomHeader from '../../common/KioskCustomHeader';
+import Footer from '../../common/Footer';
+import KioskButton from '../../common/KioskButton';
+import useTokenGenerated, { TokenGeneratedProps } from './useTokenGenerated';
 
-interface TokenGeneratedProps {
-  onFinish: () => void;
-}
-
-export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
-  const [countdown, setCountdown] = useState(15);
-  const tokenData = useAppSelector((state) => state.token);
-
-  useEffect(() => {
-    // const timer = setInterval(() => {
-    //   setCountdown((prev) => {
-    //     if (prev <= 1) {
-    //       clearInterval(timer);
-    //       // onFinish();
-    //       return 0;
-    //     }
-    //     return prev - 1;
-    //   });
-    // }, 1000);
-    // return () => clearInterval(timer);
-  }, [onFinish]);
-
-  const handlePrint = () => {
-    // Implement print functionality
-    console.log('Printing token...');
-    window.print();
-  };
+export default function TokenGenerated(props: TokenGeneratedProps) {
+  const { handlePrint, age, name, selectedDepartment, selectedDoctor, generatedToken } =
+    useTokenGenerated(props);
 
   return (
     <div className="token-generated">
@@ -70,7 +47,7 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
 
             <div className="token-generated__token-display">
               <span className="token-generated__token-number">
-                {tokenData.selectedDepartment?.prefix || 'A'}-104
+                {generatedToken || 'A-000'}
               </span>
             </div>
 
@@ -83,7 +60,7 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
                 <div className="token-generated__detail-text">
                   <p className="token-generated__detail-label">Department</p>
                   <p className="token-generated__detail-value">
-                    {tokenData.selectedDepartment?.name || 'General Medicine'}
+                    {selectedDepartment || 'General Medicine'}
                   </p>
                 </div>
               </div>
@@ -96,7 +73,7 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
                 <div className="token-generated__detail-text">
                   <p className="token-generated__detail-label">Doctor</p>
                   <p className="token-generated__detail-value">
-                    {tokenData.selectedDoctor?.name || 'Any Available'}
+                    {selectedDoctor || 'Any Available'}
                   </p>
                 </div>
               </div>
@@ -108,8 +85,8 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
                     <Groups />
                   </span>
                   <div>
-                    <p className="token-generated__waiting-label">Patients Waiting</p>
-                    <p className="token-generated__waiting-value">3 Patients</p>
+                    <p className="token-generated__waiting-label">Patients Name</p>
+                    <p className="token-generated__waiting-value">{name}</p>
                   </div>
                 </div>
                 <div className="token-generated__waiting-item">
@@ -117,8 +94,8 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
                     <AccessTime />
                   </span>
                   <div>
-                    <p className="token-generated__waiting-label">Estimated Time</p>
-                    <p className="token-generated__waiting-value">15 - 20 Mins</p>
+                    <p className="token-generated__waiting-label">Patient Age</p>
+                    <p className="token-generated__waiting-value">{age}</p>
                   </div>
                 </div>
               </div>
@@ -153,7 +130,12 @@ export default function TokenGenerated({ onFinish }: TokenGeneratedProps) {
       <Footer.Root className="token-generated__footer">
         <Footer.Actions align="space-between">
           <div className="token-generated__footer-actions">
-            <KioskButton.Root variant="confirm" size="large" fullWidth>
+            <KioskButton.Root
+              onClick={handlePrint}
+              variant="confirm"
+              size="large"
+              fullWidth
+            >
               <KioskButton.StartIcon>
                 <Print />
               </KioskButton.StartIcon>
