@@ -7,12 +7,14 @@ import { DoubleArrowUp, MedicalServices } from '../icons';
 
 import './HomeWelcome.css';
 import TokenQueue, { Token } from './common/tokens/Tokens';
+import useAds from '@/modules/kiosk/hooks/useAds';
 
 interface HomeWelcomeProps {
   onStart: () => void;
 }
 
 export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
+  const { data } = useAds();
   // Mocking queue progress as seen in HTML
   const queueProgress: Token[] = [
     { token: 'A-142', status: 'COMPLETED', current: false },
