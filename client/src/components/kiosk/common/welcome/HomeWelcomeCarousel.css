@@ -2,7 +2,7 @@
 .home-welcome__loading {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -76,7 +76,7 @@
 .home-welcome__header {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100svh;
   min-height: 600px;
   overflow: hidden;
   display: flex;

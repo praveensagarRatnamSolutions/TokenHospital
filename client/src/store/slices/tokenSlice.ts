@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
 import {
   TypeCheckInDetailsFormInput,
-  TypeCheckInDetailsFormOutput,
 } from '../schema/patient.schema';
 
 export interface TokenState {
@@ -19,7 +19,7 @@ const initialState: TokenState = {
     name: '',
     age: '',
     phone: '',
-    weight: '',
+    weight: '85',
     gender: '',
   },
   generatedToken: null,
