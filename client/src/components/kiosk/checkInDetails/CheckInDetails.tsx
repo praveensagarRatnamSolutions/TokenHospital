@@ -1,34 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import './CheckInDetails.css';
 
+import KioskButton from '../common/button';
+import Footer from '../common/footer';
 import {
-  MedicalServices,
-  OutlinePerson,
-  Calendar,
-  Monitor,
-  Phone,
-  Help,
-  Check,
   ArrowBack,
   Backspace,
+  Calendar,
+  Check,
+  Help,
+  MedicalServices,
+  OutlinePerson,
+  Phone,
 } from '../common/icons';
-
-import './CheckInDetails.css';
 import InputField from '../common/input/Input';
-import KioskButton from '../common/button';
-import useCheckDetails, { ICheckDetailsProps } from './useCheckDetails';
-import Footer from '../common/footer';
 import Select from '../common/select/Select';
+import useCheckDetails, { ICheckDetailsProps } from './useCheckDetails';
 
 export default function PatientCheckin(props: ICheckDetailsProps) {
   const { errors, register, handleClearPhone, handleBack, handleConfirm, handleSubmit } =
     useCheckDetails(props);
 
   const genderOptions = [
-    { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'other', label: 'Other' },
+    { value: 'Male', label: 'Male' },
+    { value: 'Female', label: 'Female' },
+    { value: 'Other', label: 'Other' },
   ];
 
   return (

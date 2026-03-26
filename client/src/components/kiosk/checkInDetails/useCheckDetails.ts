@@ -1,13 +1,13 @@
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
-import { setPatientDetails } from '@/store/slices/tokenSlice';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   patientSchema,
   TypeCheckInDetailsFormInput,
   TypeCheckInDetailsFormOutput,
 } from '@/store/schema/patient.schema';
+import { setPatientDetails } from '@/store/slices/tokenSlice';
 export interface ICheckDetailsProps {
   onNext: () => void;
   onBack: () => void;
@@ -43,8 +43,9 @@ const useCheckDetails = ({ onBack, onNext }: ICheckDetailsProps) => {
       setPatientDetails({
         age: data.age.toString(),
         name: data.name,
-        phone: data.phone,
         weight: data.weight.toString(),
+        gender: data.gender,
+        phone: data.phone,
       }),
     );
     onNext();

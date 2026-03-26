@@ -1,7 +1,7 @@
 /* Root wrapper */
 .kiosk-root {
   width: 100%;
-  height: 100vh;
+  height: 100svh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -130,7 +130,7 @@
   --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   /* Header Height */
-  --header-height: 83vh;
+  --header-height: 83svh;
 }
 
 /* Center container */
@@ -144,11 +144,12 @@
 
 /* 🔥 Aspect Ratio Lock (IMPORTANT) */
 .kiosk-inner {
-  height: 100vh;
-  width: 56.5vh; /* 113 / 200 = 0.565 */
+  height: 100svh;
+    width: 56.5svh;
+    /* 113 / 200 = 0.565 */
 
   max-width: 100vw;
-  max-height: 100vh;
+  max-height: 100svh;
 
   background-color: var(--color-background, #f6f7f8);
 

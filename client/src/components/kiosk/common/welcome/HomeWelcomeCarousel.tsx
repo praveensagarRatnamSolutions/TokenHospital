@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import './HomeWelcomeCarousel.css';
+
+import React, { useEffect, useRef,useState } from 'react';
+
 import { cn } from '@/lib/utils';
 import { Ad } from '@/modules/admin/ads';
-import './HomeWelcomeCarousel.css';
 
 interface CarouselItem {
   _id: string;
@@ -110,6 +112,7 @@ const HomeWelcomeCarousel: React.FC<HomeWelcomeCarouselProps> = ({
   useEffect(() => {
     if (!currentItem) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
 
     if (currentItem.type === 'video') {
@@ -188,7 +191,7 @@ const HomeWelcomeCarousel: React.FC<HomeWelcomeCarouselProps> = ({
 
   if (!currentItem || activeItems.length === 0) {
     return (
-      <div className="home-welcome__loading">
+      <div className="home-welcome__loading" onClick={handleCTAClick}>
         <div className="home-welcome__loading-spinner"></div>
         <p>Loading content...</p>
       </div>
@@ -196,7 +199,7 @@ const HomeWelcomeCarousel: React.FC<HomeWelcomeCarouselProps> = ({
   }
 
   return (
-    <header className={cn('home-welcome__header', className)}>
+    <header className={cn('home-welcome__header', className)} onClick={handleCTAClick}>
       {/* Background Overlay */}
       {/* <div className="home-welcome__overlay"></div> */}
 

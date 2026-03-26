@@ -1,12 +1,9 @@
 'use client';
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import api from '@/services/api';
-
 import './HomeWelcome.css';
+
 import useAds from '@/modules/kiosk/hooks/useAds';
-import { DoubleArrowUp, MedicalServices } from '../common/icons';
+
 import TokenQueue, { Token } from '../common/tokens/Tokens';
 import HomeWelcomeCarousel from '../common/welcome/HomeWelcomeCarousel';
 
@@ -67,7 +64,7 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
           <div className="home-welcome__cta-line"></div>
         </div>
       </header> */}
-      <HomeWelcomeCarousel items={data?.data ?? []} />
+      <HomeWelcomeCarousel items={data?.data ?? []} onStart={onStart}/>
 
       {/* Bottom Section: Token Queue Progress */}
       <footer className="home-welcome__footer">

@@ -1,7 +1,7 @@
 /* PaymentMethod.css - Industry Standard CSS with BEM methodology */
 
 .payment-method {
-  height: 100vh;
+  height: 100svh;
   width: 100vw;
   /* background-color: var(--color-background-light); */
   background-color: inherit;
