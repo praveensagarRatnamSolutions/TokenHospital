@@ -12,72 +12,44 @@ import {
   Payments,
   QrCode,
   Stethoscope,
-} from '../icons';
-import KioskCustomHeader from '../common/KioskCustomHeader';
-import Footer from '../common/Footer';
-import KioskButton from '../common/KioskButton';
+} from '../common/icons';
+import KioskCustomHeader from '../common/kioskCustomHeader/KioskCustomHeader';
+import KioskButton from '../common/button';
+import usePaymentMethod, { PaymentMethodProps } from './usePaymentMethod';
+import { PaymentMethodType } from '@/modules/kiosk/api/kioskApis';
+import Footer from '../common/footer';
 
-interface PaymentMethodProps {
-  onNext?: () => void;
-  onBack?: () => void;
-  tokenNumber?: string;
-  doctorName?: string;
-  department?: string;
-  fee?: string;
-}
+type CardsType = {
+  id: PaymentMethodType;
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+};
 
-export default function PaymentMethod({
-  onNext,
-  onBack,
-  tokenNumber = 'A-104',
-  doctorName = 'Dr. Sarah Johnson',
-  department = 'General Medicine',
-  fee = '$50.00',
-}: PaymentMethodProps) {
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+export default function PaymentMethod(props: PaymentMethodProps) {
+  const { handleContinue, handleMethodSelect, selectedMethod, handleBack, isPending } =
+    usePaymentMethod(props);
+  const {
+    tokenNumber = 'A-104',
+    doctorName = 'Dr. Sarah Johnson',
+    department = 'General Medicine',
+    fee = '$50.00',
+  } = props;
 
-  const methods = [
+  const methods: CardsType[] = [
     {
-      id: 'cash',
+      id: 'CASH',
       title: 'Cash at Counter',
       desc: 'Pay at the reception desk',
       icon: <Payments />,
     },
     {
-      id: 'upi',
+      id: 'UPI',
       title: 'UPI Payment',
       desc: 'Scan and pay using any UPI app',
       icon: <QrCode />,
     },
-    // {
-    //   id: 'card',
-    //   title: 'Card Payment',
-    //   desc: 'Swipe or tap your credit/debit card',
-    //   icon: <CreditCard />,
-    // },
-    // {
-    //   id: 'insurance',
-    //   title: 'Insurance',
-    //   desc: 'Claim through your provider',
-    //   icon: <HealthAndSafety />,
-    // },
   ];
-
-  const handleMethodSelect = (methodId: string) => {
-    setSelectedMethod(methodId);
-    // Optionally trigger onNext or store selection
-  };
-
-  const handleContinue = () => {
-    if (selectedMethod && onNext) {
-      onNext();
-    }
-  };
-
-  const handleHelp = () => {
-    console.log('Help requested');
-    // Implement help functionality
-  };
 
   return (
     <div className="payment-method">
@@ -163,14 +135,14 @@ export default function PaymentMethod({
         {/* Bottom Navigation Section */}
         <Footer.Root>
           <Footer.Actions align="space-between">
-            <KioskButton.Root variant="back" size="large" onClick={onBack}>
+            <KioskButton.Root variant="back" size="large" onClick={handleBack}>
               <KioskButton.StartIcon>
                 <ArrowBack />
               </KioskButton.StartIcon>
               <KioskButton.Text>Back</KioskButton.Text>
             </KioskButton.Root>
             <KioskButton.Root
-              disabled={!selectedMethod}
+              disabled={!selectedMethod || isPending}
               variant="confirm"
               size="large"
               onClick={handleContinue}

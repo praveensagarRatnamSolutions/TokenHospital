@@ -10,9 +10,8 @@ import { useAppDispatch } from '@/store/hooks';
 import { logout } from '@/store/slices/authSlice';
 
 export default function AdminPortal() {
-
   const router = useRouter();
-const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
   const apps = [
     {
       id: 'kiosk',
@@ -37,14 +36,13 @@ const dispatch = useAppDispatch();
   ];
 
   return (
-    <ProtectedRoute requiredRoles={['ADMIN', 'SUPERADMIN']}>
+    <ProtectedRoute requiredRoles={['ADMIN', 'SUPERADMIN', 'DOCTOR']}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-500 font-medium">
-        
         {/* Top Navigation */}
         <nav className="flex items-center justify-between px-8 py-3 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-30">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <img
-              src="/logo.png" 
+              src="/logo.png"
               className="h-12 w-auto object-contain"
               alt="Ratnam Solutions"
             />
@@ -104,7 +102,9 @@ const dispatch = useAppDispatch();
                     Launch Application
                   </span>
                   <div className="relative flex h-3 w-3">
-                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0091DD] opacity-75`}></span>
+                    <span
+                      className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0091DD] opacity-75`}
+                    ></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-[#0091DD]"></span>
                   </div>
                 </div>
@@ -112,8 +112,6 @@ const dispatch = useAppDispatch();
             ))}
           </div>
         </main>
-
-        
       </div>
     </ProtectedRoute>
   );

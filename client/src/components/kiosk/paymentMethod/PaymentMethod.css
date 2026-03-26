@@ -140,18 +140,6 @@
   display: none;
 }
 
-/* @media (min-width: 768px) {
-  .payment-method__divider {
-    display: block;
-  }
-} */
-
-/* @media (prefers-color-scheme: dark) {
-  .payment-method__divider {
-    background-color: var(--color-dark-border);
-  }
-} */
-
 .payment-method__doctor-info {
   display: flex;
   flex-direction: column;

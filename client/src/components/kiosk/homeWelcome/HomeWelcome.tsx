@@ -3,11 +3,12 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
-import { DoubleArrowUp, MedicalServices } from '../icons';
 
 import './HomeWelcome.css';
-import TokenQueue, { Token } from './common/tokens/Tokens';
 import useAds from '@/modules/kiosk/hooks/useAds';
+import { DoubleArrowUp, MedicalServices } from '../common/icons';
+import TokenQueue, { Token } from '../common/tokens/Tokens';
+import HomeWelcomeCarousel from '../common/welcome/HomeWelcomeCarousel';
 
 interface HomeWelcomeProps {
   onStart: () => void;
@@ -27,7 +28,7 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
   return (
     <div className="home-welcome">
       {/* Header / Carousel Section */}
-      <header className="home-welcome__header">
+      {/* <header className="home-welcome__header">
         <div className="home-welcome__overlay"></div>
         <div className="home-welcome__background"></div>
 
@@ -48,14 +49,14 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
           </p>
         </div>
 
-        {/* Carousel Indicators */}
+
         <div className="home-welcome__indicators">
           <div className="home-welcome__indicator home-welcome__indicator--active"></div>
           <div className="home-welcome__indicator"></div>
           <div className="home-welcome__indicator"></div>
         </div>
 
-        {/* Swipe up / Click to get token interaction area */}
+
         <div className="home-welcome__cta" onClick={onStart}>
           <div className="home-welcome__cta-button">
             <span className="home-welcome__cta-icon">
@@ -65,7 +66,8 @@ export default function HomeWelcome({ onStart }: HomeWelcomeProps) {
           </div>
           <div className="home-welcome__cta-line"></div>
         </div>
-      </header>
+      </header> */}
+      <HomeWelcomeCarousel items={data?.data ?? []} />
 
       {/* Bottom Section: Token Queue Progress */}
       <footer className="home-welcome__footer">

@@ -1,7 +1,7 @@
 // Example 6: Form buttons with ref
 import { useRef } from 'react';
 import Button from '.';
-import { ArrowBack, Check } from '@/components/icons';
+import { ArrowBack, Check } from '@/components/kiosk/common/icons';
 function FormButtonsExample() {
   const submitRef = useRef<HTMLButtonElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);

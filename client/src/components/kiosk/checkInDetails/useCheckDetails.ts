@@ -14,9 +14,7 @@ export interface ICheckDetailsProps {
 }
 
 const useCheckDetails = ({ onBack, onNext }: ICheckDetailsProps) => {
-  const { fullName, age, phoneNumber, weight } = useAppSelector(
-    (state) => state.token.patientDetails,
-  );
+  const patientDetails = useAppSelector((state) => state.token.patientDetails);
 
   const dispatch = useAppDispatch();
 
@@ -25,14 +23,11 @@ const useCheckDetails = ({ onBack, onNext }: ICheckDetailsProps) => {
     handleSubmit,
     resetField,
     setFocus,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors },
   } = useForm<TypeCheckInDetailsFormInput, any, TypeCheckInDetailsFormOutput>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
-      fullName,
-      age: age,
-      phoneNumber: phoneNumber,
-      weight: weight,
+      ...patientDetails,
     },
     mode: 'onChange',
   });
@@ -47,8 +42,8 @@ const useCheckDetails = ({ onBack, onNext }: ICheckDetailsProps) => {
     dispatch(
       setPatientDetails({
         age: data.age.toString(),
-        fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
+        name: data.name,
+        phone: data.phone,
         weight: data.weight.toString(),
       }),
     );
@@ -56,8 +51,8 @@ const useCheckDetails = ({ onBack, onNext }: ICheckDetailsProps) => {
   };
 
   const handleClearPhone = () => {
-    resetField('phoneNumber');
-    setFocus('phoneNumber');
+    resetField('phone');
+    setFocus('phone');
   };
 
   return {

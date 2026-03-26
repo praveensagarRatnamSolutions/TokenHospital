@@ -16,10 +16,11 @@ const initialState: TokenState = {
   selectedDepartment: null,
   selectedDoctor: null,
   patientDetails: {
-    fullName: '',
+    name: '',
     age: '',
-    phoneNumber: '',
+    phone: '',
     weight: '',
+    gender: '',
   },
   generatedToken: null,
   queueStatus: null,

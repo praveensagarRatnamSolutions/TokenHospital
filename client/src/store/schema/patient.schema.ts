@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const patientSchema = z.object({
-  fullName: z
+  name: z
     .string()
     .trim()
     .min(3, 'Full name must be at least 3 characters')
@@ -30,11 +30,12 @@ export const patientSchema = z.object({
     }, 'Weight must be between 1 and 300')
     .transform((value) => Number(value)),
 
-  phoneNumber: z
+  phone: z
     .string()
     .trim()
     .min(10, 'Phone is required')
     .regex(/^(\+91)?[6-9]\d{9}$/, 'Enter valid phone number'),
+  gender: z.string().trim().min(1, 'Gender is required'),
 });
 
 export type TypeCheckInDetailsFormInput = z.input<typeof patientSchema>;

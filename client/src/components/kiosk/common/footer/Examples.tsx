@@ -1,7 +1,7 @@
 // Example 1: Basic responsive footer with buttons
-import { ArrowBack, ArrowForward, Check } from '@/components/icons';
+import { ArrowBack, ArrowForward, Check } from '@/components/kiosk/common/icons';
 import Footer from '.';
-import Button from '../KioskButton';
+import Button from '../button';
 import { Save } from 'lucide-react';
 import { useState } from 'react';
 function ResponsiveFooter() {
