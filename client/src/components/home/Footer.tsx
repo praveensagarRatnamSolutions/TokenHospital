@@ -57,11 +57,11 @@ export default function Footer() {
             <div className="space-y-3 mb-8">
               <div className="flex items-center gap-3 text-xs text-gray-500 hover:text-[#0091DD] transition-colors">
                 <Mail size={14} className="text-[#0091DD]" />
-                hello@vitalflow.com
+                info@ratnamsolutions.com
               </div>
               <div className="flex items-center gap-3 text-xs text-gray-500 hover:text-[#0091DD] transition-colors">
                 <Phone size={14} className="text-[#0091DD]" />
-                +1 (555) 000-1234
+                +91 8790523012
               </div>
             </div>
 
@@ -104,7 +104,7 @@ export default function Footer() {
         {/* BOTTOM SECTION: COPYRIGHT */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-xs text-gray-400">
-            © 2026 DocToken Systems Inc. All rights reserved.
+            © All rights reserved. 2026 • Ratnam Solutions Private Limited
           </p>
           <div className="flex gap-8">
             <a href="#" className="text-xs text-gray-400 hover:text-gray-600">

@@ -15,6 +15,7 @@ const createDoctor = async (req, res, next) => {
   session.startTransaction();
   try {
     const { email, password, ...doctorData } = req.body;
+    console.log('req.hospitalId785', req.hospitalId);
 
     // 1. Create User Account
     const user = await authService.createUser(
@@ -39,6 +40,8 @@ const createDoctor = async (req, res, next) => {
       },
       { session }
     );
+
+    await doctorService.updateUser(user._id, { doctorId: doctor._id }, session);
 
     await session.commitTransaction();
     logger.info(`Doctor created with account: ${doctor.name} (${email})`);
