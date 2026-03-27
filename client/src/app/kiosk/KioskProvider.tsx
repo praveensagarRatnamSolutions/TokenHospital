@@ -1,6 +1,7 @@
 'use client';
-import React, { useEffect } from 'react';
 import './kiosk.css';
+
+import React, { useEffect } from 'react';
 
 function setRootFoot() {
   const baseHeight = 1920;
@@ -8,7 +9,7 @@ function setRootFoot() {
 
   const scale = elementHeight / baseHeight;
 
-  const min = 10;
+  const min = 6;
   const max = 18;
 
   const fontSize = Math.max(min, Math.min(max, Math.floor(16 * scale)));
@@ -17,12 +18,26 @@ function setRootFoot() {
 }
 
 const KioskProvider = ({ children }: { children: React.ReactNode }) => {
+
   useEffect(() => {
     setRootFoot();
     window.addEventListener('resize', setRootFoot);
 
     return () => window.removeEventListener('resize', setRootFoot);
   }, []);
+
+    useEffect(() => {
+    const handleClick = () => {
+      document.documentElement.requestFullscreen();
+      window.removeEventListener("click", handleClick);
+    };
+
+    window.addEventListener("click", handleClick);
+
+    return () => window.removeEventListener("click", handleClick);
+  }, []);
+
+
   return (
     <div className="kiosk-root">
       <div className="kiosk-container">

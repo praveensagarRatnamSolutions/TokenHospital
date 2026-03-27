@@ -10,7 +10,7 @@
 }
 
 /* Header Section */
-.home-welcome__header {
+/* .home-welcome__header {
   position: relative;
   width: 100%;
   overflow: hidden;
@@ -20,6 +20,7 @@
   justify-content: space-between;
 }
 
+*/
 /* Overlay with gradient */
 .home-welcome__overlay {
   position: absolute;
@@ -34,14 +35,14 @@
 }
 
 /* Background image */
-.home-welcome__background {
+/* .home-welcome__background {
   position: absolute;
   inset: 0;
   background-image: url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=2053&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-}
+  */
 
 /* Content overlay */
 .home-welcome__content {
@@ -214,13 +215,12 @@
 
 /* Print Styles */
 @media print {
-  .home-welcome__header {
+  /* .home-welcome__header {
     height: auto;
     page-break-after: avoid;
-  }
+  */
 
   .home-welcome__overlay,
-  .home-welcome__background,
   .home-welcome__cta,
   .home-welcome__indicators {
     display: none;

@@ -1,22 +1,29 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { resetKioskFlow } from '@/store/slices/tokenSlice';
+import { useEffect,useState } from 'react';
 
+import CheckInDetails from '@/components/kiosk/checkInDetails/CheckInDetails';
+import HomeWelcome from '@/components/kiosk/homeWelcome/HomeWelcome';
+import PaymentMethod from '@/components/kiosk/paymentMethod/PaymentMethod';
 // Import Screens (to be created)
 import SelectDepartment from '@/components/kiosk/selectDepartment/SelectDepartment';
 import SelectDoctor from '@/components/kiosk/selectDoctor/SelectDoctor';
-import PaymentMethod from '@/components/kiosk/paymentMethod/PaymentMethod';
 import TokenGenerated from '@/components/kiosk/tokenGenerated/TokenGenerated';
-import CheckInDetails from '@/components/kiosk/checkInDetails/CheckInDetails';
-import HomeWelcome from '@/components/kiosk/homeWelcome/HomeWelcome';
+import { useAppDispatch } from '@/store/hooks';
+import { resetKioskFlow } from '@/store/slices/tokenSlice';
+
+import useInActivity from './useInActivity';
 
 type KioskStep = 'HOME' | 'CHECKIN' | 'DEPARTMENT' | 'DOCTOR' | 'PAYMENT' | 'TOKEN';
 
 export default function KioskPage() {
   const [step, setStep] = useState<KioskStep>('HOME');
+  useInActivity(handleReset,1000 * 180); // 1 minute inactivity timeout
   const dispatch = useAppDispatch();
+    function handleReset (){
+    dispatch(resetKioskFlow());
+    setStep('HOME');
+  };
 
   // Auto-reset to home after inactivity on Token screen
   useEffect(() => {
@@ -28,10 +35,7 @@ export default function KioskPage() {
     }
   }, [step]);
 
-  const handleReset = () => {
-    dispatch(resetKioskFlow());
-    setStep('HOME');
-  };
+
 
   const nextStep = (next: KioskStep) => {
     setStep(next);
