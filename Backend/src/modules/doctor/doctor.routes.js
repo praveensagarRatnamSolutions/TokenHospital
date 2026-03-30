@@ -195,4 +195,31 @@ router.patch(
   doctorController.toggleDoctorStatus
 );
 
+/**
+ * @swagger
+ * /api/doctor/{id}/stats:
+ *   get:
+ *     summary: Get doctor performance stats
+ *     tags: [Doctor]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Performance stats retrieved successfully
+ *       404:
+ *         description: Doctor not found
+ */
+router.get(
+  '/:id/stats',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  doctorController.getDoctorStats
+);
+
 module.exports = router;

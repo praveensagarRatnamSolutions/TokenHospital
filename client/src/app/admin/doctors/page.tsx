@@ -6,33 +6,29 @@ import api from '@/services/api';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { doctorApi } from '@/modules/admin/doctors';
+import { Pagination } from '@/components/common/Pagination';
+import { useState } from 'react';
 
 export default function AdminDoctors() {
-  const { data: doctors, isLoading } = useQuery({
-    queryKey: ['doctors'],
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [search, setSearch] = useState('');
+
+  const { data: doctorsData, isLoading } = useQuery({
+    queryKey: ['doctors', page, limit, search],
     queryFn: async () => {
       try {
-        const response = await doctorApi.getAll();
-        return response.data.doctors || [];
+        const response = await doctorApi.getAll({ page, limit, name: search });
+        return response.data;
       } catch (error) {
         console.error('Failed to fetch doctors:', error);
-        return [
-          {
-            _id: '1',
-            name: 'Dr. Sarah Smith',
-            departmentId: { name: 'Cardiology' },
-            isAvailable: true,
-          },
-          {
-            _id: '2',
-            name: 'Dr. James Wilson',
-            departmentId: { name: 'Pediatrics' },
-            isAvailable: false,
-          },
-        ];
+        return { doctors: [], pagination: { total: 0, page: 1, pages: 1 } };
       }
     },
   });
+
+  const doctors = doctorsData?.doctors || [];
+  const pagination = doctorsData?.pagination;
 
   return (
     <div className="space-y-6">
@@ -58,6 +54,11 @@ export default function AdminDoctors() {
           <input
             type="text"
             placeholder="Search doctor..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1); // Reset page on search
+            }}
             className="w-full pl-10 pr-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         </div>
@@ -212,6 +213,15 @@ export default function AdminDoctors() {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination && pagination.pages > 1 && (
+        <Pagination
+          currentPage={pagination.page}
+          totalPages={pagination.pages}
+          onPageChange={(p) => setPage(p)}
+        />
+      )}
     </div>
   );
 }

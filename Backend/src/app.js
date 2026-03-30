@@ -73,6 +73,7 @@ app.use("/api/ads", require("./modules/ads/ads.routes"));
 app.use("/api/reports", require("./modules/reports/reports.routes"));
 app.use("/api/settings", require("./modules/settings/settings.routes"));
 app.use("/api/payment", require("./modules/payment/payment.routes"));
+app.use("/api/kiosk", require("./modules/kiosk/kiosk.routes"));
 
 // Global Error Handler
 app.use(errorHandler);

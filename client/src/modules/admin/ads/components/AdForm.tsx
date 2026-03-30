@@ -20,7 +20,6 @@ interface AdFormProps {
     fileName: string;
     duration: number;
     displayArea: 'carousel' | 'fullscreen';
-    priority: number;
     file?: File;
   }) => Promise<void>;
   onCancel?: () => void;
@@ -41,7 +40,6 @@ export const AdForm: React.FC<AdFormProps> = ({
     title: initialData?.title || '',
     displayArea: (initialData?.displayArea || 'carousel') as 'carousel' | 'fullscreen',
     duration: initialData?.duration?.toString() || '10',
-    priority: initialData?.priority?.toString() || '0',
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -54,7 +52,6 @@ export const AdForm: React.FC<AdFormProps> = ({
         title: initialData.title,
         displayArea: initialData.displayArea,
         duration: initialData.duration.toString(),
-        priority: initialData.priority.toString(),
       });
     }
   }, [initialData]);
@@ -74,7 +71,6 @@ export const AdForm: React.FC<AdFormProps> = ({
         type: adType as 'image' | 'video',
         fileName: selectedFile?.name || initialData?.fileKey || '',
         duration: parseInt(formData.duration) || 10,
-        priority: parseInt(formData.priority) || 0,
         file: selectedFile || undefined,
       });
     } finally {
@@ -190,20 +186,6 @@ export const AdForm: React.FC<AdFormProps> = ({
             name="duration"
             value={formData.duration}
             onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-            className={inputClass}
-          />
-        </section>
-        <section className="space-y-2">
-          <label
-            className={`text-sm font-semibold flex items-center gap-2 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}
-          >
-            <Layers size={16} /> Display Priority
-          </label>
-          <input
-            type="number"
-            name="priority"
-            value={formData.priority}
-            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
             className={inputClass}
           />
         </section>

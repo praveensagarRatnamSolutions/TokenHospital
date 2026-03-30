@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as tokenApi from '../api/tokenApi';
 import type { CreateTokenPayload, CreatePaymentPayload, VerifyPaymentPayload } from '../types';
 
-export const useTokens = (filters: any = {}) => {
+export const useTokens = (filters: { appointmentDate?: string; page?: number; limit?: number; status?: string; doctorId?: string; departmentId?: string } = {}) => {
   return useQuery({
     queryKey: ['adminTokens', filters],
     queryFn: () => tokenApi.getTokens(filters),

@@ -3,6 +3,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Ad, CreateAdPayload, UpdateAdPayload } from '../types';
 import * as adApi from '../api/adApi';
+import { useAppSelector } from '@/store/hooks';
+import { RootState } from '@/store/store';
 
 /**
  * Generic API Response Type
@@ -10,7 +12,13 @@ import * as adApi from '../api/adApi';
 type ApiResponse<T> = {
   success: boolean;
   data?: T;
-  ad?: T;
+  ads?: T;
+  ad?: T; // Keep ad for single ad responses
+  pagination?: {
+    total: number;
+    page: number;
+    pages: number;
+  };
   message?: string;
   uploadUrl?: string;
 };
@@ -20,25 +28,36 @@ type ApiResponse<T> = {
  */
 interface UseAdsReturn {
   ads: Ad[];
+  pagination?: {
+    total: number;
+    page: number;
+    pages: number;
+  };
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
 }
 
-export const useAds = (): UseAdsReturn => {
+export const useAds = (params: { page?: number; limit?: number; isActive?: string | boolean } = {}): UseAdsReturn => {
   const [ads, setAds] = useState<Ad[]>([]);
+  const [pagination, setPagination] = useState<UseAdsReturn['pagination']>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { user } = useAppSelector((state: RootState) => state.auth);
+  const hospitalId = user?.hospitalId || '';
+
   const fetchAds = useCallback(async () => {
+    if (!hospitalId) return;
     try {
       setLoading(true);
       setError(null);
 
-      const response: ApiResponse<Ad[]> = await adApi.getActiveAds();
+      const response: ApiResponse<Ad[]> = await adApi.getAds(hospitalId, params);
 
-      if (response.success && Array.isArray(response.data)) {
-        setAds(response.data);
+      if (response.success && Array.isArray(response.ads)) {
+        setAds(response.ads);
+        setPagination(response.pagination);
       } else {
         setAds([]);
         setError(response.message || 'Failed to fetch ads');
@@ -55,7 +74,7 @@ export const useAds = (): UseAdsReturn => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [hospitalId, params.page, params.limit]);
 
   useEffect(() => {
     fetchAds();
@@ -63,6 +82,7 @@ export const useAds = (): UseAdsReturn => {
 
   return {
     ads,
+    pagination,
     loading,
     error,
     refetch: fetchAds,

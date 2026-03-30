@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store/store';
-import { Calendar, Search, Filter, Plus, Clock, AlertCircle, CheckCircle2, Ticket } from 'lucide-react';
+import { Calendar, Search, Filter, Plus, Clock, AlertCircle, CheckCircle2, Ticket, Zap } from 'lucide-react';
 import { useTokens, useVerifyCashToken, useCancelToken } from '../hooks';
 import CreateTokenModal from './CreateTokenModal';
+import { Pagination } from '@/components/common/Pagination';
 
 export default function TokenManagement() {
    const { user } = useAppSelector((state: RootState) => state.auth);
@@ -14,10 +15,17 @@ export default function TokenManagement() {
    const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
    const [search, setSearch] = useState('');
    const [isModalOpen, setIsModalOpen] = useState(false);
+   const [page, setPage] = useState(1);
+   const [limit] = useState(10);
 
    // Fetch Tokens
-   const { data: tokensRes, isLoading } = useTokens({ appointmentDate: dateFilter });
+   const { data: tokensRes, isLoading } = useTokens({ 
+      appointmentDate: dateFilter,
+      page,
+      limit 
+   });
    const tokens = tokensRes?.tokens || [];
+   const pagination = tokensRes?.pagination;
 
    const verifyCashMutation = useVerifyCashToken();
    const cancelTokenMutation = useCancelToken();
@@ -81,7 +89,10 @@ export default function TokenManagement() {
                <input
                   type="date"
                   value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
+                  onChange={(e) => {
+                     setDateFilter(e.target.value);
+                     setPage(1); // Reset page on filter change
+                  }}
                   className="pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none w-full md:w-48 transition-all shadow-sm font-bold text-slate-700 dark:text-slate-200"
                />
             </div>
@@ -108,11 +119,22 @@ export default function TokenManagement() {
                         <tr><td colSpan={6} className="p-16 text-center text-slate-400 font-medium">No tokens found for this date.</td></tr>
                      ) : (
                         filteredTokens.map((token: any) => (
-                           <tr key={token._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                           <tr key={token._id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors ${token.isEmergency ? 'bg-red-50/30 dark:bg-red-900/5' : ''}`}>
                               <td className="p-6">
-                                 <span className="inline-flex items-center justify-center h-10 px-4 bg-primary/10 text-primary font-black rounded-xl border border-primary/20">
-                                    {token.tokenNumber}
-                                 </span>
+                                 <div className="flex flex-col gap-1">
+                                    <span className={`inline-flex items-center justify-center h-10 px-4 font-black rounded-xl border transition-all ${
+                                       token.isEmergency 
+                                       ? 'bg-red-600 text-white border-red-700 shadow-md shadow-red-200' 
+                                       : 'bg-primary/10 text-primary border-primary/20'
+                                    }`}>
+                                       {token.tokenNumber}
+                                    </span>
+                                    {token.isEmergency && (
+                                       <span className="flex items-center justify-center gap-1 px-2 py-1 bg-red-100 text-red-700 border border-red-200 rounded-lg text-[10px] font-black uppercase tracking-tighter animate-pulse text-center">
+                                          <Zap className="w-3 h-3 fill-red-600" /> Emergency
+                                       </span>
+                                    )}
+                                 </div>
                               </td>
                               <td className="p-6">
                                  <p className="font-bold text-slate-900 dark:text-white capitalize truncate max-w-[150px]">{typeof token.patientId === 'object' ? token.patientId?.name : 'Unknown'}</p>
@@ -155,6 +177,15 @@ export default function TokenManagement() {
                </table>
             </div>
          </div>
+
+         {/* Pagination */}
+         {pagination && pagination.pages > 1 && (
+            <Pagination
+               currentPage={pagination.page}
+               totalPages={pagination.pages}
+               onPageChange={(p) => setPage(p)}
+            />
+         )}
 
          {/* Modal */}
          {hospitalId && (

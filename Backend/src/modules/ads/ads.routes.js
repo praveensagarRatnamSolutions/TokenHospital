@@ -52,8 +52,6 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *                 enum: [carousel, fullscreen]
  *               departmentId:
  *                 type: string
- *               priority:
- *                 type: number
  *     responses:
  *       201:
  *         description: Ad created. Returns DB object + uploadUrl
@@ -61,7 +59,7 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
 router.post(
   '/',
   protect,
-  authorize('ADMIN'),
+  authorize('ADMIN', 'DOCTOR'),
   createAdValidation,
   validateRequest,
   adsController.createAd
@@ -125,8 +123,6 @@ router.get(
  *                 type: string
  *               duration:
  *                 type: number
- *               priority:
- *                 type: number
  *               isActive:
  *                 type: boolean
  *               displayArea:
@@ -138,7 +134,7 @@ router.get(
 router.put(
   '/:id',
   protect,
-  authorize('ADMIN'),
+  authorize('ADMIN', 'DOCTOR'),
   updateAdValidation,
   validateRequest,
   adsController.updateAd
@@ -162,6 +158,6 @@ router.put(
  *       200:
  *         description: Ad deleted
  */
-router.delete('/:id', protect, authorize('ADMIN'), adsController.deleteAd);
+router.delete('/:id', protect, authorize('ADMIN', 'DOCTOR'), adsController.deleteAd);
 
 module.exports = router;

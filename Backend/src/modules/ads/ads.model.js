@@ -57,15 +57,15 @@ const adSchema = new mongoose.Schema(
       max: [3600, "Duration cannot exceed 1 hour"],
       default: 10,
     },
-    priority: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
-    },
     isActive: {
       type: Boolean,
       default: true,
+      index: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Creator is required"],
       index: true,
     },
   },
@@ -83,6 +83,6 @@ const adSchema = new mongoose.Schema(
 );
 
 // Compound index for high-speed retrieval of active ads
-adSchema.index({ hospitalId: 1, isActive: 1, priority: -1 });
+adSchema.index({ hospitalId: 1, isActive: 1 });
 
 module.exports = mongoose.model("Ad", adSchema);

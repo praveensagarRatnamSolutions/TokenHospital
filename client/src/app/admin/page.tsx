@@ -10,7 +10,9 @@ import {
   Filter,
   Monitor,
   Activity,
-  ArrowUpRight
+  ArrowUpRight,
+  Zap,
+  AlertTriangle
 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/services/api';
@@ -179,19 +181,27 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
         <div>
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block">Current Patient</label>
           {activeToken ? (
-            <div className="bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 rounded-3xl p-5 relative overflow-hidden group/active">
+            <div className={`border-2 rounded-3xl p-5 relative overflow-hidden group/active transition-all ${
+               activeToken.isEmergency 
+               ? 'bg-red-600 text-white border-red-700 shadow-xl shadow-red-200 shadow-red-900/10' 
+               : 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20'
+            }`}>
               <div className="absolute top-0 right-0 p-2">
-                <Activity className="w-4 h-4 text-primary animate-pulse" />
+                {activeToken.isEmergency ? <AlertTriangle className="w-4 h-4 text-white animate-pulse" /> : <Activity className="w-4 h-4 text-primary animate-pulse" />}
               </div>
               <div className="flex items-center gap-4">
-                <div className="size-auto p-1 bg-primary text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg shadow-primary/30">
+                <div className={`size-auto p-1 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg ${
+                   activeToken.isEmergency ? 'bg-white text-red-600' : 'bg-primary text-white shadow-primary/30'
+                }`}>
                   {activeToken.tokenNumber}
                 </div>
                 <div className="truncate">
-                  <p className="font-bold text-slate-900 dark:text-white text-lg truncate">
+                  <p className={`font-bold text-lg truncate ${activeToken.isEmergency ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
                     {activeToken.patientId?.name || activeToken.patientDetails?.name}
                   </p>
-                  <p className="text-xs font-bold text-primary uppercase tracking-widest">In Session</p>
+                  <p className={`text-xs font-bold uppercase tracking-widest ${activeToken.isEmergency ? 'text-white/80' : 'text-primary'}`}>
+                     {activeToken.isEmergency ? 'High Priority' : 'In Session'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -210,16 +220,27 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
           </div>
           <div className="space-y-2">
             {waitingTokens.slice(0, 3).map((t: any) => (
-              <div key={t._id} className="flex items-center justify-between p-3 bg-slate-50/50 dark:bg-slate-800/50 rounded-2xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all">
+              <div key={t._id} className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                 t.isEmergency 
+                 ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-800' 
+                 : 'bg-slate-50/50 dark:bg-slate-800/50 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+              }`}>
                 <div className="flex items-center gap-3 truncate">
-                  <div className="size-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold text-slate-600 dark:text-slate-400 rounded-xl flex items-center justify-center text-[10px] shadow-sm">
+                  <div className={`size-8 border font-bold rounded-xl flex items-center justify-center text-[10px] shadow-sm ${
+                     t.isEmergency 
+                     ? 'bg-red-600 text-white border-red-700' 
+                     : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
                     {t.tokenNumber}
                   </div>
-                  <p className="font-bold text-slate-700 dark:text-slate-300 text-sm truncate uppercase tracking-tighter">
-                    {t.patientId?.name || t.patientDetails?.name}
-                  </p>
+                  <div className="truncate">
+                    <p className={`font-bold text-sm truncate uppercase tracking-tighter ${t.isEmergency ? 'text-red-700 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                      {t.patientId?.name || t.patientDetails?.name}
+                    </p>
+                    {t.isEmergency && <p className="text-[8px] font-black text-red-600 uppercase tracking-widest animate-pulse">Emergency</p>}
+                  </div>
                 </div>
-                <Clock className="w-3 h-3 text-slate-300 flex-shrink-0" />
+                {t.isEmergency ? <Zap className="w-3 h-3 text-red-500 fill-red-500 animate-pulse flex-shrink-0" /> : <Clock className="w-3 h-3 text-slate-300 flex-shrink-0" />}
               </div>
             ))}
             {waitingTokens.length > 3 && (

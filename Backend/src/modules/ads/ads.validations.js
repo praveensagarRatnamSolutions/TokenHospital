@@ -66,8 +66,6 @@ const createAdValidation = [
     .isMongoId()
     .withMessage('Invalid Department ID'),
 
-  body('priority').optional().isInt({ min: 0, max: 100 }),
-
   validate,
 ];
 
@@ -76,7 +74,6 @@ const updateAdValidation = [
   body('title').optional().trim().isLength({ max: 100 }).escape(),
   body('duration').optional().isInt({ min: 1, max: 3600 }),
   body('displayArea').optional().isIn(['carousel', 'fullscreen']),
-  body('priority').optional().isInt({ min: 0, max: 100 }),
   body('isActive').optional().isBoolean(),
   validate,
 ];

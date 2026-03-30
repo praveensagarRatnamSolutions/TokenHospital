@@ -14,7 +14,6 @@ export interface Ad {
   hospitalId: string;
   departmentId: string | null;
   duration: number;
-  priority: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -31,7 +30,6 @@ export interface CreateAdPayload {
   fileName: string;
   duration: number;
   displayArea: 'carousel' | 'fullscreen';
-  priority?: number;
   hospitalId: string;   // Required for the new backend index
   departmentId?: string;
 }
@@ -50,7 +48,6 @@ export interface UpdateAdPayload {
   title?: string;
   displayArea?: 'carousel' | 'fullscreen';
   duration?: number;
-  priority?: number;
   isActive?: boolean;
   departmentId?: string | null;
 }
@@ -75,7 +72,6 @@ export type AdFormData = {
   title: string;
   displayArea: 'carousel' | 'fullscreen';
   duration: string;     // Kept as string for input handling, parsed on submit
-  priority: string;
   departmentId: string;
   fileName: string;
   file?: File;          // The actual binary for S3 upload

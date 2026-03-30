@@ -64,7 +64,7 @@ const createAd = async (adData) => {
 
 /**
  * Get active ads for kiosk.
- * Logic: Filters by isActive and priority.
+ * Logic: Filters by isActive and sorted by creation date.
  */
 const getActiveAds = async (hospitalId, departmentId) => {
   const query = {
@@ -76,8 +76,8 @@ const getActiveAds = async (hospitalId, departmentId) => {
     query.$or = [{ departmentId }, { departmentId: null }];
   }
 
-  // Use the compound index: { hospitalId: 1, isActive: 1, priority: -1 }
-  const ads = await Ad.find(query).sort({ priority: -1 }).lean();
+  // Use the compound index: { hospitalId: 1, isActive: 1 }
+  const ads = await Ad.find(query).sort({ createdAt: -1 }).lean();
 
   // Logic: Parallelize URL generation for speed
   return Promise.all(
@@ -95,16 +95,16 @@ const getActiveAds = async (hospitalId, departmentId) => {
 /**
  * Delete ad with cleanup logic.
  */
-const deleteAd = async (adId, hospitalId) => {
+const deleteAd = async (query) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const ad = await Ad.findOne({ _id: adId, hospitalId }).session(session);
+    const ad = await Ad.findOne(query).session(session);
     if (!ad) throw new Error("Ad not found");
 
     // 1. Delete DB record first
-    await Ad.deleteOne({ _id: adId }).session(session);
+    await Ad.deleteOne(query).session(session);
 
     // 2. Cleanup S3 - Logic: If S3 fails, we log it for manual cleanup 
     // but don't roll back the DB deletion to avoid "ghost" records.
@@ -125,9 +125,35 @@ const deleteAd = async (adId, hospitalId) => {
 module.exports = {
   createAd,
   getActiveAds,
-  getAllAds: async (hospitalId) => 
-    Ad.find({ hospitalId }).sort({ createdAt: -1 }).lean(),
-  updateAd: async (adId, hospitalId, updateData) => 
-    Ad.findOneAndUpdate({ _id: adId, hospitalId }, updateData, { new: true, runValidators: true }),
+  getAllAds: async (hospitalId, filters = {}) => {
+    const { page = 1, limit = 10, isActive, createdBy } = filters;
+    const query = { hospitalId };
+
+    if (typeof isActive !== 'undefined') {
+      query.isActive = isActive === 'true' || isActive === true;
+    }
+
+    if (createdBy) {
+      query.createdBy = createdBy;
+    }
+
+    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+    const [ads, total] = await Promise.all([
+      Ad.find(query).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit, 10)).lean(),
+      Ad.countDocuments(query)
+    ]);
+
+    return {
+      ads,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  },
+  updateAd: async (query, updateData) => 
+    Ad.findOneAndUpdate(query, updateData, { new: true, runValidators: true }),
   deleteAd,
 };

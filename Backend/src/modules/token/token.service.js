@@ -1,4 +1,5 @@
 const Token = require('./token.model');
+const Consultation = require('../patient/consultation.model');
 const TokenCounter = require('./tokenCounter.model');
 const Department = require('../department/department.model');
 const Doctor = require('../doctor/doctor.model');
@@ -190,7 +191,7 @@ const createToken = async (tokenData) => {
         status,
         paymentType: tokenData.paymentType || 'CASH',
         patientId: patient._id,
-
+        isEmergency: tokenData.isEmergency || false,
     });
 
     const populatedToken = await Token.findById(token._id)
@@ -242,6 +243,11 @@ const getTokens = async (hospitalId, filters = {}) => {
     }
     if (filters.departmentId) query.departmentId = filters.departmentId;
     if (filters.doctorId) query.doctorId = filters.doctorId;
+    if (filters.appointmentDate) query.appointmentDate = filters.appointmentDate;
+    else {
+        // Default to today if no date filter provided
+        query.appointmentDate = new Date().toISOString().split('T')[0];
+    }
 
     const page = parseInt(filters.page, 10) || 1;
     const limit = parseInt(filters.limit, 10) || 50;
@@ -252,7 +258,8 @@ const getTokens = async (hospitalId, filters = {}) => {
             .populate('departmentId', 'name prefix')
             .populate('doctorId', 'name')
             .populate('patientId', 'name phone age gender')
-            .sort({ createdAt: -1 })
+            // Match the same sort order used in callNextToken
+            .sort({ isEmergency: -1, sortKey: 1 })
             .skip(skip)
             .limit(limit)
             .lean(),
@@ -273,15 +280,30 @@ const getTokens = async (hospitalId, filters = {}) => {
 /**
  * Complete current token for a doctor
  */
-const completeToken = async (tokenId, hospitalId) => {
+const completeToken = async (tokenId, hospitalId, consultationData = {}) => {
     const token = await Token.findOneAndUpdate(
         { _id: tokenId, hospitalId, status: 'CALLED' },
         { status: 'COMPLETED', completedAt: new Date() },
         { new: true }
     )
-        .populate('departmentId', 'name prefix')
-        .populate('doctorId', 'name')
-        .populate('patientId', 'name phone age gender');
+    .populate('departmentId', 'name prefix')
+    .populate('doctorId', 'name')
+    .populate('patientId', 'name phone age gender');
+
+    if (!token) {
+        throw new Error('Token not found or not currently active');
+    }
+
+    // Create a consultation record if data is provided
+    if (Object.keys(consultationData).length > 0) {
+        await Consultation.create({
+            ...consultationData,
+            tokenId: token._id,
+            patientId: token.patientId._id,
+            doctorId: token.doctorId._id,
+            hospitalId: hospitalId
+        });
+    }
 
 
     if (!token) {
@@ -312,11 +334,20 @@ const callNextToken = async (doctorId, hospitalId) => {
         { status: 'COMPLETED', completedAt: new Date() }
     );
 
-    // Find the oldest waiting token for this doctor
+    // Find the next waiting token for this doctor for TODAY.
+    const today = new Date().toISOString().split('T')[0];
     const nextToken = await Token.findOneAndUpdate(
-        { doctorId, hospitalId, status: 'WAITING' },
+        { 
+            doctorId, 
+            hospitalId, 
+            status: 'WAITING',
+            appointmentDate: today
+        },
         { status: 'CALLED', calledAt: new Date() },
-        { new: true, sort: { createdAt: 1 } }
+        {
+            new: true,
+            sort: { isEmergency: -1, sortKey: 1 }
+        }
     )
         .populate('departmentId', 'name prefix')
         .populate('doctorId', 'name')
@@ -397,6 +428,59 @@ const verifyCashPayment = async (tokenId, hospitalId) => {
     return token;
 };
 
+/**
+ * Skip a token (postpone it)
+ * - Changes status from CALLED back to WAITING
+ */
+const skipToken = async (tokenId, hospitalId) => {
+    // Find the token to be postponed
+    const token = await Token.findOne({ _id: tokenId, hospitalId, status: 'CALLED' });
+    if (!token) throw new Error('Token not found or not in CALLED status');
+
+    // Find the immediate NEXT patient in the queue (the one who would be called next)
+    const nextInQueue = await Token.findOne(
+        { doctorId: token.doctorId, hospitalId, status: 'WAITING' },
+        null,
+        { sort: { isEmergency: -1, sortKey: 1 } }
+    );
+
+    // Compute the effective sort time of the next patient — fall back to createdAt
+    // for legacy tokens that don't have sortKey set yet
+    let newSortKey;
+    if (nextInQueue) {
+        const baseTime = nextInQueue.sortKey
+            ? new Date(nextInQueue.sortKey).getTime()
+            : new Date(nextInQueue.createdAt).getTime();
+        newSortKey = new Date(baseTime + 1); // Slot just after the next patient
+    } else {
+        // No one else waiting — this patient goes to the front
+        newSortKey = new Date();
+    }
+
+    const updated = await Token.findByIdAndUpdate(
+        tokenId,
+        {
+            status: 'WAITING',
+            calledAt: null,
+            isPostponed: true,
+            postponedAt: new Date(),
+            sortKey: newSortKey,
+        },
+        { new: true }
+    )
+    .populate('departmentId', 'name prefix')
+    .populate('doctorId', 'name')
+    .populate('patientId', 'name phone age gender');
+
+    // Emit socket event to update all dashboards
+    try {
+        const { broadcastToHospital } = require('../../socket/socketHandler');
+        broadcastToHospital(hospitalId, 'queue-updated', updated);
+    } catch (e) { }
+
+    return updated;
+};
+
 module.exports = {
     createToken,
     getCurrentToken,
@@ -405,5 +489,6 @@ module.exports = {
     callNextToken,
     cancelToken,
     verifyCashPayment,
+    skipToken,
 };
 

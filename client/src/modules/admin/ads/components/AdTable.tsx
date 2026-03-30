@@ -143,9 +143,6 @@ export const AdTable: React.FC<AdTableProps> = ({
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" /> {ad.duration}s duration
                     </div>
-                    <div className="flex items-center gap-1 text-[10px]">
-                      Prio: {ad.priority}
-                    </div>
                   </div>
                 </td>
 
