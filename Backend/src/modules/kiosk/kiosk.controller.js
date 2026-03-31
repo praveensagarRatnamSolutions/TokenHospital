@@ -25,8 +25,13 @@ const createKiosk = async (req, res, next) => {
 const getKiosks = async (req, res, next) => {
   try {
     const filters = {};
+    console.log('req.doctor._id456', req.user.doctorId);
+
     if (req.user.role === 'DOCTOR') {
-      filters.createdBy = req.user._id;
+      filters.$or = [
+        { doctorIds: req.user.doctorId },
+        { createdBy: req.user._id },
+      ];
     }
     const kiosks = await kioskService.getKiosks(req.hospitalId, filters);
     res.status(200).json({ success: true, count: kiosks.length, data: kiosks });
@@ -46,7 +51,9 @@ const getKioskById = async (req, res, next) => {
     }
     const kiosk = await kioskService.getKiosk(query);
     if (!kiosk) {
-      return res.status(404).json({ success: false, message: 'Kiosk not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Kiosk not found' });
     }
     res.status(200).json({ success: true, data: kiosk });
   } catch (error) {
@@ -61,7 +68,9 @@ const getKioskByCode = async (req, res, next) => {
   try {
     const kiosk = await kioskService.getKiosk({ code: req.params.code });
     if (!kiosk) {
-      return res.status(404).json({ success: false, message: 'Kiosk not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Kiosk not found' });
     }
     res.status(200).json({ success: true, data: kiosk });
   } catch (error) {
@@ -81,14 +90,16 @@ const updateKiosk = async (req, res, next) => {
 
     // Logic: If updating ads, verify doctor owns those ads
     if (req.body.ads && req.user.role === 'DOCTOR') {
-       // This could be a complex check, for now we assume they only use their own ads
-       // but ideally we should validate the adId belongs to the doctor.
-       // For now, let's keep it simple or implement a quick check.
+      // This could be a complex check, for now we assume they only use their own ads
+      // but ideally we should validate the adId belongs to the doctor.
+      // For now, let's keep it simple or implement a quick check.
     }
 
     const kiosk = await kioskService.updateKiosk(query, req.body);
     if (!kiosk) {
-      return res.status(404).json({ success: false, message: 'Kiosk not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Kiosk not found' });
     }
     logger.info(`Kiosk updated: ${kiosk.name}`);
     res.status(200).json({ success: true, data: kiosk });

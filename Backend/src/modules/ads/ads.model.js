@@ -39,6 +39,11 @@ const adSchema = new mongoose.Schema(
       default: "carousel",
       index: true,
     },
+    layoutType: {
+      type: String,
+      enum: ["half", "full"],
+      default: "half",
+    },
     hospitalId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Hospital",

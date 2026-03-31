@@ -58,7 +58,7 @@ const createAdValidation = [
     .isInt({ min: 1, max: 3600 }),
 
   body('displayArea').optional().isIn(['carousel', 'fullscreen']),
-
+  body('layoutType').optional().isIn(['half', 'full']),
   body('hospitalId').optional().isMongoId().withMessage('Invalid Hospital ID'),
 
   body('departmentId')
@@ -74,6 +74,7 @@ const updateAdValidation = [
   body('title').optional().trim().isLength({ max: 100 }).escape(),
   body('duration').optional().isInt({ min: 1, max: 3600 }),
   body('displayArea').optional().isIn(['carousel', 'fullscreen']),
+  body('layoutType').optional().isIn(['half', 'full']),
   body('isActive').optional().isBoolean(),
   validate,
 ];
