@@ -204,5 +204,27 @@ router.patch('/:id/cancel', protect, authorize('ADMIN', 'DOCTOR'), tokenControll
  */
 router.patch('/:id/verify-cash', protect, authorize('ADMIN'), tokenController.verifyCashPayment);
 
+/**
+ * @swagger
+ * /api/token/{id}/skip:
+ *   patch:
+ *     summary: Skip a token (postpone it)
+ *     tags: [Token]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Token skipped and set back to WAITING
+ *       404:
+ *         description: Token not found or not currently active
+ */
+router.patch('/:id/skip', protect, authorize('ADMIN', 'DOCTOR'), tokenController.skipToken);
+
 module.exports = router;
 

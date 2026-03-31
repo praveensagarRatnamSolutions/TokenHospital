@@ -85,7 +85,7 @@ export default function LoginPage() {
       if (role === 'SUPERADMIN') {
         router.push('/superadmin');
       } else if (role === 'ADMIN') {
-        router.push('/portal');
+        router.push('/admin');
       } else if (role === 'DOCTOR') {
         router.push('/doctor');
       } else {

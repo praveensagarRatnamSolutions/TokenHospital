@@ -48,6 +48,28 @@ const tokenSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        postponedAt: {
+            type: Date,
+            default: null,
+        },
+        isPostponed: {
+            type: Boolean,
+            default: false,
+        },
+        // Virtual queue position key — updated on postpone to slot the patient one spot back
+        sortKey: {
+            type: Date,
+            default: Date.now,
+        },
+        isEmergency: {
+            type: Boolean,
+            default: false,
+        },
+        appointmentDate: {
+            type: String, // YYYY-MM-DD
+            required: true,
+            default: () => new Date().toISOString().split('T')[0],
+        },
     },
 
 
@@ -57,10 +79,9 @@ const tokenSchema = new mongoose.Schema(
 );
 
 // Indexes for performance-critical queries
-tokenSchema.index({ hospitalId: 1, status: 1, appointmentDate: 1, createdAt: 1 });
-tokenSchema.index({ hospitalId: 1, doctorId: 1, status: 1, appointmentDate: 1 });
-tokenSchema.index({ hospitalId: 1, departmentId: 1, status: 1, appointmentDate: 1 });
-tokenSchema.index({ hospitalId: 1, appointmentDate: 1, createdAt: -1 });
+tokenSchema.index({ hospitalId: 1, status: 1, appointmentDate: 1, isEmergency: -1, sortKey: 1 });
+tokenSchema.index({ hospitalId: 1, doctorId: 1, status: 1, appointmentDate: 1, isEmergency: -1, sortKey: 1 });
+tokenSchema.index({ hospitalId: 1, departmentId: 1, status: 1, appointmentDate: 1, isEmergency: -1, sortKey: 1 });
 
 
 module.exports = mongoose.model('Token', tokenSchema);

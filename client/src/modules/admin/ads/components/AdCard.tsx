@@ -122,9 +122,6 @@ export const AdCard: React.FC<AdCardProps> = ({
             <Clock className={`h-4 w-4 ${mutedText}`} />
             <span className={`text-sm font-medium ${textColor}`}>{ad.duration}s <span className="text-xs font-normal opacity-70">playtime</span></span>
           </div>
-          <div className={`text-xs px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 ${mutedText}`}>
-            Prio: {ad.priority}
-          </div>
         </div>
 
         {/* Action Grid */}

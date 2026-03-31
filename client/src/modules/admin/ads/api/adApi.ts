@@ -18,11 +18,11 @@ const ENDPOINT = '/api/ads';
 /**
  * Get all ads (admin view) - requires hospitalId for the new backend index
  */
-export const getAds = async (hospitalId: string): Promise<AdListResponse> => {
+export const getAds = async (hospitalId: string, params: { page?: number; limit?: number } = {}): Promise<AdListResponse> => {
   try {
-    const response = await api.get<AdListResponse>(
-      `${ENDPOINT}?hospitalId=${hospitalId}`,
-    );
+    const response = await api.get<AdListResponse>(ENDPOINT, { 
+      params: { hospitalId, ...params } 
+    });
     return response.data;
   } catch (error: any) {
     throw {
@@ -73,7 +73,6 @@ export const createAd = async (payload: CreateAdPayload): Promise<CreateAdRespon
       fileName: payload.fileName,
       duration: payload.duration, // Added Duration
       displayArea: payload.displayArea,
-      priority: payload.priority,
       hospitalId: payload.hospitalId,
       departmentId: payload.departmentId || null,
     });

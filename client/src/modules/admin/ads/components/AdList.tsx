@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, AlertCircle, Loader, LayoutGrid, LayoutList, Filter, CheckCircle2, Clock, Layers, X } from 'lucide-react';
+import { Pagination } from '@/components/common/Pagination';
 
 
 import { AdTable } from './AdTable';
@@ -26,7 +27,14 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
 
 
   // Hooks
-  const { ads, loading: loadingAds, error: adsError, refetch } = useAds();
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+
+  const { ads, pagination, loading: loadingAds, error: adsError, refetch } = useAds({ 
+    page, 
+    limit, 
+    isActive: activeFilter === 'all' ? undefined : activeFilter === 'active' 
+  });
   const { createAd, loading: createLoading, error: createError } = useCreateAd();
   const { updateAd, loading: updateLoading, error: updateError } = useUpdateAd();
   const { deleteAd, loading: deleteLoading, error: deleteError } = useDeleteAd();
@@ -42,15 +50,8 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
     }
   }, [successMessage]);
 
-  // Optimized Filtering based on JSON 'isActive' property
-  const filteredAds = useMemo(() => {
-    return ads.filter((ad) => {
-      if (activeFilter === 'all') return true;
-      if (activeFilter === 'active') return ad.isActive === true;
-      if (activeFilter === 'inactive') return ad.isActive === false;
-      return true;
-    });
-  }, [ads, activeFilter]);
+  // Since the backend handles filtering, we don't need a separate useMemo for filteredAds
+  const filteredAds = ads;
 
   const handleCreateClick = () => {
     setSelectedAd(null);
@@ -143,7 +144,10 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
           {(['all', 'active', 'inactive'] as const).map((f) => (
             <button
               key={f}
-              onClick={() => setActiveFilter(f)}
+              onClick={() => {
+                setActiveFilter(f);
+                setPage(1); // Reset page on filter change
+              }}
               className={`px-4 py-1.5 rounded-md text-sm font-bold capitalize transition-all ${
                 activeFilter === f 
                 ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' 
@@ -215,6 +219,15 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Pagination */}
+      {pagination && pagination.pages > 1 && (
+        <Pagination
+          currentPage={pagination.page}
+          totalPages={pagination.pages}
+          onPageChange={(p) => setPage(p)}
+        />
       )}
 
       {/* Confirmation Dialog */}

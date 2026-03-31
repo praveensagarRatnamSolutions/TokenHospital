@@ -8,6 +8,7 @@ const createTokenValidation = [
 
     check('doctorId', 'Doctor ID must be a valid Mongo ID').optional().isMongoId(),
     check('appointmentDate', 'Appointment date is required').not().isEmpty().isDate(),
+    check('isEmergency', 'isEmergency must be a boolean').optional().isBoolean(),
 ]
 
 

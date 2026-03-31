@@ -29,6 +29,12 @@ const consultationSchema = new mongoose.Schema({
         duration: String, // e.g., "5 days"
         instructions: String // e.g., "After food"
     }],
+    vitals: {
+        bp: String,
+        hr: String,
+        spo2: String,
+        temp: String
+    },
     notes: { type: String }, // Doctor's private notes
     nextFollowUp: { type: Date }
 }, { timestamps: true });

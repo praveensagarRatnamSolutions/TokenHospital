@@ -13,6 +13,7 @@ import {
   Settings,
   Crown,
   Menu,
+  Monitor
 } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,7 @@ const adminNavItems = [
   { name: 'Departments', href: '/admin/departments', icon: Building2 },
   { name: 'Tokens', href: '/admin/token', icon: Ticket },
   { name: 'Ads', href: '/admin/ads', icon: MonitorPlay },
+  { name: 'Kiosks', href: '/admin/kiosks', icon: Monitor },
   { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];

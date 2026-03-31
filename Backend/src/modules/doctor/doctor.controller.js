@@ -187,11 +187,32 @@ const getPresignedUrl = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Get doctor performance stats
+ * @route   GET /api/doctor/:id/stats
+ * @access  Private (Admin, Doctor)
+ */
+const getDoctorStats = async (req, res, next) => {
+  try {
+    const stats = await doctorService.getDoctorStats(
+      req.params.id,
+      req.hospitalId
+    );
+    res.status(200).json({ success: true, data: stats });
+  } catch (error) {
+    if (error.message === 'Doctor not found') {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
+
 module.exports = {
   createDoctor,
   getDoctors,
   getDoctorById,
   updateDoctor,
   toggleDoctorStatus,
+  getDoctorStats,
   getPresignedUrl,
 };

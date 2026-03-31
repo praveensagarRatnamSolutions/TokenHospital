@@ -35,17 +35,37 @@ const searchPatient = async (req, res, next) => {
 const getPatientHistory = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const skip = (page - 1) * limit;
         
-        const history = await Token.find({ 
-            hospitalId: req.hospitalId, 
-            patientId: id 
-        })
-        .populate('doctorId', 'name')
-        .populate('departmentId', 'name prefix')
-        .sort({ createdAt: -1 })
-        .lean();
+        const [history, total] = await Promise.all([
+            Token.find({ 
+                hospitalId: req.hospitalId, 
+                patientId: id 
+            })
+            .populate('doctorId', 'name')
+            .populate('departmentId', 'name prefix')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean(),
 
-        res.status(200).json({ success: true, count: history.length, data: history });
+            Token.countDocuments({ 
+                hospitalId: req.hospitalId, 
+                patientId: id 
+            })
+        ]);
+
+        res.status(200).json({ 
+            success: true, 
+            data: history,
+            pagination: {
+                total,
+                page,
+                pages: Math.ceil(total / limit),
+            }
+        });
     } catch (error) {
         next(error);
     }
@@ -78,14 +98,31 @@ const getPatientConsultations = async (req, res, next) => {
     try {
         const { id: patientId } = req.params;
         const hospitalId = req.hospitalId;
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const skip = (page - 1) * limit;
 
-        const consultations = await Consultation.find({ patientId, hospitalId })
-            .populate('doctorId', 'name')
-            .populate('tokenId', 'tokenNumber')
-            .sort({ createdAt: -1 })
-            .lean();
+        const [consultations, total] = await Promise.all([
+            Consultation.find({ patientId, hospitalId })
+                .populate('doctorId', 'name')
+                .populate('tokenId', 'tokenNumber')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
 
-        res.status(200).json({ success: true, count: consultations.length, data: consultations });
+            Consultation.countDocuments({ patientId, hospitalId })
+        ]);
+
+        res.status(200).json({ 
+            success: true, 
+            data: consultations,
+            pagination: {
+                total,
+                page,
+                pages: Math.ceil(total / limit),
+            }
+        });
     } catch (error) {
         next(error);
     }

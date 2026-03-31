@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { X, Search, CheckCircle2, Ticket, User, Stethoscope, Banknote, CreditCard, Smartphone } from 'lucide-react';
+import { X, Search, CheckCircle2, Ticket, User, Stethoscope, Banknote, CreditCard, Smartphone, Zap, AlertTriangle } from 'lucide-react';
 import api from '@/services/api';
 import { useCreateToken, useCreatePaymentOrder, useVerifyOnlinePayment } from '../hooks';
 
@@ -26,6 +26,7 @@ export default function CreateTokenModal({ isOpen, onClose, hospitalId }: Create
   const [doctorId, setDoctorId] = useState('');
   const [appointmentDate, setAppointmentDate] = useState(new Date().toISOString().split('T')[0]);
   const [paymentType, setPaymentType] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
+  const [isEmergency, setIsEmergency] = useState(false);
 
   // Load Razorpay
   useEffect(() => {
@@ -76,7 +77,8 @@ export default function CreateTokenModal({ isOpen, onClose, hospitalId }: Create
           phone: patientPhone,
           age: patientAge ? parseInt(patientAge) : undefined,
           gender: patientGender,
-        }
+        },
+        isEmergency,
       });
 
       const token = tokenRes.data;
@@ -221,6 +223,31 @@ export default function CreateTokenModal({ isOpen, onClose, hospitalId }: Create
                     </div>
                   </div>
                </div>
+            </div>
+
+            <div className="pt-4">
+              <button 
+                type="button"
+                onClick={() => setIsEmergency(!isEmergency)}
+                className={`w-full flex items-center gap-4 p-5 rounded-[1.5rem] border-2 transition-all duration-300 ${
+                  isEmergency 
+                  ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-200 dark:shadow-red-900/20 scale-[1.02]' 
+                  : 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-red-200'
+                }`}
+              >
+                <div className={`p-3 rounded-2xl transition-colors ${isEmergency ? 'bg-white/20' : 'bg-slate-200 dark:bg-slate-700'}`}>
+                  <Zap className={`w-6 h-6 ${isEmergency ? 'text-white' : 'text-slate-400'}`} />
+                </div>
+                <div className="text-left flex-1">
+                  <span className={`block text-sm font-black uppercase tracking-widest ${isEmergency ? 'text-white' : 'text-slate-600 dark:text-slate-300'}`}>
+                    Emergency Priority
+                  </span>
+                  <span className={`block text-[10px] font-bold ${isEmergency ? 'text-white/80' : 'text-slate-400'}`}>
+                    Jump to the front of the queue • Immediate Attention
+                  </span>
+                </div>
+                {isEmergency && <div className="w-3 h-3 bg-white rounded-full animate-ping" />}
+              </button>
             </div>
           </form>
         </div>

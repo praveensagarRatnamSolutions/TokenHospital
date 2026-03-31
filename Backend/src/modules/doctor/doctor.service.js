@@ -1,5 +1,6 @@
 const Doctor = require('./doctor.model');
 const User = require('../auth/auth.model');
+const Token = require('../token/token.model');
 
 const createDoctor = async (doctorData, options = {}) => {
   const doctor = await Doctor.create([doctorData], options);
@@ -80,11 +81,57 @@ const toggleDoctorStatus = async (doctorId, hospitalId) => {
   return doctor;
 };
 
+const getDoctorStats = async (doctorId, hospitalId) => {
+  const today = new Date().toISOString().split('T')[0];
+
+  // 1. Total patients seen today
+  const totalSeenToday = await Token.countDocuments({
+    doctorId,
+    hospitalId,
+    status: 'COMPLETED',
+    appointmentDate: today,
+  });
+
+  // 2. Average consultation time for today
+  const completedTokensToday = await Token.find({
+    doctorId,
+    hospitalId,
+    status: 'COMPLETED',
+    appointmentDate: today,
+    calledAt: { $exists: true },
+    completedAt: { $exists: true },
+  }).lean();
+
+  let avgConsultationTime = 0;
+  if (completedTokensToday.length > 0) {
+    const totalTime = completedTokensToday.reduce((acc, t) => {
+      const duration = new Date(t.completedAt) - new Date(t.calledAt);
+      return acc + duration;
+    }, 0);
+    avgConsultationTime = Math.round(totalTime / completedTokensToday.length / 60000); // In minutes
+  }
+
+  // 3. Waiting tokens currently
+  const currentWaiting = await Token.countDocuments({
+    doctorId,
+    hospitalId,
+    status: 'WAITING',
+    appointmentDate: today,
+  });
+
+  return {
+    totalSeenToday,
+    avgConsultationTime,
+    currentWaiting,
+  };
+};
+
 module.exports = {
   createDoctor,
   getDoctors,
   getDoctorById,
   updateDoctor,
   toggleDoctorStatus,
+  getDoctorStats,
   updateUser,
 };

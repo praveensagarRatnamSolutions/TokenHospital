@@ -49,6 +49,7 @@ const getTokens = async (req, res, next) => {
             status: req.query.status,
             departmentId: req.query.departmentId,
             doctorId: req.query.doctorId,
+            appointmentDate: req.query.appointmentDate,
             page: req.query.page,
             limit: req.query.limit,
         };
@@ -66,7 +67,7 @@ const getTokens = async (req, res, next) => {
  */
 const completeToken = async (req, res, next) => {
     try {
-        const token = await tokenService.completeToken(req.params.id, req.hospitalId);
+        const token = await tokenService.completeToken(req.params.id, req.hospitalId, req.body);
         logger.info(`Token completed: ${token.tokenNumber}`);
         res.status(200).json({ success: true, data: token });
     } catch (error) {
@@ -135,6 +136,24 @@ const verifyCashPayment = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Skip a token
+ * @route   PATCH /api/token/:id/skip
+ * @access  Private (Doctor)
+ */
+const skipToken = async (req, res, next) => {
+    try {
+        const token = await tokenService.skipToken(req.params.id, req.hospitalId);
+        logger.info(`Token skipped: ${token.tokenNumber}`);
+        res.status(200).json({ success: true, data: token });
+    } catch (error) {
+        if (error.message === 'Token not found or not in CALLED status') {
+            return res.status(404).json({ success: false, message: error.message });
+        }
+        next(error);
+    }
+};
+
 module.exports = {
     createToken,
     getCurrentToken,
@@ -143,5 +162,6 @@ module.exports = {
     callNextToken,
     cancelToken,
     verifyCashPayment,
+    skipToken,
 };
 

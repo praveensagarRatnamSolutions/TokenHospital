@@ -51,6 +51,13 @@ export default function DoctorLayoutClient({ children }: { children: React.React
 
                                 <DropdownMenuSeparator />
 
+                                <DropdownMenuItem onClick={() => router.push('/doctor/kiosks')}>
+                                    <User className="mr-2 h-4 w-4" />
+                                    <span>My Kiosks</span>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator />
+
                                 <DropdownMenuItem>
                                     <User className="mr-2 h-4 w-4" />
                                     <span>Profile</span>

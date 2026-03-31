@@ -37,3 +37,20 @@ export interface Doctor {
     createdAt?: string;
     updatedAt?: string;
 }
+
+export interface DoctorListResponse {
+    success: boolean;
+    doctors: Doctor[];
+    pagination?: {
+        total: number;
+        page: number;
+        pages: number;
+    };
+    message?: string;
+}
+
+export interface DoctorResponse {
+    success: boolean;
+    data: Doctor;
+    message?: string;
+}

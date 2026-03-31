@@ -18,6 +18,7 @@ export interface Token {
   paymentId?: string;
   appointmentDate: string;
   paymentType?: 'CASH' | 'UPI' | 'CARD';
+  isEmergency: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,6 +30,7 @@ export interface CreateTokenPayload {
   paymentType?: 'CASH' | 'UPI' | 'CARD';
   patientId?: string;
   patientDetails?: TokenPatientDetails;
+  isEmergency?: boolean;
 }
 
 export interface CreatePaymentPayload {
