@@ -4,7 +4,7 @@ const TokenCounter = require('./tokenCounter.model');
 const Department = require('../department/department.model');
 const Doctor = require('../doctor/doctor.model');
 const Patient = require('../patient/patient.model');
-const { getIo } = require('../../socket/socketHandler');
+const { getIo, broadcastToHospital, broadcastKioskQueue } = require('../../socket/socketHandler');
 
 /**
  * Resolve/Create Patient
@@ -203,8 +203,9 @@ const createToken = async (tokenData) => {
 
     // Emit socket event
     try {
-        const { broadcastToHospital } = require('../../socket/socketHandler');
+        const { broadcastToHospital, broadcastKioskQueue } = require('../../socket/socketHandler');
         broadcastToHospital(hospitalId, 'queue-updated', populatedToken);
+        broadcastKioskQueue(hospitalId);
     } catch (e) {
         // Socket not initialized yet, skip
     }
@@ -312,8 +313,9 @@ const completeToken = async (tokenId, hospitalId, consultationData = {}) => {
 
     // Emit socket event
     try {
-        const { broadcastToHospital } = require('../../socket/socketHandler');
+        const { broadcastToHospital, broadcastKioskQueue } = require('../../socket/socketHandler');
         broadcastToHospital(hospitalId, 'queue-updated', token);
+        broadcastKioskQueue(hospitalId);
     } catch (e) {
         // Socket not initialized yet, skip
     }
@@ -357,16 +359,18 @@ const callNextToken = async (doctorId, hospitalId) => {
     if (!nextToken) {
         // Broadcast update even if no more tokens (to clear UI)
         try {
-            const { broadcastToHospital } = require('../../socket/socketHandler');
+            const { broadcastToHospital, broadcastKioskQueue } = require('../../socket/socketHandler');
             broadcastToHospital(hospitalId, 'queue-updated', { doctorId, status: 'EMPTY' });
+            broadcastKioskQueue(hospitalId);
         } catch (e) { }
         return null;
     }
 
     // Emit socket event
     try {
-        const { broadcastToHospital } = require('../../socket/socketHandler');
+        const { broadcastToHospital, broadcastKioskQueue } = require('../../socket/socketHandler');
         broadcastToHospital(hospitalId, 'queue-updated', nextToken);
+        broadcastKioskQueue(hospitalId);
     } catch (e) {
         // Socket not initialized yet, skip
     }
@@ -393,8 +397,9 @@ const cancelToken = async (tokenId, hospitalId) => {
 
     // Emit socket event
     try {
-        const { broadcastToHospital } = require('../../socket/socketHandler');
+        const { broadcastToHospital, broadcastKioskQueue } = require('../../socket/socketHandler');
         broadcastToHospital(hospitalId, 'queue-updated', token);
+        broadcastKioskQueue(hospitalId);
     } catch (e) {
         // skip
     }
@@ -421,8 +426,9 @@ const verifyCashPayment = async (tokenId, hospitalId) => {
 
     // Emit socket event
     try {
-        const { broadcastToHospital } = require('../../socket/socketHandler');
+        const { broadcastToHospital, broadcastKioskQueue } = require('../../socket/socketHandler');
         broadcastToHospital(hospitalId, 'queue-updated', token);
+        broadcastKioskQueue(hospitalId);
     } catch (e) { }
 
     return token;
@@ -474,8 +480,9 @@ const skipToken = async (tokenId, hospitalId) => {
 
     // Emit socket event to update all dashboards
     try {
-        const { broadcastToHospital } = require('../../socket/socketHandler');
+        const { broadcastToHospital, broadcastKioskQueue } = require('../../socket/socketHandler');
         broadcastToHospital(hospitalId, 'queue-updated', updated);
+        broadcastKioskQueue(hospitalId);
     } catch (e) { }
 
     return updated;

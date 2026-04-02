@@ -1,10 +1,10 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from '../components/ProtectedRoute';
-import LoginForm from '../components/LoginForm';
-import KioskSelector from '../components/KioskSelector';
-import KioskDisplay from '../components/KioskDisplay';
-import type { User, Kiosk } from '../types';
+import ProtectedRoute from '../features/auth/components/ProtectedRoute';
+import LoginForm from '../features/auth/components/LoginForm';
+import KioskSelector from '../features/setup/components/KioskSelector';
+import KioskDisplay from '../features/display/components/KioskDisplay';
+import type { User, Kiosk } from '../core/types';
 
 interface AppRoutesProps {
   user: User | null;

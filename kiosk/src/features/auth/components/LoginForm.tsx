@@ -1,38 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authApi } from '../api';
+import React from 'react';
 import { User as UserIcon, Lock, Loader2, Hospital } from 'lucide-react';
+import { useLoginForm } from '../hooks/useLoginForm';
 
 interface LoginFormProps {
   onLoginSuccess: (user: any) => void;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await authApi.login({ email, password });
-      if (response.success) {
-        localStorage.setItem('kiosk_token', response.data.token);
-        localStorage.setItem('kiosk_user', JSON.stringify(response.data));
-        await onLoginSuccess(response.data);
-        navigate('/select');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { state, actions } = useLoginForm(onLoginSuccess);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 p-6 transition-colors duration-500">
@@ -45,13 +20,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
           <p className="text-slate-500 text-sm font-bold">Authorized Personnel Only</p>
         </div>
 
-        {error && (
+        {state.error && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 dark:text-red-400 text-xs font-bold animate-in slide-in-from-top-2">
-            {error}
+            {state.error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={actions.handleSubmit} className="space-y-4">
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Email Address</label>
             <div className="relative">
@@ -59,8 +34,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
               <input
                 type="email"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={state.email}
+                onChange={(e) => actions.setEmail(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-all font-semibold"
                 placeholder="admin@hospital.com"
               />
@@ -74,8 +49,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
               <input
                 type="password"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={state.password}
+                onChange={(e) => actions.setPassword(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-all font-semibold"
                 placeholder="••••••••"
               />
@@ -84,10 +59,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={state.loading}
             className="w-full bg-sky-600 hover:bg-sky-500 text-white font-black py-4 rounded-xl shadow-lg shadow-sky-600/20 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2"
           >
-            {loading ? (
+            {state.loading ? (
               <Loader2 className="animate-spin" size={20} />
             ) : (
               'Authenticate'

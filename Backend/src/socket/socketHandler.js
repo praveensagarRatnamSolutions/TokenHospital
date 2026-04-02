@@ -20,6 +20,13 @@ const initSocket = (server) => {
             logger.info(`Socket ${socket.id} joined hospital room: ${hospitalId}`);
         });
 
+        // Kiosk devices join hospital room via query param on connect
+        const hospitalId = socket.handshake.query?.hospitalId;
+        if (hospitalId) {
+            socket.join(hospitalId);
+            logger.info(`Kiosk socket ${socket.id} auto-joined hospital room: ${hospitalId}`);
+        }
+
         socket.on('disconnect', () => {
             logger.info(`Socket disconnected: ${socket.id}`);
         });
@@ -36,6 +43,22 @@ const broadcastToHospital = (hospitalId, eventName, data) => {
     io.to(hospitalId).emit(eventName, data);
 };
 
+/**
+ * Broadcast the full grouped token queue to all kiosk displays in a hospital.
+ * This fetches fresh stats and emits 'kiosk-queue-updated' with department-grouped data.
+ */
+const broadcastKioskQueue = async (hospitalId) => {
+    if (!io) return;
+    try {
+        const kioskService = require('../modules/kiosk/kiosk.service');
+        const stats = await kioskService.getKioskTokenStats(hospitalId);
+        io.to(hospitalId.toString()).emit('kiosk-queue-updated', stats);
+        logger.info(`Broadcasted kiosk-queue-updated to hospital ${hospitalId}`);
+    } catch (e) {
+        logger.error(`Failed to broadcast kiosk queue: ${e.message}`);
+    }
+};
+
 const getIo = () => {
     if (!io) {
         throw new Error('Socket.io not initialized');
@@ -47,4 +70,5 @@ module.exports = {
     initSocket,
     getIo,
     broadcastToHospital,
+    broadcastKioskQueue,
 };

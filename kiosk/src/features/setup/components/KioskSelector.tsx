@@ -1,45 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { kioskApi } from '../api';
-import type { Kiosk } from '../types';
+import React from 'react';
+import type { Kiosk } from '../../../core/types';
 import { Monitor, MapPin, Loader2, Search, ArrowRight } from 'lucide-react';
+import { useKioskSelector } from '../hooks/useKioskSelector';
 
 interface KioskSelectorProps {
   onSelect: (kiosk: Kiosk) => void;
 }
 
 const KioskSelector: React.FC<KioskSelectorProps> = ({ onSelect }) => {
-  const [kiosks, setKiosks] = useState<Kiosk[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const navigate = useNavigate();
+  const { state, actions } = useKioskSelector(onSelect);
 
-  useEffect(() => {
-    const fetchKiosks = async () => {
-      try {
-        const response = await kioskApi.getAll();
-        setKiosks(response.data);
-      } catch (err) {
-        console.error('Failed to fetch kiosks', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchKiosks();
-  }, []);
-
-  const filteredKiosks = kiosks.filter(k => 
-    k.name.toLowerCase().includes(search.toLowerCase()) || 
-    k.code.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleKioskSelect = (kiosk: Kiosk) => {
-    onSelect(kiosk);
-    navigate(`/display/${kiosk.code}`);
-  };
-
-  if (loading) {
+  if (state.loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-500">
         <Loader2 className="animate-spin text-sky-500 mb-4" size={48} />
@@ -61,14 +32,14 @@ const KioskSelector: React.FC<KioskSelectorProps> = ({ onSelect }) => {
             <input 
               type="text"
               placeholder="Search by code or name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={state.search}
+              onChange={(e) => actions.setSearch(e.target.value)}
               className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/30 transition-all font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600"
             />
           </div>
         </div>
 
-        {filteredKiosks.length === 0 ? (
+        {state.filteredKiosks.length === 0 ? (
           <div className="bg-white dark:bg-white/5 border border-dashed border-slate-200 dark:border-white/10 rounded-3xl p-32 flex flex-col items-center justify-center text-center shadow-sm">
             <Monitor className="text-slate-200 dark:text-slate-800 mb-6" size={80} />
             <h3 className="text-2xl font-black text-slate-400 dark:text-slate-600 uppercase tracking-tight">No Kiosks Found</h3>
@@ -76,10 +47,10 @@ const KioskSelector: React.FC<KioskSelectorProps> = ({ onSelect }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredKiosks.map((kiosk) => (
+            {state.filteredKiosks.map((kiosk) => (
               <button
                 key={kiosk._id}
-                onClick={() => handleKioskSelect(kiosk)}
+                onClick={() => actions.handleKioskSelect(kiosk)}
                 className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 p-8 rounded-[2.5rem] text-left hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-sky-500/50 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-sky-500/10"
               >
                 <div className="flex justify-between items-start mb-6">
@@ -109,10 +80,7 @@ const KioskSelector: React.FC<KioskSelectorProps> = ({ onSelect }) => {
 
         <div className="mt-16 text-center">
           <button 
-            onClick={() => {
-              localStorage.clear();
-              window.location.reload();
-            }}
+            onClick={actions.handleLogoutAdmin}
             className="px-6 py-2 rounded-full border border-slate-200 dark:border-white/5 text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] hover:text-red-500 hover:border-red-500/20 hover:bg-red-500/5 transition-all"
           >
             Logout and Reset Device

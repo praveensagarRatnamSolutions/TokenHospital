@@ -30,7 +30,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
         queryFn: async () => {
             if (!doctorId) return null;
             const res = await doctorApi.getById(doctorId);
-            return res.data.data;
+            return res.data;
         },
         enabled: !!doctorId
     });
