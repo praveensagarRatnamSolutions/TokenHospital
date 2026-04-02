@@ -19,7 +19,7 @@ export default function AdminDoctors() {
     queryFn: async () => {
       try {
         const response = await doctorApi.getAll({ page, limit, name: search });
-        return response.data;
+        return response;
       } catch (error) {
         console.error('Failed to fetch doctors:', error);
         return { doctors: [], pagination: { total: 0, page: 1, pages: 1 } };

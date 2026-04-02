@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, ShieldCheck, Clock, ArrowLeft, Loader2, Star, CheckCircle2 } from 'lucide-react';
-import { kioskApi } from '../../api';
-import type { Department, Doctor } from '../../types';
+import { kioskApi } from '../../../core/api';
+import type { Department, Doctor } from '../../../core/types';
 
 interface StepDoctorGridProps {
   department: Department;
@@ -117,8 +117,7 @@ const StepDoctorGrid: React.FC<StepDoctorGridProps> = ({ department, onSelect, o
                 </div>
               </div>
 
-              {/* Decorative background logo */}
-              <ShieldCheck className="absolute -right-8 -bottom-8 size-40 text-slate-100 dark:text-white/5 group-hover:text-sky-500/5 transition-colors" />
+             
             </motion.button>
           ))}
 

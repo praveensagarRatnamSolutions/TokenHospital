@@ -54,6 +54,29 @@ export interface Token {
   };
 }
 
+/** Grouped token display data from /api/kiosk/token */
+export interface DoctorQueueDisplay {
+  id: string;
+  name: string;
+  room?: string;
+  display: {
+    emergency: string | null;
+    current: string;
+    next: string;
+  };
+  queue: string[];
+  meta: {
+    totalWaiting: number;
+    estimatedWaitTime: string;
+  };
+}
+
+export interface DepartmentQueue {
+  id: string;
+  name: string;
+  doctors: DoctorQueueDisplay[];
+}
+
 export interface User {
   _id: string;
   name: string;

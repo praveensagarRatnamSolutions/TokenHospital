@@ -81,6 +81,30 @@ router.get('/code/:code', kioskController.getKioskByCode);
 
 /**
  * @swagger
+ * /api/kiosk/token:
+ *   get:
+ *     summary: Get live department-grouped token queue for a hospital (Public - used by kiosks)
+ *     tags: [Kiosks]
+ *     parameters:
+ *       - in: query
+ *         name: hospitalId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Grouped token queue by department and doctor
+ */
+router.get(
+  '/token',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  kioskController.getKioskTokensByHospital
+);
+
+
+/**
+ * @swagger
  * /api/kiosk/{id}:
  *   get:
  *     summary: Get kiosk by ID

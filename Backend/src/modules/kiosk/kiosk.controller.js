@@ -19,6 +19,32 @@ const createKiosk = async (req, res, next) => {
   }
 };
 
+const getKioskTokenStats = async (req, res, next) => {
+  try {
+    console.log('Getting kiosk token stats for hospital:', req.hospitalId);
+    const stats = await kioskService.getKioskTokenStats(req.hospitalId);
+    res.status(200).json({ success: true ,data: stats });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc Get live token queue grouped by department/doctor (Public - for Kiosk displays)
+ */
+const getKioskTokensByHospital = async (req, res, next) => {
+  try {
+    const { hospitalId } = req.query;
+    if (!hospitalId) {
+      return res.status(400).json({ success: false, message: 'hospitalId query param is required' });
+    }
+    const stats = await kioskService.getKioskTokenStats(hospitalId);
+    res.status(200).json({ success: true, data: stats });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * @desc Get all kiosks for hospital (Admin sees all, Doctor sees own)
  */
@@ -135,4 +161,6 @@ module.exports = {
   getKioskByCode,
   updateKiosk,
   deleteKiosk,
+  getKioskTokenStats,
+  getKioskTokensByHospital,
 };

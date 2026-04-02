@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Stethoscope, Heart, Baby, Eye, Activity, ChevronRight, Loader2, Hospital } from 'lucide-react';
-import { kioskApi } from '../../api';
-import type { Department } from '../../types';
+import { kioskApi } from '../../../core/api';
+import type { Department } from '../../../core/types';
 
 interface StepDepartmentGridProps {
   onSelect: (dept: Department) => void;

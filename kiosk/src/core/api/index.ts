@@ -46,6 +46,10 @@ export const kioskApi = {
     const response = await api.post('/api/token', data);
     return response.data;
   },
+  getTokenQueue: async (hospitalId: string) => {
+    const response = await api.get('/api/kiosk/token', { params: { hospitalId } });
+    return response.data;
+  },
 };
 
 export default api;
