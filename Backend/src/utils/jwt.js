@@ -1,9 +1,25 @@
 const jwt = require('jsonwebtoken');
 
-const generateToken = (id, role, hospitalId) => {
-    return jwt.sign({ id, role, hospitalId }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN || '1d',
-    });
+const generateRefreshToken = (id, role, hospitalId) => {
+  return jwt.sign({ id, role, hospitalId }, process.env.JWT_SECRET, {
+    expiresIn: getExpirationTimeOfTokens().REFRESH_TOKEN,
+  });
 };
 
-module.exports = { generateToken };
+const generateAccessToken = (id, role, hospitalId) => {
+  return jwt.sign({ id, role, hospitalId }, process.env.JWT_ACCESS_KEY_SECRET, {
+    expiresIn: getExpirationTimeOfTokens().ACCESS_TOKEN,
+  });
+};
+
+const getExpirationTimeOfTokens = () => ({
+  ACCESS_TOKEN: '15m',
+  REFRESH_TOKEN: '7d',
+  COOKIE_MAX_AGE: 7 * 24 * 60 * 60 * 1000,
+});
+
+module.exports = {
+  generateRefreshToken,
+  generateAccessToken,
+  getExpirationTimeOfTokens,
+};

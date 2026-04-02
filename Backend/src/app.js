@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const errorHandler = require('./middlewares/errorHandler');
+const cookieparser = require('cookie-parser');
 
 const app = express();
 
@@ -13,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: '*', // Allow all origins (for development, adjust in production)
+    origin: true, // Allow all origins (for development, adjust in production)
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -21,6 +22,7 @@ app.use(
 );
 app.use(helmet());
 app.use(morgan('dev'));
+app.use(cookieparser());
 
 // Swagger Setup
 const swaggerOptions = {
@@ -70,6 +72,10 @@ app.get('/', (req, res) => {
   res.send(
     'Hospital Token Management API is running. Check /api-docs for documentation.'
   );
+});
+
+app.get('/ping', (req, res) => {
+  res.status(200).send('ok');
 });
 
 // Import and use routes
