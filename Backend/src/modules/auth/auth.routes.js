@@ -1,12 +1,12 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const authController = require("./auth.controller");
+const authController = require('./auth.controller');
 const {
   registerValidation,
   loginValidation,
   validateRequest,
-} = require("./auth.validations");
-const { protect, authorize } = require("../../middlewares/authMiddleware");
+} = require('./auth.validations');
+const { protect, authorize } = require('../../middlewares/authMiddleware');
 
 /**
  * @swagger
@@ -53,10 +53,10 @@ const { protect, authorize } = require("../../middlewares/authMiddleware");
  *         description: Validation errors or User already exists
  */
 router.post(
-  "/register",
+  '/register',
   registerValidation,
   validateRequest,
-  authController.register,
+  authController.register
 );
 
 /**
@@ -85,7 +85,7 @@ router.post(
  *       401:
  *         description: Invalid email or password
  */
-router.post("/login", loginValidation, validateRequest, authController.login);
+router.post('/login', loginValidation, validateRequest, authController.login);
 
 /**
  * @swagger
@@ -101,6 +101,8 @@ router.post("/login", loginValidation, validateRequest, authController.login);
  *       401:
  *         description: Not authorized
  */
-router.get("/me", protect, authController.getMe);
+router.get('/me', protect, authController.getMe);
+
+router.post('/refresh', authController.refresh);
 
 module.exports = router;

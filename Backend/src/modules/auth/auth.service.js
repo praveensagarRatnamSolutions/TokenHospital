@@ -1,8 +1,12 @@
 const User = require('./auth.model');
 const Hospital = require('../hospital/hospital.model');
-const { generateToken } = require('../../utils/jwt');
+const {
+  generateRefreshToken,
+  generateAccessToken,
+} = require('../../utils/jwt');
 
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 const registerUser = async (userData) => {
   const { name, email, password, hospitalName, phone } = userData;
@@ -15,24 +19,34 @@ const registerUser = async (userData) => {
     // 1. Check if user already exists
     const userExists = await User.findOne({ email }).session(session);
     if (userExists) {
-      throw new Error("Account already exists with this email");
+      throw new Error('Account already exists with this email');
     }
 
     // 2. Create Admin (Notice the .session(session) passed to all ops)
-    const [admin] = await User.create([{
-      name,
-      email,
-      password,
-      role: "ADMIN",
-    }], { session });
+    const [admin] = await User.create(
+      [
+        {
+          name,
+          email,
+          password,
+          role: 'ADMIN',
+        },
+      ],
+      { session }
+    );
 
     // 3. Create Hospital
-    const [hospital] = await Hospital.create([{
-      name: hospitalName,
-      email,
-      phone,
-      createdBy: admin._id,
-    }], { session });
+    const [hospital] = await Hospital.create(
+      [
+        {
+          name: hospitalName,
+          email,
+          phone,
+          createdBy: admin._id,
+        },
+      ],
+      { session }
+    );
 
     // 4. Link hospital to admin
     admin.hospitalId = hospital._id;
@@ -47,7 +61,7 @@ const registerUser = async (userData) => {
       email: admin.email,
       role: admin.role,
       hospitalId: hospital._id,
-      token: generateToken(admin._id, admin.role, hospital._id),
+      token: generateRefreshToken(admin._id, admin.role, hospital._id),
     };
   } catch (error) {
     // If anything fails, undo every change made during this process
@@ -63,6 +77,20 @@ const loginUser = async (email, password) => {
   const user = await User.findOne({ email }).select('+password');
 
   if (user && (await user.matchPassword(password))) {
+    const refreshToken = generateRefreshToken(
+      user._id,
+      user.role,
+      user.hospitalId
+    );
+    const accessToken = generateAccessToken(
+      user._id,
+      user.role,
+      user.hospitalId
+    );
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
     return {
       _id: user._id,
       name: user.name,
@@ -70,7 +98,8 @@ const loginUser = async (email, password) => {
       role: user.role,
       hospitalId: user.hospitalId,
       doctorId: user?.doctorId || null,
-      token: generateToken(user._id, user.role, user.hospitalId),
+      token: accessToken,
+      refreshToken,
     };
   } else {
     throw new Error('Invalid email or password');
@@ -82,25 +111,56 @@ const createUser = async (userData, session = null) => {
 
   const userExists = await User.findOne({ email }).session(session);
   if (userExists) {
-    throw new Error("User with this email already exists");
+    throw new Error('User with this email already exists');
   }
 
-  const [user] = await User.create([{
-    name,
-    email,
-    password,
-    role,
-    hospitalId,
-    profilePic
-  }], { session });
+  const [user] = await User.create(
+    [
+      {
+        name,
+        email,
+        password,
+        role,
+        hospitalId,
+        profilePic,
+      },
+    ],
+    { session }
+  );
 
   return user;
 };
 
+const refreshToken = async (req) => {
+  const refreshToken = req.cookies?.refreshToken;
+
+  let token = null;
+
+  if (!refreshToken) {
+    return token;
+  }
+
+  const user = await User.findOne({ refreshToken });
+
+  jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decode) => {
+    if (err) {
+      user.refreshToken = '';
+      token = null;
+    } else {
+      token = generateAccessToken(user._id, user.role, user.hospitalId);
+    }
+  });
+
+  if (!token) {
+    await user.save();
+  }
+
+  return token;
+};
 
 module.exports = {
   registerUser,
   loginUser,
   createUser,
+  refreshToken,
 };
-
