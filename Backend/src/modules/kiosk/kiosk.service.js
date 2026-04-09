@@ -1,5 +1,11 @@
 const Kiosk = require('./kiosk.model');
 const Token = require('../token/token.model');
+const {
+  generateTokensForKiosk,
+  generateAccessTokenForKiosk,
+} = require('../../utils/jwt');
+const { aggregateDoctorQueue } = require('../token/token.repository');
+const Ads = require('../ads/ads.model');
 
 /**
  * @desc Create a new kiosk
@@ -208,6 +214,123 @@ const getKioskTokenStats = async (hospitalId) => {
     return acc;
   }, []);
 };
+
+const loginKiosk = async ({ code, password }) => {
+  const kioskPassword = '119911';
+
+  if (!code) {
+    throw Error(`Kiosk id required `);
+  }
+
+  if (!password) {
+    throw Error(`Kiosk password required `);
+  }
+
+  const kiosk = await Kiosk.findOne({ code });
+
+  if (!kiosk || password !== kioskPassword) {
+    throw Error('Invalid kiosk id or password');
+  }
+  const { accessToken: token, refreshToken } = generateTokensForKiosk(kiosk);
+
+  kiosk.refreshToken = refreshToken;
+  await kiosk.save();
+
+  return { token, refreshToken, kioskType: kiosk.locationType };
+};
+
+const refreshKioskToken = async (refreshToken) => {
+  if (!refreshToken) {
+    throw Error('Refresh token is needed');
+  }
+
+  const kiosk = await Kiosk.findOne({ refreshToken });
+
+  if (!kiosk) {
+    throw Error('Kiosk not found');
+  }
+
+  const token = generateAccessTokenForKiosk(kiosk);
+
+  return token;
+};
+
+const getKioskAds = async (req) => {
+  const { sub: kioskId } = req.kiosk;
+
+  if (!kioskId) {
+    throw new Error('Invalid token');
+  }
+
+  const result = await Kiosk.findById(kioskId);
+
+  const ads = await Promise.all(
+    result.ads.map((ad) =>
+      Ads.findById(ad.adId).select(['fileKey', 'title', 'type', 'isActive'])
+    )
+  );
+
+  return ads;
+};
+
+const doctorQueueCache = new Map();
+
+const getDoctorQueue = async (doctorId) => {
+  if (doctorQueueCache.has(doctorId)) {
+    return doctorQueueCache.get(doctorId);
+  }
+
+  const result = await aggregateDoctorQueue(doctorId);
+
+  const queue = result[0] ?? {
+    lastCompleted: [],
+    current: [],
+    emergency: [],
+    next: [],
+  };
+
+  // const queue = result;
+
+  doctorQueueCache.set(doctorId, queue);
+
+  return queue;
+};
+
+const invalidateDoctorCache = (doctorId) => {
+  doctorQueueCache.delete(doctorId);
+};
+
+const getMultipleDoctorQueues = async (doctorIds = []) => {
+  const queues = await Promise.all(
+    doctorIds.map((docId) => aggregateDoctorQueue(docId))
+  );
+
+  return doctorIds.map((docId, index) => ({
+    doctorId: docId,
+    ...queues[index],
+  }));
+};
+
+const getKioskDisplayData = async (req) => {
+  const { lt: locationType, dids: doctorIds } = req.kiosk;
+
+  switch (locationType) {
+    case 'doctor_room':
+      return getDoctorQueue(doctorIds[0]);
+
+    case 'waiting_area':
+      return getMultipleDoctorQueues(doctorIds);
+
+    case 'reception':
+      // return getReceptionData(hospitalId);
+      return [];
+
+    default:
+      // return getGeneralData(hospitalId);
+      return [];
+  }
+};
+
 module.exports = {
   createKiosk,
   getKiosks,
@@ -215,4 +338,9 @@ module.exports = {
   updateKiosk,
   deleteKiosk,
   getKioskTokenStats,
+  loginKiosk,
+  getKioskAds,
+  refreshKioskToken,
+  getKioskDisplayData,
+  invalidateDoctorCache,
 };

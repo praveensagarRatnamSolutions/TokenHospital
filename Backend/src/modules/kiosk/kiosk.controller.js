@@ -23,7 +23,7 @@ const getKioskTokenStats = async (req, res, next) => {
   try {
     console.log('Getting kiosk token stats for hospital:', req.hospitalId);
     const stats = await kioskService.getKioskTokenStats(req.hospitalId);
-    res.status(200).json({ success: true ,data: stats });
+    res.status(200).json({ success: true, data: stats });
   } catch (error) {
     next(error);
   }
@@ -36,7 +36,10 @@ const getKioskTokensByHospital = async (req, res, next) => {
   try {
     const { hospitalId } = req.query;
     if (!hospitalId) {
-      return res.status(400).json({ success: false, message: 'hospitalId query param is required' });
+      return res.status(400).json({
+        success: false,
+        message: 'hospitalId query param is required',
+      });
     }
     const stats = await kioskService.getKioskTokenStats(hospitalId);
     res.status(200).json({ success: true, data: stats });
@@ -154,6 +157,59 @@ const deleteKiosk = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc Login in kiosk
+ */
+
+const loginIntoKiosk = async (req, res, next) => {
+  try {
+    const data = await kioskService.loginKiosk({
+      code: req.body?.kioskId,
+      password: req.body?.password,
+    });
+    res.status(200).json({ data, success: true });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc Refresh token
+ */
+
+const refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body || {};
+    const token = await kioskService.refreshKioskToken(refreshToken);
+    res.status(200).json({ success: true, data: { token } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc Kiosk ads
+ */
+
+const getKioskAds = async (req, res, next) => {
+  try {
+    const data = await kioskService.getKioskAds(req);
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getKioskTokens = async (req, res, next) => {
+  try {
+    const data = await kioskService.getKioskDisplayData(req);
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createKiosk,
   getKiosks,
@@ -163,4 +219,8 @@ module.exports = {
   deleteKiosk,
   getKioskTokenStats,
   getKioskTokensByHospital,
+  loginIntoKiosk,
+  refreshToken,
+  getKioskAds,
+  getKioskTokens,
 };

@@ -1,17 +1,17 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const kioskSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Kiosk name is required"],
+      required: [true, 'Kiosk name is required'],
       trim: true,
-      maxlength: [100, "Name is too long"],
+      maxlength: [100, 'Name is too long'],
     },
 
     code: {
       type: String,
-      required: [true, "Kiosk code is required"],
+      required: [true, 'Kiosk code is required'],
       unique: true,
       trim: true,
       uppercase: true,
@@ -19,8 +19,8 @@ const kioskSchema = new mongoose.Schema(
 
     hospitalId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Hospital",
-      required: [true, "Hospital ID is required"],
+      ref: 'Hospital',
+      required: [true, 'Hospital ID is required'],
       index: true,
     },
 
@@ -28,7 +28,7 @@ const kioskSchema = new mongoose.Schema(
     departmentIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Department",
+        ref: 'Department',
         index: true,
       },
     ],
@@ -36,7 +36,7 @@ const kioskSchema = new mongoose.Schema(
     doctorIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Doctor",
+        ref: 'Doctor',
         index: true,
       },
     ],
@@ -46,7 +46,7 @@ const kioskSchema = new mongoose.Schema(
       {
         adId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Ad",
+          ref: 'Ad',
           required: true,
         },
         order: {
@@ -58,15 +58,15 @@ const kioskSchema = new mongoose.Schema(
 
     locationType: {
       type: String,
-      enum: ["reception", "waiting_area", "doctor_room", "general"],
-      default: "general",
+      enum: ['reception', 'waiting_area', 'doctor_room', 'general'],
+      default: 'general',
     },
 
     // ✅ NEW: who created this kiosk
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "Creator is required"],
+      ref: 'User',
+      required: [true, 'Creator is required'],
       index: true,
     },
 
@@ -74,6 +74,11 @@ const kioskSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
       index: true,
+    },
+
+    refreshToken: {
+      type: String,
+      default: null,
     },
   },
   {
@@ -95,4 +100,4 @@ kioskSchema.index({ hospitalId: 1, departmentIds: 1, isActive: 1 });
 kioskSchema.index({ hospitalId: 1, doctorIds: 1, isActive: 1 });
 kioskSchema.index({ hospitalId: 1, createdBy: 1, isActive: 1 });
 
-module.exports = mongoose.model("Kiosk", kioskSchema);
+module.exports = mongoose.model('Kiosk', kioskSchema);

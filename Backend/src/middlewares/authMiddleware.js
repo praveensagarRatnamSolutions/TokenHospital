@@ -23,7 +23,6 @@ const protect = async (req, res, next) => {
 
       req.user = await User.findById(decoded.id).select('-password');
       req.hospitalId = decoded.hospitalId;
-      console.log('sdfaf', req.user);
 
       if (!req.user) {
         return res
@@ -59,4 +58,36 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { protect, authorize };
+const protectKiosk = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.query.token) {
+    token = req.query.token;
+  } else {
+    token = req.query.state;
+  }
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ success: false, message: 'Not authorized, no token' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_KEY_SECRET);
+    req.kiosk = decoded;
+    next();
+  } catch (error) {
+    logger.error(`Auth Middleware Error: ${error.message}`);
+    return res
+      .status(401)
+      .json({ success: false, message: 'Not authorized, token failed' });
+  }
+};
+
+module.exports = { protect, authorize, protectKiosk };
