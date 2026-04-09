@@ -4,9 +4,14 @@ const kioskController = require('./kiosk.controller');
 const {
   createKioskValidation,
   updateKioskValidation,
+  kioskLoginValidation,
 } = require('./kiosk.validations');
 const { validateRequest } = require('../auth/auth.validations');
-const { protect, authorize } = require('../../middlewares/authMiddleware');
+const {
+  protect,
+  authorize,
+  protectKiosk,
+} = require('../../middlewares/authMiddleware');
 
 /**
  * @swagger
@@ -41,6 +46,10 @@ router.post(
   validateRequest,
   kioskController.createKiosk
 );
+
+router.get('/ads', protectKiosk, kioskController.getKioskAds);
+
+router.get('/tokens', protectKiosk, kioskController.getKioskTokens);
 
 /**
  * @swagger
@@ -101,7 +110,6 @@ router.get(
   authorize('ADMIN', 'DOCTOR'),
   kioskController.getKioskTokensByHospital
 );
-
 
 /**
  * @swagger
@@ -179,5 +187,14 @@ router.delete(
   authorize('ADMIN', 'DOCTOR'),
   kioskController.deleteKiosk
 );
+
+router.post(
+  '/login',
+  kioskLoginValidation,
+  validateRequest,
+  kioskController.loginIntoKiosk
+);
+
+router.post('/refresh', kioskController.refreshToken);
 
 module.exports = router;

@@ -28,7 +28,22 @@ const updateKioskValidation = [
   check('ads.*.order', 'Order must be a number').optional().isNumeric(),
 ];
 
+const kioskLoginValidation = [
+  check('kioskId')
+    .notEmpty()
+    .withMessage('Kiosk ID is required')
+    .matches(/^[A-Z]+-\d+$/)
+    .withMessage('Kiosk ID must be like KISOK-101'),
+
+  check('password')
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
+];
+
 module.exports = {
   createKioskValidation,
   updateKioskValidation,
+  kioskLoginValidation,
 };
