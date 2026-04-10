@@ -1,4 +1,7 @@
 const kioskService = require('./kiosk.service');
+const departmentService = require('../department/department.service');
+const doctorController = require('../doctor/doctor.controller');
+const tokenController = require('../token/token.controller');
 const logger = require('../../config/logger');
 
 /**
@@ -210,6 +213,33 @@ const getKioskTokens = async (req, res, next) => {
   }
 };
 
+const getDepartments = async (req, res, next) => {
+  try {
+    const departments = await departmentService.getDepartments(req.kiosk.hid);
+    res.status(200).json({ success: true, data: departments });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getDoctors = async (req, res, next) => {
+  try {
+    req.hospitalId = req.kiosk.hid;
+    await doctorController.getDoctors(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createToken = async (req, res, next) => {
+  try {
+    req.hospitalId = req.kiosk.hid;
+    tokenController.createToken(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createKiosk,
   getKiosks,
@@ -223,4 +253,7 @@ module.exports = {
   refreshToken,
   getKioskAds,
   getKioskTokens,
+  getDepartments,
+  getDoctors,
+  createToken,
 };
