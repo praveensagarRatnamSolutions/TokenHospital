@@ -51,6 +51,12 @@ router.get('/ads', protectKiosk, kioskController.getKioskAds);
 
 router.get('/tokens', protectKiosk, kioskController.getKioskTokens);
 
+router.get('/department', protectKiosk, kioskController.getDepartments);
+
+router.get('/doctor', protectKiosk, kioskController.getDoctors);
+
+router.post('/token', protectKiosk, kioskController.createToken);
+
 /**
  * @swagger
  * /api/kiosk:
