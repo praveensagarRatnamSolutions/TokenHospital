@@ -142,8 +142,9 @@ const verifyCashPayment = async (req, res, next) => {
  * @access  Private (Doctor)
  */
 const skipToken = async (req, res, next) => {
+    const doctorId = req.user.doctorId;
     try {
-        const token = await tokenService.skipToken(req.params.id, req.hospitalId);
+        const token = await tokenService.skipToken(req.params.id, req.hospitalId, doctorId);
         logger.info(`Token skipped: ${token.tokenNumber}`);
         res.status(200).json({ success: true, data: token });
     } catch (error) {

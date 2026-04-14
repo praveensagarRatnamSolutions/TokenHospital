@@ -24,7 +24,7 @@ const protect = async (req, res, next) => {
 
       req.user = await User.findById(decoded.id).select('-password');
       req.hospitalId = decoded.hospitalId;
-      console.log('sdfaf', req.user);
+      
 
       if (!req.user) {
         return res

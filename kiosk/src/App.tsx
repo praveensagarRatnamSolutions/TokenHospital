@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { HashRouter } from 'react-router-dom';
 import AppRoutes from './routes';
-import type { User, Kiosk } from './types';
+import type { User, Kiosk } from './core/types/index';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
