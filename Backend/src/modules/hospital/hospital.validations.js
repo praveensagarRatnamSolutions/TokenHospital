@@ -18,12 +18,17 @@ const createHospitalValidation = [
     .isEmail()
     .withMessage("Valid email is required")
     .normalizeEmail(),
-  body("phone")
-    .trim()
-    .notEmpty()
-    .withMessage("Phone number is required")
-    .matches(/^[0-9+\-\s()]+$/)
-    .withMessage("Invalid phone number format"),
+  body("phone").custom((value) => {
+    if (typeof value === "string") {
+      if (!/^[0-9+\-\s()]+$/.test(value)) throw new Error("Invalid phone number format");
+      return true;
+    }
+    if (typeof value === "object" && value !== null) {
+      if (!value.full || !/^[0-9+\-\s()]+$/.test(value.full)) throw new Error("Invalid phone number format");
+      return true;
+    }
+    throw new Error("Phone number is required");
+  }),
   body("address.street")
     .trim()
     .notEmpty()
@@ -56,7 +61,7 @@ const updateHospitalValidation = [
     .isEmail()
     .withMessage("Valid email is required")
     .normalizeEmail(),
-  body("phone")
+  body("phone.full")
     .optional()
     .trim()
     .matches(/^[0-9+\-\s()]+$/)

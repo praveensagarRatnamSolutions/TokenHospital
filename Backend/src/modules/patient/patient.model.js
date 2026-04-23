@@ -8,9 +8,20 @@ const patientSchema = new mongoose.Schema(
             trim: true,
         },
         phone: {
-            type: String,
-            required: [true, 'Patient phone is required'],
-            trim: true,
+            full: {
+                type: String,
+                required: [true, 'Patient phone is required'],
+                trim: true,
+            },
+            countryCode: {
+                type: String,
+            },
+            country: {
+                type: String, // "IN", "US" etc
+            },
+            nationalNumber: {
+                type: String,
+            },
         },
         age: {
             type: Number,
@@ -31,7 +42,7 @@ const patientSchema = new mongoose.Schema(
 );
 
 // Ensure unique phone number per hospital
-patientSchema.index({ hospitalId: 1, phone: 1 }, { unique: true });
+patientSchema.index({ hospitalId: 1, 'phone.full': 1 }, { unique: true });
 patientSchema.index({ hospitalId: 1, name: 1 });
 
 module.exports = mongoose.model('Patient', patientSchema);

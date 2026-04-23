@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronRight, Loader2, WifiOff } from 'lucide-react';
-import type { Token } from '../types';
+import type { Token } from '../../../core/types';
 
 interface TokenActionCardProps {
   token: Token | null;

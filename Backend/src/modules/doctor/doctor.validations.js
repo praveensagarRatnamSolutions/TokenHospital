@@ -7,7 +7,7 @@ const createDoctorValidation = [
     check('departmentId', 'Department ID is required').not().isEmpty().isMongoId(),
 
     check('experience', 'Experience is required and must be a number').not().isEmpty().isNumeric(),
-    check('tokenConfig.maxPerDay', 'Max tokens per day is required').not().isEmpty().isNumeric(),
+    check('education', 'Education must be a string').optional().isString(),
     check('consultationFee', 'Consultation fee is required and must be a number').not().isEmpty().isNumeric(),
     check('availability', 'Availability must be an array').optional().isArray(),
 
@@ -19,11 +19,9 @@ const updateDoctorValidation = [
     check('departmentId', 'Department ID must be valid').optional().isMongoId(),
 
     check('experience', 'Experience must be a number').optional().isNumeric(),
+    check('education', 'Education must be a string').optional().isString(),
     check('isAvailable', 'Status must be a boolean').optional().isBoolean(),
     check('availability', 'Availability must be an array').optional().isArray(),
-    check('tokenConfig.maxPerDay', 'Max tokens per day must be a number').optional().isNumeric(),
-    check('tokenConfig.avgTimePerPatient', 'Avg time must be a number').optional().isNumeric(),
-    check('breaks', 'Breaks must be an array').optional().isArray(),
 ];
 
 module.exports = {

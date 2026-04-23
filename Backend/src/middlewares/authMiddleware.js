@@ -19,12 +19,10 @@ const protect = async (req, res, next) => {
 
   if (token) {
     try {
-
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       req.user = await User.findById(decoded.id).select('-password');
       req.hospitalId = decoded.hospitalId;
-      
 
       if (!req.user) {
         return res
@@ -35,6 +33,15 @@ const protect = async (req, res, next) => {
       next();
     } catch (error) {
       logger.error(`Auth Middleware Error: ${error.message}`);
+
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({
+          success: false,
+          message: 'Token expired',
+          code: 'TOKEN_EXPIRED',
+        });
+      }
+
       return res
         .status(401)
         .json({ success: false, message: 'Not authorized, token failed' });
@@ -50,6 +57,8 @@ const protect = async (req, res, next) => {
 
 const authorize = (...roles) => {
   return (req, res, next) => {
+    console.log('req.user.role', req.user.role);
+
     if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,

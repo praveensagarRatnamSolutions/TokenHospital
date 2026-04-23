@@ -1,6 +1,7 @@
 import React from 'react';
-import type { Token } from '../types';
+
 import { User, Activity } from 'lucide-react';
+import type { Token } from '../../../core/types';
 
 interface TokenListProps {
   tokens: Token[];

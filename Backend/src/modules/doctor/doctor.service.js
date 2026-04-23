@@ -49,7 +49,7 @@ const getDoctors = async (hospitalId, filters = {}) => {
 const getDoctorById = async (doctorId, hospitalId) => {
   const doctor = await Doctor.findOne({ _id: doctorId, hospitalId })
     .populate('departmentId', 'name prefix')
-    .populate('userId', 'profilePic')
+    .populate('userId', 'profilePic email')
     .lean();
 
   if (!doctor) {

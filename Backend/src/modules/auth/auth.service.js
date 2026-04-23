@@ -98,9 +98,27 @@ const createUser = async (userData, session = null) => {
 };
 
 
+const refreshUserToken = async (refreshToken) => {
+  const jwt = require('jsonwebtoken');
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const accessToken = generateToken(user._id, user.role, user.hospitalId);
+    return { accessToken };
+  } catch (error) {
+    throw new Error('Invalid refresh token');
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   createUser,
+  refreshUserToken,
 };
 

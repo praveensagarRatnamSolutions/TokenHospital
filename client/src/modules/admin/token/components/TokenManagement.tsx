@@ -44,7 +44,9 @@ export default function TokenManagement() {
 
    const filteredTokens = tokens.filter((t: any) => {
       const pName = typeof t.patientId === 'object' ? t.patientId?.name : '';
-      const pPhone = typeof t.patientId === 'object' ? t.patientId?.phone : '';
+      const pPhone = typeof t.patientId === 'object' 
+        ? (typeof t.patientId.phone === 'object' ? t.patientId.phone.full : t.patientId.phone) 
+        : '';
       const searchLower = search.toLowerCase();
       return pName?.toLowerCase().includes(searchLower) || pPhone?.includes(searchLower) || t.tokenNumber.toLowerCase().includes(searchLower);
    });
@@ -138,7 +140,9 @@ export default function TokenManagement() {
                               </td>
                               <td className="p-6">
                                  <p className="font-bold text-slate-900 dark:text-white capitalize truncate max-w-[150px]">{typeof token.patientId === 'object' ? token.patientId?.name : 'Unknown'}</p>
-                                 <p className="text-xs font-semibold text-slate-400">{typeof token.patientId === 'object' ? token.patientId?.phone : ''}</p>
+                                 <p className="text-xs font-semibold text-slate-400">
+                                    {formatPhone(typeof token.patientId === 'object' ? token.patientId.phone : '')}
+                                 </p>
                               </td>
                               <td className="p-6">
                                  <p className="font-bold text-slate-700 dark:text-slate-300 capitalize">{typeof token.doctorId === 'object' ? token.doctorId?.name : 'Unassigned'}</p>
@@ -197,6 +201,25 @@ export default function TokenManagement() {
          )}
       </div>
    );
+}
+
+function formatPhone(phone: any) {
+   if (!phone) return '';
+   if (typeof phone === 'string') {
+      if (phone.startsWith('91') && phone.length === 12) {
+         return `+91 ${phone.slice(2, 7)} ${phone.slice(7)}`;
+      }
+      return phone;
+   }
+   if (typeof phone === 'object') {
+      const code = phone.countryCode || '';
+      const num = phone.nationalNumber || '';
+      if (code && num) {
+         return `${code} ${num.slice(0, 5)} ${num.slice(5)}`;
+      }
+      return phone.full || '';
+   }
+   return '';
 }
 
 function StatusBadge({ status }: { status: string }) {

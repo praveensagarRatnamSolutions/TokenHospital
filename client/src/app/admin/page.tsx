@@ -12,7 +12,7 @@ import {
   Activity,
   ArrowUpRight,
   Zap,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/services/api';
@@ -49,10 +49,10 @@ export default function AdminDashboard() {
     enabled: !!hospitalId,
     queryFn: async () => {
       const response = await api.get('/api/token', {
-        params: { status: 'WAITING,CALLED' }
+        params: { status: 'WAITING,CALLED' },
       });
       return response.data.tokens;
-    }
+    },
   });
 
   const groupedQueue = useMemo(() => {
@@ -73,7 +73,9 @@ export default function AdminDashboard() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Live Hospital Status</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+              Live Hospital Status
+            </span>
           </div>
           <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">
             Global Queue <span className="text-primary italic font-serif">Board</span>
@@ -157,8 +159,12 @@ function StatusMetric({ title, value, icon: Icon, color, trend }: any) {
           </span>
         )}
       </div>
-      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{title}</p>
-      <h4 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{value}</h4>
+      <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">
+        {title}
+      </p>
+      <h4 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+        {value}
+      </h4>
     </div>
   );
 }
@@ -170,7 +176,10 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
       <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-50 dark:border-slate-800">
-        <h3 className="font-black text-lg tracking-tight truncate max-w-[200px]" title={groupKey}>
+        <h3
+          className="font-black text-lg tracking-tight truncate max-w-[200px]"
+          title={groupKey}
+        >
           {groupKey}
         </h3>
         <span className="size-2 rounded-full bg-emerald-500" />
@@ -179,35 +188,58 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
       <div className="p-6 flex-1 space-y-6">
         {/* Active Consultation Section */}
         <div>
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block">Current Patient</label>
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block">
+            Current Patient
+          </label>
           {activeToken ? (
-            <div className={`border-2 rounded-3xl p-5 relative overflow-hidden group/active transition-all ${
-               activeToken.isEmergency 
-               ? 'bg-red-600 text-white border-red-700 shadow-xl shadow-red-200 shadow-red-900/10' 
-               : 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20'
-            }`}>
+            <div
+              className={`border-2 rounded-3xl p-5 relative overflow-hidden group/active transition-all ${
+                activeToken.isEmergency
+                  ? 'bg-red-600 text-white border-red-700 shadow-xl shadow-red-200 shadow-red-900/10'
+                  : 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20'
+              }`}
+            >
               <div className="absolute top-0 right-0 p-2">
-                {activeToken.isEmergency ? <AlertTriangle className="w-4 h-4 text-white animate-pulse" /> : <Activity className="w-4 h-4 text-primary animate-pulse" />}
+                {activeToken.isEmergency ? (
+                  <AlertTriangle className="w-4 h-4 text-white animate-pulse" />
+                ) : (
+                  <Activity className="w-4 h-4 text-primary animate-pulse" />
+                )}
               </div>
               <div className="flex items-center gap-4">
-                <div className={`size-auto p-1 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg ${
-                   activeToken.isEmergency ? 'bg-white text-red-600' : 'bg-primary text-white shadow-primary/30'
-                }`}>
+                <div
+                  className={`size-auto p-1 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg ${
+                    activeToken.isEmergency
+                      ? 'bg-white text-red-600'
+                      : 'bg-primary text-white shadow-primary/30'
+                  }`}
+                >
                   {activeToken.tokenNumber}
                 </div>
                 <div className="truncate">
-                  <p className={`font-bold text-lg truncate ${activeToken.isEmergency ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                  <p
+                    className={`font-bold text-lg truncate ${activeToken.isEmergency ? 'text-white' : 'text-slate-900 dark:text-white'}`}
+                  >
                     {activeToken.patientId?.name || activeToken.patientDetails?.name}
                   </p>
-                  <p className={`text-xs font-bold uppercase tracking-widest ${activeToken.isEmergency ? 'text-white/80' : 'text-primary'}`}>
-                     {activeToken.isEmergency ? 'High Priority' : 'In Session'}
+                  {(activeToken.patientId?.phone || activeToken.patientDetails?.phone) && (
+                    <p className={`text-xs text-dark-200 dark:text-dark-400 truncate`}>
+                      {formatPhone(activeToken.patientId?.phone || activeToken.patientDetails?.phone)}
+                    </p>
+                  )}
+                  <p
+                    className={`text-xs font-bold uppercase tracking-widest ${activeToken.isEmergency ? 'text-white/80' : 'text-primary'}`}
+                  >
+                    {activeToken.isEmergency ? 'High Priority' : 'In Session'}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
             <div className="border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl p-6 text-center">
-              <p className="text-sm font-bold text-slate-300 italic">No Active Consultation</p>
+              <p className="text-sm font-bold text-slate-300 italic">
+                No Active Consultation
+              </p>
             </div>
           )}
         </div>
@@ -215,52 +247,103 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
         {/* Queue List */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Next in Queue</label>
-            <span className="text-[10px] font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">{waitingTokens.length} </span>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              Next in Queue
+            </label>
+            <span className="text-[10px] font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+              {waitingTokens.length}{' '}
+            </span>
           </div>
           <div className="space-y-2">
             {waitingTokens.slice(0, 3).map((t: any) => (
-              <div key={t._id} className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
-                 t.isEmergency 
-                 ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-800' 
-                 : 'bg-slate-50/50 dark:bg-slate-800/50 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
-              }`}>
+              <div
+                key={t._id}
+                className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                  t.isEmergency
+                    ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-800'
+                    : t.isPostponed
+                      ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/10 dark:border-yellow-800'
+                      : 'bg-slate-50/50 dark:bg-slate-800/50 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+                }`}
+              >
                 <div className="flex items-center gap-3 truncate">
-                  <div className={`size-8 border font-bold rounded-xl flex items-center justify-center text-[10px] shadow-sm ${
-                     t.isEmergency 
-                     ? 'bg-red-600 text-white border-red-700' 
-                     : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
+                  <div
+                    className={`size-8 border font-bold rounded-xl flex items-center justify-center text-[10px] shadow-sm ${
+                      t.isEmergency
+                        ? 'bg-red-600 text-white border-red-700'
+                        : t.isPostponed
+                          ? 'bg-yellow-500 text-white border-yellow-600'
+                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
                     {t.tokenNumber}
                   </div>
+
                   <div className="truncate">
-                    <p className={`font-bold text-sm truncate uppercase tracking-tighter ${t.isEmergency ? 'text-red-700 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                    <p
+                      className={`font-bold text-sm truncate uppercase tracking-tighter ${
+                        t.isEmergency
+                          ? 'text-red-700 dark:text-red-400'
+                          : t.isPostponed
+                            ? 'text-yellow-700 dark:text-yellow-400'
+                            : 'text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
                       {t.patientId?.name || t.patientDetails?.name}
                     </p>
-                    {t.isEmergency && <p className="text-[8px] font-black text-red-600 uppercase tracking-widest animate-pulse">Emergency</p>}
+                    {(t.patientId?.phone || t.patientDetails?.phone) && (
+                      <p className="text-[11px] text-slate-400 truncate">
+                         {formatPhone(t.patientId?.phone || t.patientDetails?.phone)}
+                      </p>
+                    )}
+
+                    {t.isEmergency && (
+                      <p className="text-[8px] font-black text-red-600 uppercase tracking-widest animate-pulse">
+                        Emergency
+                      </p>
+                    )}
+
+                    {t.isPostponed && !t.isEmergency && (
+                      <p className="text-[8px] font-black text-yellow-600 uppercase tracking-widest">
+                        Postponed
+                      </p>
+                    )}
                   </div>
                 </div>
-                {t.isEmergency ? <Zap className="w-3 h-3 text-red-500 fill-red-500 animate-pulse flex-shrink-0" /> : <Clock className="w-3 h-3 text-slate-300 flex-shrink-0" />}
+
+                {t.isEmergency ? (
+                  <Zap className="w-3 h-3 text-red-500 fill-red-500 animate-pulse flex-shrink-0" />
+                ) : t.isPostponed ? (
+                  <Clock className="w-3 h-3 text-yellow-500 flex-shrink-0" />
+                ) : (
+                  <Clock className="w-3 h-3 text-slate-300 flex-shrink-0" />
+                )}
               </div>
             ))}
             {waitingTokens.length > 3 && (
               <div className="text-center pt-2">
-                <p className="text-[10px] font-bold text-slate-400 tracking-widest">+ {waitingTokens.length - 3} more waiting</p>
+                <p className="text-[10px] font-bold text-slate-400 tracking-widest">
+                  + {waitingTokens.length - 3} more waiting
+                </p>
               </div>
             )}
             {waitingTokens.length === 0 && !activeToken && (
               <div className="py-2 text-center">
-                <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">No patients</p>
+                <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">
+                  No patients
+                </p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center gap-2">
+      {/* <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center gap-2">
         <Monitor className="w-3 h-3 text-slate-400" />
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kiosk View Active</span>
-      </div>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          Kiosk View Active
+        </span>
+      </div> */}
     </div>
   );
 }
@@ -281,8 +364,32 @@ function EmptyState() {
       <div className="size-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-8">
         <Ticket className="w-12 h-12 text-slate-300 dark:text-slate-600" />
       </div>
-      <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Hospital Queue Clear</h3>
-      <p className="text-slate-500 max-w-md mx-auto font-medium">No patients are currently in the queue. New registrations from the kiosk will appear here instantly.</p>
+      <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+        Hospital Queue Clear
+      </h3>
+      <p className="text-slate-500 max-w-md mx-auto font-medium">
+        No patients are currently in the queue. New registrations from the kiosk will
+        appear here instantly.
+      </p>
     </div>
   );
+}
+
+function formatPhone(phone: any) {
+  if (!phone) return '';
+  if (typeof phone === 'string') {
+    if (phone.startsWith('91') && phone.length === 12) {
+      return `+91 ${phone.slice(2, 7)} ${phone.slice(7)}`;
+    }
+    return phone;
+  }
+  if (typeof phone === 'object') {
+    const code = phone.countryCode || '';
+    const num = phone.nationalNumber || '';
+    if (code && num) {
+      return `${code} ${num.slice(0, 5)} ${num.slice(5)}`;
+    }
+    return phone.full || '';
+  }
+  return '';
 }

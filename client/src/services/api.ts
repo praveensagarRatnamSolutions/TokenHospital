@@ -1,12 +1,8 @@
 import axios from 'axios';
+import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 
 const getApiUrl = () => {
-  // Use environment variable if available
-  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  // Fallback to localhost
-  return 'http://localhost:5000';
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 };
 
 const api = axios.create({
@@ -19,12 +15,9 @@ const api = axios.create({
 // Request Interceptor
 api.interceptors.request.use(
   (config) => {
-    // Only access localStorage on client side
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
+    const token = getCookie('accessToken');
+    if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-      }
     }
     return config;
   },
@@ -37,25 +30,29 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry && typeof window !== 'undefined') {
+    const isAuthRequest = originalRequest.url?.includes('auth/login') || originalRequest.url?.includes('auth/register');
+    const isTokenExpired = error.response?.data?.code === 'TOKEN_EXPIRED';
+
+    if (error.response?.status === 401 && !originalRequest._retry && isTokenExpired && !isAuthRequest && typeof window !== 'undefined') {
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = getCookie('refreshToken');
         if (!refreshToken) throw new Error('No refresh token available');
 
         const response = await axios.post(`${getApiUrl()}/api/auth/refresh`, {
           refreshToken,
         });
 
-        const { accessToken } = response.data;
-        localStorage.setItem('accessToken', accessToken);
+        const { accessToken } = response.data.data;
+        setCookie('accessToken', accessToken, { maxAge: 60 * 60 * 24 * 7 });
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        deleteCookie('accessToken');
+        deleteCookie('refreshToken');
+        deleteCookie('userRole');
         localStorage.removeItem('userData');
         return Promise.reject(refreshError);
       }

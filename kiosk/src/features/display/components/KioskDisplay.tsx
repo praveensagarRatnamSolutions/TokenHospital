@@ -35,7 +35,7 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
   onToggleTheme,
 }) => {
   const { state, actions } = useKioskDisplay(code);
-
+  
   if (state.loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white overflow-hidden transition-colors duration-500">
@@ -98,7 +98,7 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
         );
       default:
         return (
-          <div className="w-screen h-screen relative overflow-hidden">
+          <div className="w-screen h-screen relative overflow-hidden" onClick={actions.handleStartProcess}>
             {/* Full-screen carousel — ads + department queue slides interleaved */}
             <AdCarousel
               ads={state.kiosk.ads}
@@ -108,7 +108,7 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
             />
 
             {/* "Get Token" CTA — floats over the carousel */}
-            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20">
+            {/* <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20">
               <motion.button
                 onClick={actions.handleStartProcess}
                 animate={{ y: [0, -12, 0] }}
@@ -135,7 +135,7 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
                   Tap to Get Token
                 </span>
               </motion.button>
-            </div>
+            </div> */}
           </div>
         );
     }

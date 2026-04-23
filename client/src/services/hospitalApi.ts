@@ -4,7 +4,12 @@ export interface Hospital {
   _id: string;
   name: string;
   email: string;
-  phone: string;
+  phone: string | {
+    full: string;
+    countryCode: string;
+    country: string;
+    nationalNumber: string;
+  };
   address: {
     street: string;
     city: string;

@@ -15,7 +15,7 @@ const searchPatient = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Phone number is required' });
         }
 
-        const patient = await Patient.findOne({ hospitalId: req.hospitalId, phone }).lean();
+        const patient = await Patient.findOne({ hospitalId: req.hospitalId, 'phone.full': phone }).lean();
         
         if (!patient) {
             return res.status(404).json({ success: false, message: 'Patient not found' });
@@ -80,7 +80,8 @@ const createConsultation = async (req, res, next) => {
     try {
         const { id: patientId } = req.params;
         const hospitalId = req.hospitalId;
-        const consultationData = { ...req.body, patientId, hospitalId };
+        const doctorId = req.user.doctorId || req.user._id;
+        const consultationData = { ...req.body, patientId, hospitalId, doctorId };
 
         const consultation = await Consultation.create(consultationData);
         res.status(201).json({ success: true, data: consultation });

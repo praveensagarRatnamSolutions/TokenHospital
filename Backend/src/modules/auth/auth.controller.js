@@ -64,8 +64,31 @@ const getMe = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Refresh access token
+ * @route   POST /api/auth/refresh
+ * @access  Public
+ */
+const refresh = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return res.status(400).json({ success: false, message: 'Refresh token is required' });
+        }
+
+        const data = await authService.refreshUserToken(refreshToken);
+        res.status(200).json({
+            success: true,
+            data,
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     register,
     login,
     getMe,
+    refresh,
 };

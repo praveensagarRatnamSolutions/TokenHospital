@@ -37,50 +37,48 @@ const doctorSchema = new mongoose.Schema(
             required: [true, 'Experience is required'],
         },
 
-        // ✅ Availability (day-wise)
+        education: {
+            type: String, // e.g. MBBS, MD
+        },
+
+        // ✅ Availability (day-wise with sessions)
         availability: [
             {
                 day: {
                     type: String, // "Monday"
                     required: true,
                 },
-                from: {
-                    type: String, // "09:00"
-                    required: true,
-                },
-                to: {
-                    type: String, // "17:00"
-                    required: true,
-                },
+                sessions: [
+                    {
+                        label: {
+                            type: String, // "Morning", "Evening"
+                        },
+                        from: {
+                            type: String, // "09:00"
+                            required: true,
+                        },
+                        to: {
+                            type: String, // "13:00"
+                            required: true,
+                        },
+                        maxTokens: {
+                            type: Number, // tokens only for this session
+                        },
+                        avgTimePerPatient: {
+                            type: Number, // override global if needed
+                        },
+                        breaks: [
+                            {
+                                from: String,
+                                to: String,
+                                label: String, // "Tea Break"
+                            },
+                        ],
+                    },
+                ],
             },
         ],
 
-        // ✅ Token Configuration
-        tokenConfig: {
-            maxPerDay: {
-                type: Number,
-                required: [true, 'Max tokens per day required'],
-            },
-            avgTimePerPatient: {
-                type: Number, // minutes
-                default: 10,
-            },
-        },
-
-        // ✅ Live Queue Tracking
-        currentToken: {
-            type: Number,
-            default: 0,
-        },
-
-        // ✅ Optional Break Time
-        breaks: [
-            {
-                from: String,
-                to: String,
-                label: String, // Added label (e.g., "Lunch Break")
-            },
-        ],
         // ✅ Consultation Fee
         consultationFee: {
             type: Number,

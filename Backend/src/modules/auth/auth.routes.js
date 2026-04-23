@@ -101,6 +101,8 @@ router.post("/login", loginValidation, validateRequest, authController.login);
  *       401:
  *         description: Not authorized
  */
+router.post("/refresh", authController.refresh);
+
 router.get("/me", protect, authController.getMe);
 
 module.exports = router;

@@ -64,11 +64,13 @@ export function Sidebar() {
 
       {/* Mobile Menu */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger className="md:hidden">
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
+        <SheetTrigger
+          render={
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu className="h-6 w-6" />
+            </Button>
+          }
+        />
         <SheetContent side="left" className="w-64 p-0">
           <SidebarContent />
         </SheetContent>

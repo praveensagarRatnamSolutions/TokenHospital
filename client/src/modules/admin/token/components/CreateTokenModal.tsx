@@ -6,6 +6,9 @@ import { X, Search, CheckCircle2, Ticket, User, Stethoscope, Banknote, CreditCar
 import api from '@/services/api';
 import { useCreateToken, useCreatePaymentOrder, useVerifyOnlinePayment } from '../hooks';
 
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
 interface CreateTokenModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,7 +20,7 @@ export default function CreateTokenModal({ isOpen, onClose, hospitalId }: Create
   const [loading, setLoading] = useState(false);
 
   // Form State
-  const [patientPhone, setPatientPhone] = useState('');
+  const [patientPhone, setPatientPhone] = useState<any>({ full: '' });
   const [patientName, setPatientName] = useState('');
   const [patientAge, setPatientAge] = useState('');
   const [patientGender, setPatientGender] = useState<'Male' | 'Female' | 'Other'>('Male');
@@ -112,7 +115,7 @@ export default function CreateTokenModal({ isOpen, onClose, hospitalId }: Create
           },
           prefill: {
             name: patientName,
-            contact: patientPhone
+            contact: patientPhone.full
           },
           theme: { color: "#3b82f6" }
         };
@@ -153,9 +156,23 @@ export default function CreateTokenModal({ isOpen, onClose, hospitalId }: Create
                   <h3 className="font-bold uppercase tracking-widest text-xs">1. Patient Information</h3>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="md:col-span-1">
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phone Number</label>
-                    <input required type="tel" value={patientPhone} onChange={e => setPatientPhone(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary outline-none" placeholder="+91..." />
+                    <PhoneInput
+                      country={'in'}
+                      value={patientPhone.full}
+                      onChange={(value, data: any) => {
+                          setPatientPhone({
+                              full: value,
+                              countryCode: `+${data.dialCode}`,
+                              country: data.countryCode?.toUpperCase(),
+                              nationalNumber: value.replace(data.dialCode, '')
+                          });
+                      }}
+                      inputClass="!w-full !p-3 !bg-slate-50 dark:!bg-slate-800 !border-none !rounded-xl !focus:!ring-2 !focus:!ring-primary !outline-none"
+                      containerClass="!w-full"
+                      buttonClass="!bg-slate-50 dark:!bg-slate-800 !border-none !rounded-l-xl"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
@@ -208,18 +225,18 @@ export default function CreateTokenModal({ isOpen, onClose, hospitalId }: Create
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Method</label>
                     <div className="flex gap-2">
-                      <button type="button" onClick={() => setPaymentType('CASH')} className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'CASH' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}>
-                         <Banknote className="w-5 h-5 mb-1" />
-                         <span className="text-xs font-bold">CASH</span>
-                      </button>
-                      <button type="button" onClick={() => setPaymentType('UPI')} className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'UPI' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}>
-                         <Smartphone className="w-5 h-5 mb-1" />
-                         <span className="text-xs font-bold">UPI</span>
-                      </button>
-                      <button type="button" onClick={() => setPaymentType('CARD')} className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'CARD' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}>
-                         <CreditCard className="w-5 h-5 mb-1" />
-                         <span className="text-xs font-bold">CARD</span>
-                      </button>
+                       <button type="button" onClick={() => setPaymentType('CASH')} className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'CASH' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}>
+                          <Banknote className="w-5 h-5 mb-1" />
+                          <span className="text-xs font-bold">CASH</span>
+                       </button>
+                       <button type="button" onClick={() => setPaymentType('UPI')} className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'UPI' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}>
+                          <Smartphone className="w-5 h-5 mb-1" />
+                          <span className="text-xs font-bold">UPI</span>
+                       </button>
+                       <button type="button" onClick={() => setPaymentType('CARD')} className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'CARD' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}>
+                          <CreditCard className="w-5 h-5 mb-1" />
+                          <span className="text-xs font-bold">CARD</span>
+                       </button>
                     </div>
                   </div>
                </div>

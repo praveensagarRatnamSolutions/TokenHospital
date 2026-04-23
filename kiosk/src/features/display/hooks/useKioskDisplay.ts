@@ -24,7 +24,7 @@ export const useKioskDisplay = (code: string) => {
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [generatedToken, setGeneratedToken] = useState<any>(null);
-
+  
   const isOnline = useOnlineStatus();
   useSync(isOnline);
 
@@ -67,6 +67,7 @@ export const useKioskDisplay = (code: string) => {
 
       // Grouped department queue for the kiosk display
       socketService.on("kiosk-queue-updated", (data: DepartmentQueue[]) => {
+        console.log("Received queue update via socket", data);
         setDepartmentQueue(data);
         dbStore.set("tokens", "current_dept_queue", data);
       });

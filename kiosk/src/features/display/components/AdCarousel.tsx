@@ -27,6 +27,8 @@ const AdCarousel: React.FC<AdCarouselProps> = ({
     onLayoutChange,
   );
 
+  
+
   if (state.slides.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-slate-950 text-white/20 gap-4">
@@ -68,6 +70,7 @@ const AdCarousel: React.FC<AdCarouselProps> = ({
               onVideoEnd={actions.handleVideoEnd}
             />
           ) : (
+            
             <DeptSlideView
               dept={(state.activeSlide as DeptSlide).dept}
               slideIndex={state.currentIndex}

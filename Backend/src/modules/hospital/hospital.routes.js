@@ -69,7 +69,7 @@ const { protect, authorize } = require("../../middlewares/authMiddleware");
 router.post(
   "/",
   protect,
-  authorize("superadmin"),
+  authorize("SUPERADMIN"),
   createHospitalValidation,
   validateRequest,
   hospitalController.createHospital,
@@ -98,7 +98,7 @@ router.post(
 router.get(
   "/",
   protect,
-  authorize("superadmin"),
+  authorize("SUPERADMIN"),
   hospitalController.getAllHospitals,
 );
 
@@ -127,7 +127,7 @@ router.get(
 router.get(
   "/:id",
   protect,
-  authorize("superadmin"),
+  authorize("SUPERADMIN"),
   hospitalController.getHospitalById,
 );
 
@@ -164,7 +164,7 @@ router.get(
 router.patch(
   "/:id",
   protect,
-  authorize("superadmin"),
+  authorize("SUPERADMIN"),
   updateHospitalValidation,
   validateRequest,
   hospitalController.updateHospital,
@@ -195,7 +195,7 @@ router.patch(
 router.delete(
   "/:id",
   protect,
-  authorize("superadmin"),
+  authorize("SUPERADMIN"),
   hospitalController.deleteHospital,
 );
 
@@ -224,7 +224,7 @@ router.delete(
 router.patch(
   "/:id/deactivate",
   protect,
-  authorize("superadmin"),
+  authorize("SUPERADMIN"),
   hospitalController.deactivateHospital,
 );
 
@@ -253,7 +253,7 @@ router.patch(
 router.patch(
   "/:id/activate",
   protect,
-  authorize("superadmin"),
+  authorize("SUPERADMIN"),
   hospitalController.activateHospital,
 );
 

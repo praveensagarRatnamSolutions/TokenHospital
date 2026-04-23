@@ -1,7 +1,12 @@
 export interface TokenPatientDetails {
   _id?: string;
   name: string;
-  phone: string;
+  phone: string | {
+    full: string;
+    countryCode?: string;
+    country?: string;
+    nationalNumber?: string;
+  };
   age?: number;
   gender?: 'Male' | 'Female' | 'Other';
 }

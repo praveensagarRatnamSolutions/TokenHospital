@@ -49,7 +49,7 @@ export function HospitalForm({ hospital, onClose, onSuccess }: HospitalFormProps
         ...INITIAL_STATE,
         hospitalName: hospital.name || '',
         email: hospital.email || '',
-        phone: hospital.phone || '',
+        phone: typeof hospital.phone === 'object' ? hospital.phone.full : hospital.phone || '',
         address: {
           street: hospital.address?.street || '',
           city: hospital.address?.city || '',

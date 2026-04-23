@@ -16,12 +16,14 @@ const {
 const resolvePatient = async (hospitalId, patientData) => {
   const { name, phone, age, gender } = patientData;
 
-  let patient = await Patient.findOne({ hospitalId, phone });
+  // Search by the full phone number string
+  const phoneFull = typeof phone === 'object' ? phone.full : phone;
+  let patient = await Patient.findOne({ hospitalId, 'phone.full': phoneFull });
 
   if (!patient) {
     patient = await Patient.create({
       name,
-      phone,
+      phone: typeof phone === 'object' ? phone : { full: phone },
       age,
       gender,
       hospitalId,
@@ -96,7 +98,7 @@ const autoAssignDoctor = async (hospitalId, departmentId, date) => {
     weekday: 'long',
   });
   const availableToday = doctors.filter((doctor) =>
-    doctor.availability?.some((a) => a.day === dayOfWeek)
+    doctor.availability?.some((a) => a.day === dayOfWeek && a.sessions?.length > 0)
   );
 
   if (!availableToday.length) return null;
@@ -132,7 +134,10 @@ const autoAssignDoctor = async (hospitalId, departmentId, date) => {
 
   for (const doctor of availableToday) {
     const count = countMap[doctor._id.toString()] || 0;
-    const maxTokens = doctor.tokenConfig?.maxPerDay || 50;
+
+    // Calculate daily capacity from sessions
+    const daySchedule = doctor.availability?.find((a) => a.day === dayOfWeek);
+    const maxTokens = daySchedule?.sessions?.reduce((sum, s) => sum + (s.maxTokens || 0), 0) || 50;
 
     if (count < maxTokens && count < minCount) {
       minCount = count;
@@ -191,18 +196,32 @@ const createToken = async (tokenData) => {
     const dayOfWeek = new Date(targetDate).toLocaleDateString('en-US', {
       weekday: 'long',
     });
-    const hasSchedule = doctor.availability?.some((a) => a.day === dayOfWeek);
-    if (!hasSchedule) throw new Error(`Doctor does not work on ${dayOfWeek}s`);
 
-    const currentQueue = await Token.countDocuments({
-      hospitalId,
-      doctorId: assignedDoctorId,
-      appointmentDate: targetDate,
-      status: { $in: ['WAITING', 'CALLED'] },
-    });
+    if (!tokenData.isEmergency) {
+      const hasSchedule = doctor.availability?.some(
+        (a) => a.day === dayOfWeek && a.sessions?.length > 0
+      );
+      if (!hasSchedule) throw new Error(`Doctor does not work on ${dayOfWeek}s`);
 
-    if (currentQueue >= (doctor.tokenConfig?.maxPerDay || 50)) {
-      throw new Error('Doctor has reached maximum token capacity for the day');
+      // Calculate daily capacity from sessions
+      const daySchedule = doctor.availability?.find((a) => a.day === dayOfWeek);
+      const maxTokens =
+        daySchedule?.sessions?.reduce((sum, s) => sum + (s.maxTokens || 0), 0) ||
+        50;
+
+      // Calculate current queue count for this doctor on this day
+      const currentQueue = await Token.countDocuments({
+        hospitalId,
+        doctorId: assignedDoctorId,
+        appointmentDate: targetDate,
+        status: { $in: ['WAITING', 'CALLED'] },
+      });
+
+      if (currentQueue >= maxTokens) {
+        throw new Error(
+          'Doctor has reached maximum token capacity for the day'
+        );
+      }
     }
   }
 
@@ -214,7 +233,11 @@ const createToken = async (tokenData) => {
   );
 
   // 4. Create Token
-  const status = tokenData.paymentType === 'CASH' ? 'PROVISIONAL' : 'WAITING';
+  // Emergencies are always WAITING regardless of payment type
+  const status =
+    tokenData.isEmergency || tokenData.paymentType !== 'CASH'
+      ? 'WAITING'
+      : 'PROVISIONAL';
 
   const token = await Token.create({
     tokenNumber,
@@ -263,7 +286,6 @@ const getCurrentToken = async (hospitalId, doctorId) => {
     .populate('doctorId', 'name')
     .populate('patientId', 'name phone age gender')
     .lean();
-  console.log('current token', token);
 
   return token;
 };
@@ -298,7 +320,7 @@ const getTokens = async (hospitalId, filters = {}) => {
       .populate('doctorId', 'name')
       .populate('patientId', 'name phone age gender')
       // Match the same sort order used in callNextToken
-      .sort({ isEmergency: -1, sortKey: 1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(),
@@ -407,7 +429,7 @@ const callNextToken = async (doctorId, hospitalId) => {
         status: 'EMPTY',
       });
       broadcastKioskQueue(hospitalId);
-    } catch (e) {}
+    } catch (e) { }
     return null;
   }
 
@@ -483,7 +505,7 @@ const verifyCashPayment = async (tokenId, hospitalId) => {
     } = require('../../socket/socketHandler');
     broadcastToHospital(hospitalId, 'queue-updated', token);
     broadcastKioskQueue(hospitalId);
-  } catch (e) {}
+  } catch (e) { }
 
   return token;
 };
@@ -553,7 +575,7 @@ const skipToken = async (tokenId, hospitalId, doctorId) => {
     } = require('../../socket/socketHandler');
     broadcastToHospital(hospitalId, 'queue-updated', updated);
     broadcastKioskQueue(hospitalId);
-  } catch (e) {}
+  } catch (e) { }
 
   return updated;
 };
