@@ -159,6 +159,7 @@ router.patch('/:id/complete', protect, authorize('ADMIN', 'DOCTOR'), tokenContro
  *         description: Next token called or no tokens in queue
  */
 router.post('/next', protect, authorize('ADMIN', 'DOCTOR'), tokenController.callNextToken);
+router.post('/:id/call', protect, authorize('ADMIN', 'DOCTOR'), tokenController.callTokenById);
 
 /**
  * @swagger

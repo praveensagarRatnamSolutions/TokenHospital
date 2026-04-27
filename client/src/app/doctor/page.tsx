@@ -43,6 +43,7 @@ import DoctorEmergencyModal from './components/DoctorEmergencyModal';
 
 // Helper for phone formatting
 function formatPhone(phone: any) {
+  console.log('Formatting phone:', phone);
   if (!phone) return '';
   if (typeof phone === 'string') {
     if (phone.startsWith('91') && phone.length === 12) {
@@ -126,19 +127,19 @@ export default function DoctorDashboard() {
 
   const orderedUpcomingTokens = upcomingTokens
     ? [...upcomingTokens].sort((a: any, b: any) => {
-      // 1. Emergency first
-      if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
+        // 1. Emergency first
+        if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
 
-      // 2. Use sortKey (crucial for postpone logic)
-      const timeA = new Date(a.sortKey || a.createdAt || 0).getTime();
-      const timeB = new Date(b.sortKey || b.createdAt || 0).getTime();
-      if (timeA !== timeB) return timeA - timeB;
+        // 2. Use sortKey (crucial for postpone logic)
+        const timeA = new Date(a.sortKey || a.createdAt || 0).getTime();
+        const timeB = new Date(b.sortKey || b.createdAt || 0).getTime();
+        if (timeA !== timeB) return timeA - timeB;
 
-      // 3. Fallback to token number numeric value
-      const numA = parseInt(a.tokenNumber?.toString().replace(/\D/g, '') || '0', 10);
-      const numB = parseInt(b.tokenNumber?.toString().replace(/\D/g, '') || '0', 10);
-      return numA - numB;
-    })
+        // 3. Fallback to token number numeric value
+        const numA = parseInt(a.tokenNumber?.toString().replace(/\D/g, '') || '0', 10);
+        const numB = parseInt(b.tokenNumber?.toString().replace(/\D/g, '') || '0', 10);
+        return numA - numB;
+      })
     : [];
 
   const nextToken = orderedUpcomingTokens[0];
@@ -220,6 +221,16 @@ export default function DoctorDashboard() {
       resetForm();
     },
   });
+
+  const callSpecificTokenMutation = useMutation({
+    mutationFn: (data: any) => api.post(`/api/token/${data.id}/call`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentToken', doctorId] });
+      queryClient.invalidateQueries({ queryKey: ['upcomingTokens', doctorId] });
+      refetchStats();
+      resetForm();
+    },
+  }); // For future use if we want to call a specific token from the queue
 
   const completeMutation = useMutation({
     mutationFn: (data: { id: string; consultation: any }) =>
@@ -305,6 +316,10 @@ export default function DoctorDashboard() {
       consultation:
         diagnosis || symptoms || Object.values(vitals).some((v) => v) ? consultation : {},
     });
+  };
+
+  const handleCallSpecificToken = (tokenId: string) => {
+    callSpecificTokenMutation.mutate({ id: tokenId ,doctorId});
   };
 
   return (
@@ -714,8 +729,8 @@ export default function DoctorDashboard() {
                       <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">
                         Next Patient
                       </p>
-
                     </div>
+
                     <div className="flex flex-col items-end gap-2">
                       <div
                         className={cn(
@@ -741,33 +756,50 @@ export default function DoctorDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-5">
-                    <div className={cn(
-                      "min-w-14 h-14 px-3 rounded-3xl flex items-center justify-center font-black text-lg shadow-lg",
-                      nextToken.isEmergency ? "bg-red-500 text-white shadow-red-500/20" : "bg-slate-950 text-white"
-                    )}>
+                    <div
+                      className={cn(
+                        'min-w-14 h-14 px-3 rounded-3xl flex items-center justify-center font-black text-lg shadow-lg',
+                        nextToken.isEmergency
+                          ? 'bg-red-500 text-white shadow-red-500/20'
+                          : 'bg-slate-950 text-white',
+                      )}
+                    >
                       {nextToken.tokenNumber}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className={cn(
-                        "text-xl font-black truncate",
-                        nextToken.isEmergency ? "text-red-500 dark:text-red-400" : "text-slate-900 dark:text-white"
-                      )}>
+                      <p
+                        className={cn(
+                          'text-xl font-black truncate',
+                          nextToken.isEmergency
+                            ? 'text-red-500 dark:text-red-400'
+                            : 'text-slate-900 dark:text-white',
+                        )}
+                      >
                         {nextToken.patientId?.name || 'Unknown Patient'}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex flex-col items-start gap-2 mt-1">
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
                           {nextToken.patientId?.age} yrs ·{' '}
                           {nextToken.patientId?.gender || 'N/A'}
                         </p>
-                        <span className={cn(
+                        {/* <span className={cn(
                           "size-1 rounded-full",
                           nextToken.isEmergency ? "bg-red-500" : "bg-slate-300"
-                        )} />
+                        )} /> */}
                         <p className="text-xs font-medium text-slate-400 truncate">
-                          {formatPhone(nextToken.patientId?.phone)}
+                          {formatPhone(nextToken.patientId?.phone?.full) ||
+                            'No contact info'}
                         </p>
                       </div>
                     </div>
+                    {!currentToken && (
+                      <button
+                        onClick={() => handleCallSpecificToken(nextToken._id)}
+                        className="px-3 py-1.5 bg-primary text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow"
+                      >
+                        Call
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -825,6 +857,14 @@ export default function DoctorDashboard() {
                                 {token.isPostponed ? 'Postponed' : 'Waiting'}
                               </p>
                             </div>
+                            {!currentToken && (
+                              <button
+                                onClick={() => handleCallSpecificToken(token._id)}
+                                className="px-3 py-1.5 bg-primary text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow ms-auto"
+                              >
+                                Call
+                              </button>
+                            )}
                           </div>
                           {token.isPostponed && (
                             <div className="bg-amber-500/10 p-1.5 rounded-lg">
@@ -1026,7 +1066,12 @@ function QuickStatCard({ label, value, icon: Icon, color, trend }: any) {
       )}
     >
       {/* Background Watermark Icon */}
-      <Icon className={cn("absolute -right-4 -bottom-4 size-32 opacity-[0.03] dark:opacity-[0.05] -rotate-12 transition-transform group-hover:rotate-0 group-hover:scale-110", style.text)} />
+      <Icon
+        className={cn(
+          'absolute -right-4 -bottom-4 size-32 opacity-[0.03] dark:opacity-[0.05] -rotate-12 transition-transform group-hover:rotate-0 group-hover:scale-110',
+          style.text,
+        )}
+      />
 
       {/* Subtle Background Accent */}
       <div
@@ -1069,7 +1114,13 @@ function QuickStatCard({ label, value, icon: Icon, color, trend }: any) {
           ) : (
             /* Decorative Micro-Chart if no trend */
             <div className="w-16 h-8 opacity-40">
-              <svg viewBox="0 0 40 20" className={cn("w-full h-full fill-none stroke-current stroke-2", style.text)}>
+              <svg
+                viewBox="0 0 40 20"
+                className={cn(
+                  'w-full h-full fill-none stroke-current stroke-2',
+                  style.text,
+                )}
+              >
                 <path d="M0,15 Q5,5 10,12 T20,8 T30,15 T40,5" strokeLinecap="round" />
               </svg>
             </div>

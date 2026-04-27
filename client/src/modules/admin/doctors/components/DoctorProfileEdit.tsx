@@ -309,7 +309,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
           selectedFile.name,
           selectedFile.type,
         );
-        const { uploadUrl, imageUrl, key } = data.data;
+        const { uploadUrl, imageUrl, key } = data;
 
         // 2. Upload to S3
         await fetch(uploadUrl, {

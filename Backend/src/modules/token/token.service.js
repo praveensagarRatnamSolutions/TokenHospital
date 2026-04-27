@@ -98,7 +98,9 @@ const autoAssignDoctor = async (hospitalId, departmentId, date) => {
     weekday: 'long',
   });
   const availableToday = doctors.filter((doctor) =>
-    doctor.availability?.some((a) => a.day === dayOfWeek && a.sessions?.length > 0)
+    doctor.availability?.some(
+      (a) => a.day === dayOfWeek && a.sessions?.length > 0
+    )
   );
 
   if (!availableToday.length) return null;
@@ -137,7 +139,9 @@ const autoAssignDoctor = async (hospitalId, departmentId, date) => {
 
     // Calculate daily capacity from sessions
     const daySchedule = doctor.availability?.find((a) => a.day === dayOfWeek);
-    const maxTokens = daySchedule?.sessions?.reduce((sum, s) => sum + (s.maxTokens || 0), 0) || 50;
+    const maxTokens =
+      daySchedule?.sessions?.reduce((sum, s) => sum + (s.maxTokens || 0), 0) ||
+      50;
 
     if (count < maxTokens && count < minCount) {
       minCount = count;
@@ -201,13 +205,16 @@ const createToken = async (tokenData) => {
       const hasSchedule = doctor.availability?.some(
         (a) => a.day === dayOfWeek && a.sessions?.length > 0
       );
-      if (!hasSchedule) throw new Error(`Doctor does not work on ${dayOfWeek}s`);
+      if (!hasSchedule)
+        throw new Error(`Doctor does not work on ${dayOfWeek}s`);
 
       // Calculate daily capacity from sessions
       const daySchedule = doctor.availability?.find((a) => a.day === dayOfWeek);
       const maxTokens =
-        daySchedule?.sessions?.reduce((sum, s) => sum + (s.maxTokens || 0), 0) ||
-        50;
+        daySchedule?.sessions?.reduce(
+          (sum, s) => sum + (s.maxTokens || 0),
+          0
+        ) || 50;
 
       // Calculate current queue count for this doctor on this day
       const currentQueue = await Token.countDocuments({
@@ -429,7 +436,7 @@ const callNextToken = async (doctorId, hospitalId) => {
         status: 'EMPTY',
       });
       broadcastKioskQueue(hospitalId);
-    } catch (e) { }
+    } catch (e) {}
     return null;
   }
 
@@ -446,6 +453,47 @@ const callNextToken = async (doctorId, hospitalId) => {
   }
 
   return nextToken;
+};
+
+const callTokenById = async (tokenId,  hospitalId) => {
+  // Get token first
+  const token = await Token.findById(tokenId);
+
+  if (!token) throw new Error('Token not found');
+
+  const { doctorId } = token;
+
+  // Complete current CALLED token
+  await Token.updateMany(
+    { doctorId, hospitalId, status: 'CALLED' },
+    { status: 'COMPLETED', completedAt: new Date() }
+  );
+
+  // Call selected token
+  const updatedToken = await Token.findByIdAndUpdate(
+    tokenId,
+    {
+      status: 'CALLED',
+      calledAt: new Date(),
+    },
+    { new: true }
+  )
+    .populate('departmentId', 'name prefix')
+    .populate('doctorId', 'name')
+    .populate('patientId', 'name phone age gender');
+
+  // 🔊 Emit socket events
+  try {
+    const {
+      broadcastToHospital,
+      broadcastKioskQueue,
+    } = require('../../socket/socketHandler');
+
+    broadcastToHospital(hospitalId, 'queue-updated', updatedToken);
+    broadcastKioskQueue(hospitalId);
+  } catch (e) {}
+
+  return updatedToken;
 };
 
 /**
@@ -505,7 +553,7 @@ const verifyCashPayment = async (tokenId, hospitalId) => {
     } = require('../../socket/socketHandler');
     broadcastToHospital(hospitalId, 'queue-updated', token);
     broadcastKioskQueue(hospitalId);
-  } catch (e) { }
+  } catch (e) {}
 
   return token;
 };
@@ -575,7 +623,7 @@ const skipToken = async (tokenId, hospitalId, doctorId) => {
     } = require('../../socket/socketHandler');
     broadcastToHospital(hospitalId, 'queue-updated', updated);
     broadcastKioskQueue(hospitalId);
-  } catch (e) { }
+  } catch (e) {}
 
   return updated;
 };
@@ -589,4 +637,5 @@ module.exports = {
   cancelToken,
   verifyCashPayment,
   skipToken,
+  callTokenById,
 };

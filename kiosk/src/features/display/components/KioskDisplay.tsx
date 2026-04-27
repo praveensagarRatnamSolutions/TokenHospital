@@ -10,7 +10,6 @@ import {
   Minimize2,
   LogOut,
   ShieldCheck,
-  ChevronUp,
   Sun,
   Moon,
   MoreVertical,
@@ -35,7 +34,9 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
   onToggleTheme,
 }) => {
   const { state, actions } = useKioskDisplay(code);
-  
+  const userData = localStorage.getItem("kiosk_user");
+  const user = userData ? JSON.parse(userData) : null;
+  const isDoctor = user?.role === "DOCTOR";
   if (state.loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white overflow-hidden transition-colors duration-500">
@@ -98,10 +99,13 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
         );
       default:
         return (
-          <div className="w-screen h-screen relative overflow-hidden" onClick={actions.handleStartProcess}>
+          <div
+            className="w-screen h-screen relative overflow-hidden"
+            onClick={actions.handleStartProcess}
+          >
             {/* Full-screen carousel — ads + department queue slides interleaved */}
             <AdCarousel
-              ads={state.kiosk.ads}
+              ads={state.kiosk?.ads || []}
               isOnline={state.isOnline}
               departments={state.departmentQueue}
               theme={theme}

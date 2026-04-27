@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import type { User, Kiosk } from '../types';
+import type { User, Kiosk } from "../../../core/types";
 
 interface ProtectedRouteProps {
   user: User | null;

@@ -4,6 +4,7 @@ import type { KioskAd, DepartmentQueue } from "../../../core/types/index";
 import { Zap, Clock, ChevronRight, Stethoscope } from "lucide-react";
 import { useAdCarousel } from "../hooks/useAdCarousel";
 import type { DeptSlide } from "../hooks/useAdCarousel";
+import DoctorTokenPanel from "./DoctorTokenPanel";
 
 interface AdCarouselProps {
   ads: KioskAd[];
@@ -20,14 +21,16 @@ const AdCarousel: React.FC<AdCarouselProps> = ({
   departments = [],
   theme = "dark",
 }) => {
+  const userData = localStorage.getItem("kiosk_user");
+  const user = userData ? JSON.parse(userData) : null;
+  const isDoctor = user?.role === "DOCTOR";
+
   const { state, actions } = useAdCarousel(
     ads,
     isOnline,
     departments,
     onLayoutChange,
   );
-
-  
 
   if (state.slides.length === 0) {
     return (
@@ -48,6 +51,43 @@ const AdCarousel: React.FC<AdCarouselProps> = ({
     state.activeSlide?.kind === "ad"
       ? `ad-${state.activeSlide.ad.adId?._id}-${state.currentIndex}`
       : `dept-${(state.activeSlide as DeptSlide)?.dept?.id}-${state.currentIndex}`;
+
+  if (isDoctor) {
+    return (
+      <div className="flex flex-col w-full h-full">
+        {/* 🔵 80% Ads (Top) */}
+        <div className="h-[80%] w-full relative">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={slideKey}
+              className="absolute inset-0"
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {state.activeSlide?.kind === "ad" && (
+                <AdSlideView
+                  ad={state.activeSlide.ad}
+                  cloudFrontUrl={state.cloudFrontUrl}
+                  isOnline={isOnline}
+                  onVideoEnd={actions.handleVideoEnd}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* 🟣 20% Tokens (Bottom) */}
+        <div className="h-[20%] w-full bg-slate-900 border-t border-slate-800 px-6 py-3">
+          <DoctorTokenPanel
+            doctorId={user?.doctorId}
+            departments={departments}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -70,7 +110,6 @@ const AdCarousel: React.FC<AdCarouselProps> = ({
               onVideoEnd={actions.handleVideoEnd}
             />
           ) : (
-            
             <DeptSlideView
               dept={(state.activeSlide as DeptSlide).dept}
               slideIndex={state.currentIndex}
@@ -101,6 +140,7 @@ const AdSlideView: React.FC<{
       {adData.type === "video" && isOnline ? (
         <video
           src={`${cloudFrontUrl}/${adData.fileKey}`}
+          loop
           autoPlay
           muted
           playsInline
@@ -411,7 +451,6 @@ const DoctorRow: React.FC<{
           }`}
         >
           {doctor.display.current}
-          
         </motion.div>
       </div>
 

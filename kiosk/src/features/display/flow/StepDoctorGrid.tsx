@@ -13,6 +13,7 @@ interface StepDoctorGridProps {
 const StepDoctorGrid: React.FC<StepDoctorGridProps> = ({ department, onSelect, onBack }) => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
+  const cloudFrontUrl = import.meta.env.VITE_CLOUDFRONT_URL || "";
 
   useEffect(() => {
     const fetch = async () => {
@@ -82,7 +83,7 @@ const StepDoctorGrid: React.FC<StepDoctorGridProps> = ({ department, onSelect, o
                 <div className="relative">
                   <div className="size-24 rounded-3xl bg-slate-200 dark:bg-slate-800 overflow-hidden border-2 border-white dark:border-white/10 group-hover:border-sky-500/30 transition-all shadow-inner">
                     {doctor.profilePic ? (
-                      <img src={doctor.profilePic} alt={doctor.name} className="w-full h-full object-cover" />
+                      <img  src={`${cloudFrontUrl}/${doctor.profilePic}`} alt={doctor.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-sky-500/10 text-sky-500 dark:text-sky-400">
                         <User size={40} />

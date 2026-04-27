@@ -59,6 +59,17 @@ const getDoctorById = async (doctorId, hospitalId) => {
 };
 
 const updateDoctor = async (doctorId, hospitalId, updateData) => {
+  // Extract user-related fields
+  const userUpdateFields = {};
+  if (updateData.email) userUpdateFields.email = updateData.email;
+  if (updateData.profilePic)
+    userUpdateFields.profilePic = updateData.profilePic;
+
+  // Remove them from doctor update payload
+  delete updateData.email;
+  delete updateData.profilePic;
+
+  // Update Doctor
   const doctor = await Doctor.findOneAndUpdate(
     { _id: doctorId, hospitalId },
     updateData,
@@ -68,6 +79,16 @@ const updateDoctor = async (doctorId, hospitalId, updateData) => {
   if (!doctor) {
     throw new Error('Doctor not found');
   }
+
+  // Update User (if needed)
+  if (Object.keys(userUpdateFields).length > 0) {
+    await User.findOneAndUpdate(
+      { doctorId: doctorId },
+      userUpdateFields,
+      { new: true, runValidators: true }
+    );
+  }
+
   return doctor;
 };
 
@@ -108,7 +129,9 @@ const getDoctorStats = async (doctorId, hospitalId) => {
       const duration = new Date(t.completedAt) - new Date(t.calledAt);
       return acc + duration;
     }, 0);
-    avgConsultationTime = Math.round(totalTime / completedTokensToday.length / 60000); // In minutes
+    avgConsultationTime = Math.round(
+      totalTime / completedTokensToday.length / 60000
+    ); // In minutes
   }
 
   // 3. Waiting tokens currently
