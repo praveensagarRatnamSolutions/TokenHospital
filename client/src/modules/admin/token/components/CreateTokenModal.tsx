@@ -25,6 +25,7 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store/store';
+import PhoneNumberInput from '@/components/common/phone-input';
 
 export default function CreateTokenPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function CreateTokenPage() {
   const [patientGender, setPatientGender] = useState<'Male' | 'Female' | 'Other'>('Male');
   const [departmentId, setDepartmentId] = useState('');
   const [doctorId, setDoctorId] = useState('');
-  const [paymentType, setPaymentType] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
+  const [paymentMethod, setpaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
   const [isEmergency, setIsEmergency] = useState(false);
   const [appointmentDate, setAppointmentDate] = useState(
     new Date().toISOString().split('T')[0],
@@ -77,7 +78,7 @@ export default function CreateTokenPage() {
         departmentId,
         doctorId,
         appointmentDate: new Date().toISOString().split('T')[0],
-        paymentType,
+        paymentMethod,
         patientDetails: {
           name: patientName,
           phone: patientPhone,
@@ -87,7 +88,7 @@ export default function CreateTokenPage() {
         isEmergency,
       });
 
-      if (paymentType !== 'CASH') {
+      if (paymentMethod !== 'CASH') {
         // ... Razorpay logic remains same as previous ...
       } else {
         router.push('/admin/token');
@@ -117,12 +118,21 @@ export default function CreateTokenPage() {
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
                   Phone Number
                 </label>
-                <PhoneInput
+                {/* <PhoneInput
                   country={'in'}
                   value={patientPhone.full}
                   onChange={(v) => setPatientPhone({ full: v })}
                   inputClass="!w-full !h-14 !bg-slate-50 dark:!bg-slate-800 !border-none !rounded-2xl !font-bold"
+                /> */}
+
+                <PhoneNumberInput
+                  value={patientPhone.full} // ✅ string for UI
+                  onChange={(val) => setPatientPhone(val)} // ✅ full object
+                  showLabel={false} // ✅ hide internal label since we have our own
+                  
                 />
+
+                
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
@@ -180,24 +190,24 @@ export default function CreateTokenPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => setPaymentType('CASH')}
-                    className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'CASH' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}
+                    onClick={() => setpaymentMethod('CASH')}
+                    className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentMethod === 'CASH' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}
                   >
                     <Banknote className="w-5 h-5 mb-1" />
                     <span className="text-xs font-bold">CASH</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setPaymentType('UPI')}
-                    className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'UPI' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}
+                    onClick={() => setpaymentMethod('UPI')}
+                    className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentMethod === 'UPI' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}
                   >
                     <Smartphone className="w-5 h-5 mb-1" />
                     <span className="text-xs font-bold">UPI</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setPaymentType('CARD')}
-                    className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentType === 'CARD' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}
+                    onClick={() => setpaymentMethod('CARD')}
+                    className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentMethod === 'CARD' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}
                   >
                     <CreditCard className="w-5 h-5 mb-1" />
                     <span className="text-xs font-bold">CARD</span>
@@ -445,13 +455,13 @@ export default function CreateTokenPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center bg-black/20 p-4 rounded-2xl border border-white/5">
                     <div className="flex items-center gap-3">
-                      {paymentType === 'CASH' ? (
+                      {paymentMethod === 'CASH' ? (
                         <Banknote className="w-5 h-5" />
                       ) : (
                         <Smartphone className="w-5 h-5" />
                       )}
                       <span className="text-xs font-black uppercase tracking-widest">
-                        {paymentType} PAYMENT
+                        {paymentMethod} PAYMENT
                       </span>
                     </div>
                     {isEmergency && (

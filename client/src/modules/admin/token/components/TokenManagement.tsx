@@ -193,27 +193,27 @@ export default function TokenManagement() {
                     </td>
                     <td className="p-6">
                       <p className="font-bold text-slate-900 dark:text-white capitalize truncate max-w-[150px]">
-                        {typeof token.patientId === 'object'
-                          ? token.patientId?.name
+                        {typeof token.patient === 'object'
+                          ? token.patient?.name
                           : 'Unknown'}
                       </p>
                       <p className="text-xs font-semibold text-slate-400">
                         {formatPhone(
-                          typeof token.patientId === 'object'
-                            ? token.patientId.phone
+                          typeof token.patient === 'object'
+                            ? token.patient.phone
                             : '',
                         )}
                       </p>
                     </td>
                     <td className="p-6">
                       <p className="font-bold text-slate-700 dark:text-slate-300 capitalize">
-                        {typeof token.doctorId === 'object'
-                          ? token.doctorId?.name
+                        {typeof token.doctor === 'object'
+                          ? token.doctor?.name
                           : 'Unassigned'}
                       </p>
                       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                        {typeof token.departmentId === 'object'
-                          ? token.departmentId?.name
+                        {typeof token.department === 'object'
+                          ? token.department?.name
                           : 'General'}
                       </p>
                     </td>
@@ -221,7 +221,7 @@ export default function TokenManagement() {
                       <StatusBadge status={token.status} />
                     </td>
                     <td className="p-6 text-center">
-                      {token.status === 'PROVISIONAL' ? (
+                      {token.payment?.status === 'pending' ? (
                         <div className="inline-flex flex-col items-center">
                           <span className="px-3 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[10px] font-black uppercase tracking-widest mb-1.5 flex items-center gap-1">
                             <AlertCircle className="w-3 h-3" /> Pending Cash

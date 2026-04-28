@@ -118,7 +118,7 @@ export default function DoctorDashboard() {
     queryKey: ['upcomingTokens', doctorId],
     enabled: !!doctorId,
     queryFn: async () => {
-      const response = await api.get('/api/token', {
+      const response = await api.get('/api/token/doctor', {
         params: { doctorId, status: 'WAITING', limit: 10 },
       });
       return response.data.tokens;
@@ -775,19 +775,19 @@ export default function DoctorDashboard() {
                             : 'text-slate-900 dark:text-white',
                         )}
                       >
-                        {nextToken.patientId?.name || 'Unknown Patient'}
+                        {nextToken.patient?.name || 'Unknown Patient'}
                       </p>
                       <div className="flex flex-col items-start gap-2 mt-1">
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
-                          {nextToken.patientId?.age} yrs ·{' '}
-                          {nextToken.patientId?.gender || 'N/A'}
+                          {nextToken.patient?.age} yrs ·{' '}
+                          {nextToken.patient?.gender || 'N/A'}
                         </p>
                         {/* <span className={cn(
                           "size-1 rounded-full",
                           nextToken.isEmergency ? "bg-red-500" : "bg-slate-300"
                         )} /> */}
                         <p className="text-xs font-medium text-slate-400 truncate">
-                          {formatPhone(nextToken.patientId?.phone?.full) ||
+                          {formatPhone(nextToken.patient?.phone?.full) ||
                             'No contact info'}
                         </p>
                       </div>
@@ -850,10 +850,10 @@ export default function DoctorDashboard() {
                                       : 'text-slate-900 dark:text-white',
                                 )}
                               >
-                                {token.patientId?.name}
+                                {token.patient?.name}
                               </p>
                               <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest leading-tight">
-                                {token.patientId?.age}yrs •{' '}
+                                {token.patient?.age}yrs •{' '}
                                 {token.isPostponed ? 'Postponed' : 'Waiting'}
                               </p>
                             </div>

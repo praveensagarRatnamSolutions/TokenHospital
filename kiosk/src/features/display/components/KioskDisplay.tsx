@@ -34,9 +34,6 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
   onToggleTheme,
 }) => {
   const { state, actions } = useKioskDisplay(code);
-  const userData = localStorage.getItem("kiosk_user");
-  const user = userData ? JSON.parse(userData) : null;
-  const isDoctor = user?.role === "DOCTOR";
   if (state.loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white overflow-hidden transition-colors duration-500">
@@ -111,35 +108,7 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
               theme={theme}
             />
 
-            {/* "Get Token" CTA — floats over the carousel */}
-            {/* <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20">
-              <motion.button
-                onClick={actions.handleStartProcess}
-                animate={{ y: [0, -12, 0] }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className={`h-20 px-14 rounded-full border flex flex-col items-center justify-center group transition-all shadow-2xl active:scale-95 ${
-                  theme === "dark" 
-                    ? "bg-white/10 backdrop-blur-3xl border-white/25 shadow-black/40 hover:bg-teal-500 hover:border-teal-400" 
-                    : "bg-white shadow-blue-500/10 border-slate-200 hover:bg-blue-600 hover:border-blue-500"
-                }`}
-              >
-                <ChevronUp
-                  className={`transition-colors duration-500 group-hover:text-white group-hover:animate-bounce mb-0.5 ${
-                    theme === "dark" ? "text-white" : "text-blue-600"
-                  }`}
-                  size={28}
-                />
-                <span className={`text-base font-black uppercase tracking-[0.3em] group-hover:scale-105 transition-all group-hover:text-white ${
-                  theme === "dark" ? "text-white" : "text-slate-900"
-                }`}>
-                  Tap to Get Token
-                </span>
-              </motion.button>
-            </div> */}
+            
           </div>
         );
     }

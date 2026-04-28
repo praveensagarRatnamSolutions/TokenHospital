@@ -93,6 +93,7 @@ router.post('/', protect, createTokenValidation, validateRequest, tokenControlle
  *         description: List of tokens
  */
 router.get('/', protect, tokenController.getTokens);
+router.get('/doctor', protect, tokenController.getDoctorQueue);
 
 /**
  * @swagger

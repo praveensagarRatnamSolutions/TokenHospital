@@ -15,6 +15,10 @@ const DoctorTokenPanel = ({ doctorId, departments }: DoctorTokenPanelProps) => {
 
   const { display, queue = [], meta } = doctor;
 
+  // ✅ Check if current token is emergency
+  const isEmergencyCurrent =
+    display?.emergency && display?.current === display?.emergency;
+
   const steps = [
     { label: display.current || "--", type: "current" },
     { label: display.next || "--", type: "next" },
@@ -26,60 +30,70 @@ const DoctorTokenPanel = ({ doctorId, departments }: DoctorTokenPanelProps) => {
       {/* 🟢 CIRCLE SEQUENCE */}
       <div className="flex items-center gap-4">
         {steps.map((step, i) => (
-          <div key={i} className="flex items-center ">
+          <div key={i} className="flex items-center">
             <div className="flex flex-col items-center relative">
-              {/* CURRENT Indicator (Floating Arrow) */}
+              {/* CURRENT Indicator */}
               {step.type === "current" && (
                 <div className="absolute -top-10 animate-bounce">
                   <ArrowDown
                     size={32}
-                    className="text-emerald-500 fill-emerald-500/20"
+                    className={`${
+                      isEmergencyCurrent
+                        ? "text-red-500 fill-red-500/20"
+                        : "text-emerald-500 fill-emerald-500/20"
+                    }`}
                   />
                 </div>
               )}
 
-              {/* 🎯 THE CIRCLE */}
+              {/* 🎯 CIRCLE */}
               <div
                 className={`
                   flex items-center justify-center rounded-full transition-all duration-500 text-center
                   ${
                     step.type === "current"
-                      ? "w-28 h-28 bg-emerald-500 text-white mx-auto text-2xl font-black shadow-[0_0_40px_rgba(16,185,129,0.4)] ring-8 ring-emerald-500/20 "
+                      ? isEmergencyCurrent
+                        ? "w-28 h-28 bg-red-600 text-white mx-auto text-2xl font-black shadow-[0_0_40px_rgba(239,68,68,0.5)] ring-8 ring-red-500/30 animate-pulse"
+                        : "w-28 h-28 bg-emerald-500 text-white mx-auto text-2xl font-black shadow-[0_0_40px_rgba(16,185,129,0.4)] ring-8 ring-emerald-500/20"
                       : step.type === "next"
-                        ? "w-20 h-20 bg-amber-500 text-black text-xl font-bold ring-4 ring-amber-500/20 "
-                        : "w-16 h-16 bg-slate-800 text-slate-400 text-xl font-bold border border-slate-700"
+                        ? "w-20 h-20 bg-amber-500 text-black text-xl font-bold ring-4 ring-amber-500/20"
+                        : "w-18 h-18 bg-slate-800 text-blue-400 text-l font-bold border border-blue-700"
                   }
                 `}
               >
                 {step.label}
               </div>
 
-              {/* Label below circle for clarity */}
+              {/* LABEL */}
               <span
                 className={`mt-2 text-1xl font-bold tracking-[0.2em] uppercase ${
                   step.type === "current"
-                    ? "text-emerald-400"
+                    ? isEmergencyCurrent
+                      ? "text-red-400"
+                      : "text-emerald-400"
                     : "text-slate-500"
                 }`}
               >
                 {step.type === "current"
-                  ? "Serving"
+                  ? isEmergencyCurrent
+                    ? "Emergency"
+                    : "Serving"
                   : step.type === "next"
                     ? "Next"
                     : ""}
               </span>
             </div>
 
-            {/* Subtle Separator */}
+            {/* ➡️ Separator */}
             {i < steps.length - 1 && (
-              <ChevronRight size={34} className="mx-5 text-slate-800 " />
+              <ChevronRight size={34} className="mx-5 text-slate-800" />
             )}
           </div>
         ))}
       </div>
 
-      {/* 📊 META STATS (Right Side) */}
-      <div className="flex items-center gap-6">
+      {/* 📊 META STATS */}
+      {/* <div className="flex items-center gap-6">
         <div className="text-center">
           <div className="flex items-center justify-center w-12 h-12 bg-indigo-500/10 rounded-2xl mb-1 mx-auto">
             <Users className="text-indigo-400" size={20} />
@@ -105,7 +119,7 @@ const DoctorTokenPanel = ({ doctorId, departments }: DoctorTokenPanelProps) => {
             {meta?.estimatedWaitTime || "--"}
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

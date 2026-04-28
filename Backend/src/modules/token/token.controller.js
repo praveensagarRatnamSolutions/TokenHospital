@@ -62,6 +62,27 @@ const getTokens = async (req, res, next) => {
   }
 };
 
+const getDoctorQueue = async (req, res, next) => {
+  try {
+    const { doctorId, date } = req.query;
+
+    console.log('Doctor ID:', req.query);
+
+    const tokens = await tokenService.getDoctorQueue(
+      req.hospitalId,
+      doctorId,
+      date
+    );
+
+    res.status(200).json({
+      success: true,
+      tokens,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * @desc    Complete a token
  * @route   PATCH /api/token/:id/complete
@@ -214,4 +235,5 @@ module.exports = {
   verifyCashPayment,
   skipToken,
   callTokenById,
+  getDoctorQueue,
 };

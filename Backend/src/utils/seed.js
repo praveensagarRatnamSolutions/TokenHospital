@@ -49,6 +49,7 @@ const seedData = async () => {
         zipCode: '500001',
         country: 'India',
       },
+      timezone: 'Asia/Kolkata',
       createdBy: superAdmin._id,
     });
 
@@ -181,133 +182,133 @@ const seedData = async () => {
       doctorId: pedsDoctor._id,
     });
 
-    // 6. Create Patients
-    const patientsData = [
-      { name: 'Alice Johnson', phone: '1234567890', age: 30, gender: 'Female' },
-      { name: 'Bob Smith', phone: '0987654321', age: 45, gender: 'Male' },
-      { name: 'Charlie Davis', phone: '1112223333', age: 50, gender: 'Male' },
-      { name: 'Diana Prince', phone: '4445556666', age: 28, gender: 'Female' },
-      { name: 'Evan Wright', phone: '7778889999', age: 60, gender: 'Male' },
-      {
-        name: 'Fiona Gallagher',
-        phone: '1231231234',
-        age: 22,
-        gender: 'Female',
-      },
-      { name: 'George Miller', phone: '3213214321', age: 35, gender: 'Male' },
-      { name: 'Hannah Abbott', phone: '5556667777', age: 40, gender: 'Female' },
-    ];
+    // // 6. Create Patients
+    // const patientsData = [
+    //   { name: 'Alice Johnson', phone: '1234567890', age: 30, gender: 'Female' },
+    //   { name: 'Bob Smith', phone: '0987654321', age: 45, gender: 'Male' },
+    //   { name: 'Charlie Davis', phone: '1112223333', age: 50, gender: 'Male' },
+    //   { name: 'Diana Prince', phone: '4445556666', age: 28, gender: 'Female' },
+    //   { name: 'Evan Wright', phone: '7778889999', age: 60, gender: 'Male' },
+    //   {
+    //     name: 'Fiona Gallagher',
+    //     phone: '1231231234',
+    //     age: 22,
+    //     gender: 'Female',
+    //   },
+    //   { name: 'George Miller', phone: '3213214321', age: 35, gender: 'Male' },
+    //   { name: 'Hannah Abbott', phone: '5556667777', age: 40, gender: 'Female' },
+    // ];
 
-    const patients = await Patient.insertMany(
-      patientsData.map((p) => ({ ...p, hospitalId: hospital._id }))
-    );
+    // const patients = await Patient.insertMany(
+    //   patientsData.map((p) => ({ ...p, hospitalId: hospital._id }))
+    // );
 
-    // 7. Create Tokens
-    const today = new Date().toISOString().split('T')[0];
+    // // 7. Create Tokens
+    // const today = new Date().toISOString().split('T')[0];
 
-    const tokensData = [
-      // Cardiology - Dr. Smith (Various states)
-      {
-        tokenNumber: 'CARD1',
-        sequenceNumber: 1,
-        departmentId: cardiology._id,
-        doctorId: cardDoctor._id,
-        status: 'COMPLETED',
-        patientId: patients[0]._id,
-        paymentType: 'DIGITAL',
-      },
-      {
-        tokenNumber: 'CARD2',
-        sequenceNumber: 2,
-        departmentId: cardiology._id,
-        doctorId: cardDoctor._id,
-        status: 'CALLED',
-        patientId: patients[1]._id,
-        paymentType: 'CASH',
-      },
-      {
-        tokenNumber: 'CARD3',
-        sequenceNumber: 3,
-        departmentId: cardiology._id,
-        doctorId: cardDoctor._id,
-        status: 'WAITING',
-        patientId: patients[2]._id,
-        paymentType: 'DIGITAL',
-      },
-      {
-        tokenNumber: 'CARD4',
-        sequenceNumber: 4,
-        departmentId: cardiology._id,
-        doctorId: cardDoctor._id,
-        status: 'WAITING',
-        patientId: patients[3]._id,
-        paymentType: 'CASH',
-      },
-      {
-        tokenNumber: 'CARD5',
-        sequenceNumber: 5,
-        departmentId: cardiology._id,
-        doctorId: cardDoctor._id,
-        status: 'WAITING',
-        patientId: patients[4]._id,
-        paymentType: 'DIGITAL',
-      },
-      {
-        tokenNumber: 'CARD6',
-        sequenceNumber: 6,
-        departmentId: cardiology._id,
-        doctorId: cardDoctor._id,
-        status: 'PROVISIONAL',
-        patientId: patients[5]._id,
-        paymentType: 'CASH',
-      },
+    // const tokensData = [
+    //   // Cardiology - Dr. Smith (Various states)
+    //   {
+    //     tokenNumber: 'CARD1',
+    //     sequenceNumber: 1,
+    //     departmentId: cardiology._id,
+    //     doctorId: cardDoctor._id,
+    //     status: 'COMPLETED',
+    //     patientId: patients[0]._id,
+    //     paymentType: 'DIGITAL',
+    //   },
+    //   {
+    //     tokenNumber: 'CARD2',
+    //     sequenceNumber: 2,
+    //     departmentId: cardiology._id,
+    //     doctorId: cardDoctor._id,
+    //     status: 'CALLED',
+    //     patientId: patients[1]._id,
+    //     paymentType: 'CASH',
+    //   },
+    //   {
+    //     tokenNumber: 'CARD3',
+    //     sequenceNumber: 3,
+    //     departmentId: cardiology._id,
+    //     doctorId: cardDoctor._id,
+    //     status: 'WAITING',
+    //     patientId: patients[2]._id,
+    //     paymentType: 'DIGITAL',
+    //   },
+    //   {
+    //     tokenNumber: 'CARD4',
+    //     sequenceNumber: 4,
+    //     departmentId: cardiology._id,
+    //     doctorId: cardDoctor._id,
+    //     status: 'WAITING',
+    //     patientId: patients[3]._id,
+    //     paymentType: 'CASH',
+    //   },
+    //   {
+    //     tokenNumber: 'CARD5',
+    //     sequenceNumber: 5,
+    //     departmentId: cardiology._id,
+    //     doctorId: cardDoctor._id,
+    //     status: 'WAITING',
+    //     patientId: patients[4]._id,
+    //     paymentType: 'DIGITAL',
+    //   },
+    //   {
+    //     tokenNumber: 'CARD6',
+    //     sequenceNumber: 6,
+    //     departmentId: cardiology._id,
+    //     doctorId: cardDoctor._id,
+    //     status: 'PROVISIONAL',
+    //     patientId: patients[5]._id,
+    //     paymentType: 'CASH',
+    //   },
 
-      // Pediatrics - Dr. Jones
-      {
-        tokenNumber: 'PEDS1',
-        sequenceNumber: 1,
-        departmentId: pediatrics._id,
-        doctorId: pedsDoctor._id,
-        status: 'CALLED',
-        patientId: patients[6]._id,
-        paymentType: 'DIGITAL',
-      },
-      {
-        tokenNumber: 'PEDS2',
-        sequenceNumber: 2,
-        departmentId: pediatrics._id,
-        doctorId: pedsDoctor._id,
-        status: 'WAITING',
-        patientId: patients[7]._id,
-        paymentType: 'CASH',
-      },
-      {
-        tokenNumber: 'PEDS3',
-        sequenceNumber: 3,
-        departmentId: pediatrics._id,
-        doctorId: pedsDoctor._id,
-        status: 'PROVISIONAL',
-        patientId: patients[0]._id,
-        paymentType: 'CASH',
-      },
-      {
-        tokenNumber: 'PEDS4',
-        sequenceNumber: 4,
-        departmentId: pediatrics._id,
-        doctorId: pedsDoctor._id,
-        status: 'WAITING',
-        patientId: patients[1]._id,
-        paymentType: 'DIGITAL',
-      },
-    ];
+    //   // Pediatrics - Dr. Jones
+    //   {
+    //     tokenNumber: 'PEDS1',
+    //     sequenceNumber: 1,
+    //     departmentId: pediatrics._id,
+    //     doctorId: pedsDoctor._id,
+    //     status: 'CALLED',
+    //     patientId: patients[6]._id,
+    //     paymentType: 'DIGITAL',
+    //   },
+    //   {
+    //     tokenNumber: 'PEDS2',
+    //     sequenceNumber: 2,
+    //     departmentId: pediatrics._id,
+    //     doctorId: pedsDoctor._id,
+    //     status: 'WAITING',
+    //     patientId: patients[7]._id,
+    //     paymentType: 'CASH',
+    //   },
+    //   {
+    //     tokenNumber: 'PEDS3',
+    //     sequenceNumber: 3,
+    //     departmentId: pediatrics._id,
+    //     doctorId: pedsDoctor._id,
+    //     status: 'PROVISIONAL',
+    //     patientId: patients[0]._id,
+    //     paymentType: 'CASH',
+    //   },
+    //   {
+    //     tokenNumber: 'PEDS4',
+    //     sequenceNumber: 4,
+    //     departmentId: pediatrics._id,
+    //     doctorId: pedsDoctor._id,
+    //     status: 'WAITING',
+    //     patientId: patients[1]._id,
+    //     paymentType: 'DIGITAL',
+    //   },
+    // ];
 
-    await Token.insertMany(
-      tokensData.map((t) => ({
-        ...t,
-        hospitalId: hospital._id,
-        appointmentDate: today,
-      }))
-    );
+    // await Token.insertMany(
+    //   tokensData.map((t) => ({
+    //     ...t,
+    //     hospitalId: hospital._id,
+    //     appointmentDate: today,
+    //   }))
+    // );
 
     console.log('Seeding completed successfully!');
     process.exit(0);

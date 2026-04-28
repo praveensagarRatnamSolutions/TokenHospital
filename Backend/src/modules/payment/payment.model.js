@@ -1,16 +1,21 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema(
   {
     hospitalId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Hospital",
+      ref: 'Hospital',
       required: true,
     },
-    tokenId: { type: mongoose.Schema.Types.ObjectId, ref: 'Token', required: true },
+    tokenId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Token',
+      required: true,
+      index: true,
+    },
     patientId: {
-      type: String, // Or ObjectId if you have a Patient model
-      ref: "Patient",
+      type: mongoose.Schema.Types.ObjectId, // Or ObjectId if you have a Patient model
+      ref: 'Patient',
       required: false,
     },
     amount: {
@@ -19,12 +24,14 @@ const paymentSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: "INR",
+      default: 'INR',
     },
     razorpayOrderId: {
       type: String,
-      required: true,
-      unique: true,
+    },
+    doctorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Doctor',
     },
     razorpayPaymentId: {
       type: String,
@@ -32,11 +39,15 @@ const paymentSchema = new mongoose.Schema(
     razorpaySignature: {
       type: String,
     },
-    method: { type: String, enum: ['CASH', 'UPI', 'CARD'], required: true },
+    method: {
+      type: String,
+      enum: ['CASH', 'UPI', 'CARD', 'NETBANKING', 'WALLET'],
+      required: true,
+    },
     status: {
       type: String,
-      enum: ["pending", "captured", "failed"],
-      default: "pending",
+      enum: ['pending', 'authorized', 'captured', 'failed', 'refunded'],
+      default: 'pending',
     },
     metadata: {
       type: Object,
@@ -47,4 +58,4 @@ const paymentSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Payment", paymentSchema);
+module.exports = mongoose.model('Payment', paymentSchema);

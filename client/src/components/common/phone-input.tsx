@@ -20,12 +20,15 @@ type PhoneInputMeta = {
 type Props = {
   value: string;
   onChange: (phone: PhoneData) => void;
+  showLabel?: boolean;
 };
 
-export default function PhoneNumberInput({ value, onChange }: Props) {
+export default function PhoneNumberInput({ value, onChange, showLabel = true }: Props) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">Phone Number</label>
+      {showLabel && (
+        <label className="text-sm font-medium text-gray-700">Phone Number</label>
+      )}
 
       <PhoneInput
         country="in"

@@ -58,8 +58,8 @@ export default function AdminDashboard() {
   const groupedQueue = useMemo(() => {
     if (!queueData) return {};
     return queueData.reduce((acc: any, token: any) => {
-      const doctorName = token.doctorId?.name || 'Unassigned';
-      const deptName = token.departmentId?.name || 'General';
+      const doctorName = token.doctor?.name || 'Unassigned';
+      const deptName = token.department?.name || 'General';
       const key = `${doctorName} (${deptName})`;
       if (!acc[key]) acc[key] = [];
       acc[key].push(token);
@@ -173,6 +173,8 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
   const activeToken = tokens.find((t: any) => t.status === 'CALLED');
   const waitingTokens = tokens.filter((t: any) => t.status === 'WAITING');
 
+  console.log('Rendering DoctorQueueCard for', groupKey, { activeToken, waitingTokens });
+
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
       <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-50 dark:border-slate-800">
@@ -220,11 +222,11 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
                   <p
                     className={`font-bold text-lg truncate ${activeToken.isEmergency ? 'text-white' : 'text-slate-900 dark:text-white'}`}
                   >
-                    {activeToken.patientId?.name || activeToken.patientDetails?.name}
+                    {activeToken.patient?.name || activeToken.patientDetails?.name}
                   </p>
-                  {(activeToken.patientId?.phone || activeToken.patientDetails?.phone) && (
+                  {(activeToken.patient?.phone || activeToken.patientDetails?.phone) && (
                     <p className={`text-xs text-dark-200 dark:text-dark-400 truncate`}>
-                      {formatPhone(activeToken.patientId?.phone || activeToken.patientDetails?.phone)}
+                      {formatPhone(activeToken.patient?.phone || activeToken.patientDetails?.phone)}
                     </p>
                   )}
                   <p
@@ -289,11 +291,11 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
                             : 'text-slate-700 dark:text-slate-300'
                       }`}
                     >
-                      {t.patientId?.name || t.patientDetails?.name}
+                      {t.patient?.name || t.patientDetails?.name}
                     </p>
-                    {(t.patientId?.phone || t.patientDetails?.phone) && (
+                    {(t.patient?.phone || t.patientDetails?.phone) && (
                       <p className="text-[11px] text-slate-400 truncate">
-                         {formatPhone(t.patientId?.phone || t.patientDetails?.phone)}
+                         {formatPhone(t.patient?.phone || t.patientDetails?.phone)}
                       </p>
                     )}
 

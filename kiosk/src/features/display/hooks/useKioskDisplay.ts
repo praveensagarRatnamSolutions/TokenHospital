@@ -1,14 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { kioskApi } from "../../../core/api";
 import { socketService } from "../../../core/api/socket";
 import { dbStore, initDB } from "../../../core/db";
 import { useOnlineStatus } from "../../../core/hooks/useOnlineStatus";
 import { useSync } from "../../../core/hooks/useSync";
-import type { Kiosk, Department, Doctor, DepartmentQueue } from "../../../core/types";
+import type {
+  Kiosk,
+  Department,
+  Doctor,
+  DepartmentQueue,
+} from "../../../core/types";
 
-export type KioskStep = "LANDING" | "DEPARTMENT" | "DOCTOR" | "PAYMENT" | "SUCCESS";
+export type KioskStep =
+  | "LANDING"
+  | "DEPARTMENT"
+  | "DOCTOR"
+  | "PAYMENT"
+  | "SUCCESS";
 
 export const useKioskDisplay = (code: string) => {
+  // Idle timeout configuration (3 minutes = 180000 milliseconds)
+  const IDLE_TIMEOUT = 180000;
+  const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [showMenu, setShowMenu] = useState(false);
   const [kiosk, setKiosk] = useState<Kiosk | null>(null);
   const [departmentQueue, setDepartmentQueue] = useState<DepartmentQueue[]>([]);
@@ -24,9 +38,65 @@ export const useKioskDisplay = (code: string) => {
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [generatedToken, setGeneratedToken] = useState<any>(null);
-  
+
   const isOnline = useOnlineStatus();
   useSync(isOnline);
+
+  // Idle timeout handler - resets to LANDING after inactivity
+  const resetIdleTimeout = () => {
+    // Clear existing timeout
+    if (idleTimeoutRef.current) {
+      clearTimeout(idleTimeoutRef.current);
+    }
+
+    // Set new timeout (only if not on LANDING or SUCCESS steps)
+    if (step !== "LANDING") {
+      idleTimeoutRef.current = setTimeout(() => {
+        console.log("Kiosk idle timeout - returning to landing");
+        setStep("LANDING");
+        setSelectedDept(null);
+        setSelectedDoctor(null);
+        setGeneratedToken(null);
+      }, IDLE_TIMEOUT);
+    }
+  };
+
+  // Setup interaction listeners
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      resetIdleTimeout();
+    };
+
+    // List of events to track user interaction
+    const events = [
+      "mousedown",
+      "mouseup",
+      "keydown",
+      "keyup",
+      "touchstart",
+      "touchend",
+      "click",
+      "scroll",
+    ];
+
+    // Add event listeners
+    events.forEach((event) => {
+      document.addEventListener(event, handleUserInteraction);
+    });
+
+    // Reset timeout on component mount
+    resetIdleTimeout();
+
+    // Cleanup
+    return () => {
+      events.forEach((event) => {
+        document.removeEventListener(event, handleUserInteraction);
+      });
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
+      }
+    };
+  }, [step]);
 
   // Initialize DB and fetch kiosk
   useEffect(() => {
@@ -123,15 +193,30 @@ export const useKioskDisplay = (code: string) => {
     setStep("PAYMENT");
   };
 
-  const handlePaymentProceed = async (data: { name: string; phone: string; method: string; }) => {
+  const handlePaymentProceed = async (data: {
+    name: string;
+    age: number;
+    gender: "Male" | "Female" | "Other";
+    phone: {
+      full: string;
+      countryCode: string;
+      country: string;
+      nationalNumber: string;
+    };
+    paymentMethod: "CASH" | "ONLINE";
+  }) => {
     try {
+      const today = new Date().toISOString().split("T")[0];
       const response = await kioskApi.createToken({
         departmentId: selectedDept!._id,
         doctorId: selectedDoctor!._id,
+        appointmentDate: today,
+        paymentMethod: data.paymentMethod,
         patientDetails: {
           name: data.name,
+          age: data.age,
+          gender: data.gender,
           phone: data.phone,
-          paymentMode: data.method,
         },
       });
       setGeneratedToken(response.data);
@@ -150,13 +235,33 @@ export const useKioskDisplay = (code: string) => {
 
   return {
     state: {
-      showMenu, kiosk, departmentQueue, loading, error, isFullscreen,
-      showPinModal, pin, pinError, step, selectedDept, selectedDoctor, generatedToken, isOnline
+      showMenu,
+      kiosk,
+      departmentQueue,
+      loading,
+      error,
+      isFullscreen,
+      showPinModal,
+      pin,
+      pinError,
+      step,
+      selectedDept,
+      selectedDoctor,
+      generatedToken,
+      isOnline,
     },
     actions: {
-      setShowMenu, setPin, setShowPinModal,
-      toggleFullscreen, handleExitKiosk, handleStartProcess,
-      handleDeptSelect, handleDoctorSelect, handlePaymentProceed, resetFlow, setStep
-    }
+      setShowMenu,
+      setPin,
+      setShowPinModal,
+      toggleFullscreen,
+      handleExitKiosk,
+      handleStartProcess,
+      handleDeptSelect,
+      handleDoctorSelect,
+      handlePaymentProceed,
+      resetFlow,
+      setStep,
+    },
   };
 };

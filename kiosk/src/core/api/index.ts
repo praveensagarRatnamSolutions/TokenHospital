@@ -49,6 +49,8 @@ export const kioskApi = {
     departmentId: string;
     doctorId?: string;
     patientDetails: any;
+    appointmentDate?: string;
+    paymentMethod?: string;
   }) => {
     const response = await api.post("/api/token", data);
     return response.data;

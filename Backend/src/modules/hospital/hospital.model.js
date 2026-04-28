@@ -39,6 +39,11 @@ const hospitalSchema = new mongoose.Schema(
       zipCode: String,
       country: String,
     },
+    // ✅ ADD THIS
+    timezone: {
+      type: String,
+      default: 'Asia/Kolkata', // fallback
+    },
     registrationNumber: {
       type: String,
       unique: true,

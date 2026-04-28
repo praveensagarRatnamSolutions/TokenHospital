@@ -1,7 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import type { KioskAd, DepartmentQueue } from "../../../core/types";
 
-export type AdSlide = { kind: "ad"; ad: KioskAd; duration: number };
+export type AdSlide = {
+  kind: "ad";
+  ad: KioskAd;
+  duration: number;
+  isActive: boolean;
+};
 export type DeptSlide = {
   kind: "dept";
   dept: DepartmentQueue;
@@ -10,7 +15,6 @@ export type DeptSlide = {
 export type Slide = AdSlide | DeptSlide;
 
 const DEPT_SLIDE_DURATION = 8;
-const AD_INTERVAL = 2;
 
 export const useAdCarousel = (
   ads: KioskAd[],
@@ -41,6 +45,7 @@ export const useAdCarousel = (
           kind: "ad",
           ad,
           duration: ad.adId?.duration || 10,
+          isActive: false,
         });
       }
       if (deptCount > 0) {
@@ -53,7 +58,6 @@ export const useAdCarousel = (
       }
     }
 
-    
     return result;
   }, [filteredAds, departments]);
 

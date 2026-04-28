@@ -5,6 +5,7 @@ import { Zap, Clock, ChevronRight, Stethoscope } from "lucide-react";
 import { useAdCarousel } from "../hooks/useAdCarousel";
 import type { DeptSlide } from "../hooks/useAdCarousel";
 import DoctorTokenPanel from "./DoctorTokenPanel";
+import { useDoctorAdCarousel } from "../hooks/useDoctorAdCarousel";
 
 interface AdCarouselProps {
   ads: KioskAd[];
@@ -53,38 +54,59 @@ const AdCarousel: React.FC<AdCarouselProps> = ({
       : `dept-${(state.activeSlide as DeptSlide)?.dept?.id}-${state.currentIndex}`;
 
   if (isDoctor) {
+    const { state, actions } = useDoctorAdCarousel(ads);
+
+    const currentAd = state.currentAd;
+    const isFullscreen = currentAd?.adId?.displayArea === "fullscreen";
+
+    if (!currentAd) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full bg-slate-950 text-white/20 gap-4">
+          <div className="size-20 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center">
+            <span className="text-4xl">📺</span>
+          </div>
+          <p className="font-black uppercase tracking-widest text-sm text-center px-12">
+            No ads available for display
+          </p>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col w-full h-full">
-        {/* 🔵 80% Ads (Top) */}
-        <div className="h-[80%] w-full relative">
+        {/* 🔵 Ads Section */}
+        <div
+          className={
+            isFullscreen ? "h-full w-full relative" : "h-[80%] w-full relative"
+          }
+        >
           <AnimatePresence mode="wait">
             <motion.div
-              key={slideKey}
+              key={currentAd.adId?._id + state.currentIndex}
               className="absolute inset-0"
               initial={{ opacity: 0, scale: 1.04 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.8 }}
             >
-              {state.activeSlide?.kind === "ad" && (
-                <AdSlideView
-                  ad={state.activeSlide.ad}
-                  cloudFrontUrl={state.cloudFrontUrl}
-                  isOnline={isOnline}
-                  onVideoEnd={actions.handleVideoEnd}
-                />
-              )}
+              <AdSlideView
+                ad={currentAd}
+                cloudFrontUrl={state.cloudFrontUrl || ""}
+                isOnline={isOnline}
+                onVideoEnd={actions.handleVideoEnd}
+              />
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* 🟣 20% Tokens (Bottom) */}
-        <div className="h-[20%] w-full bg-slate-900 border-t border-slate-800 px-6 py-3">
-          <DoctorTokenPanel
-            doctorId={user?.doctorId}
-            departments={departments}
-          />
-        </div>
+        {/* 🟣 Tokens ONLY if not fullscreen */}
+        {!isFullscreen && (
+          <div className="h-[20%] w-full bg-slate-900 border-t border-slate-800 px-6 py-3">
+            <DoctorTokenPanel
+              doctorId={user?.doctorId}
+              departments={departments}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -140,7 +162,6 @@ const AdSlideView: React.FC<{
       {adData.type === "video" && isOnline ? (
         <video
           src={`${cloudFrontUrl}/${adData.fileKey}`}
-          loop
           autoPlay
           muted
           playsInline
