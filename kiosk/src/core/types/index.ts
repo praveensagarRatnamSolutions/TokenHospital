@@ -17,6 +17,28 @@ export interface Department {
   description?: string;
 }
 
+export interface SessionBreak {
+  from: string;
+  to: string;
+  label: string;
+  _id: string;
+}
+
+export interface AvailabilitySession {
+  label: string;
+  from: string;
+  to: string;
+  maxTokens: number;
+  breaks: SessionBreak[];
+  _id: string;
+}
+
+export interface DayAvailability {
+  day: string;
+  sessions: AvailabilitySession[];
+  _id: string;
+}
+
 export interface Doctor {
   _id: string;
   name: string;
@@ -24,7 +46,11 @@ export interface Doctor {
   profilePic?: string;
   departmentId: string | Department;
   isAvailable: boolean;
+  experience?: number;
+  availability?: DayAvailability[];
+  consultationFee?: number;
 }
+
 
 export interface Kiosk {
   _id: string;
@@ -84,6 +110,10 @@ export interface User {
   role: string;
   hospitalId: string;
   token: string;
+  doctorId?: {
+    _id: string;
+    departmentId?: string | Department;
+  } | string;
 }
 
 export interface AuthResponse {

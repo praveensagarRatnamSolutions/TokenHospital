@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { kioskApi } from "../../../core/api";
+import { kioskApi, authApi } from "../../../core/api";
 import { socketService } from "../../../core/api/socket";
 import { dbStore, initDB } from "../../../core/db";
 import { useOnlineStatus } from "../../../core/hooks/useOnlineStatus";
@@ -9,6 +9,7 @@ import type {
   Department,
   Doctor,
   DepartmentQueue,
+  User,
 } from "../../../core/types";
 
 export type KioskStep =
@@ -38,6 +39,7 @@ export const useKioskDisplay = (code: string) => {
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [generatedToken, setGeneratedToken] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const isOnline = useOnlineStatus();
   useSync(isOnline);
@@ -98,10 +100,12 @@ export const useKioskDisplay = (code: string) => {
     };
   }, [step]);
 
-  // Initialize DB and fetch kiosk
+  // Initialize DB and fetch kiosk & current user profile
   useEffect(() => {
     const init = async () => {
       await initDB();
+      
+      // Fetch Kiosk
       const fetchKiosk = async () => {
         try {
           setLoading(true);
@@ -125,7 +129,20 @@ export const useKioskDisplay = (code: string) => {
           setLoading(false);
         }
       };
-      fetchKiosk();
+
+      // Fetch Current User Profile
+      const fetchProfile = async () => {
+        try {
+          const response = await authApi.getMe();
+          if (response.success) {
+            setCurrentUser(response.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch user profile", err);
+        }
+      };
+
+      await Promise.all([fetchKiosk(), fetchProfile()]);
     };
     init();
   }, [code]);
@@ -183,7 +200,19 @@ export const useKioskDisplay = (code: string) => {
     }
   };
 
-  const handleStartProcess = () => setStep("DEPARTMENT");
+  const handleStartProcess = () => {
+    if (currentUser?.role?.toLowerCase() === "doctor") {
+      // Find department from populated doctorId
+      const docProfile = currentUser.doctorId;
+      if (docProfile && typeof docProfile === "object" && docProfile.departmentId) {
+        const dept = docProfile.departmentId as Department;
+        setSelectedDept(dept);
+        setStep("DOCTOR");
+        return;
+      }
+    }
+    setStep("DEPARTMENT");
+  };
   const handleDeptSelect = (dept: Department) => {
     setSelectedDept(dept);
     setStep("DOCTOR");

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, ShieldCheck, Clock, ArrowLeft, Loader2, Star, CheckCircle2 } from 'lucide-react';
+import { User, ShieldCheck, Clock, ArrowLeft, Loader2, Star, CheckCircle2, Info } from 'lucide-react';
 import { kioskApi } from '../../../core/api';
 import type { Department, Doctor } from '../../../core/types';
+import DoctorDetailsModal from '../components/DoctorDetailsModal';
 
 interface StepDoctorGridProps {
   department: Department;
@@ -13,6 +14,7 @@ interface StepDoctorGridProps {
 const StepDoctorGrid: React.FC<StepDoctorGridProps> = ({ department, onSelect, onBack }) => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDoctorDetails, setSelectedDoctorDetails] = useState<Doctor | null>(null);
   const cloudFrontUrl = import.meta.env.VITE_CLOUDFRONT_URL || "";
 
   useEffect(() => {
@@ -98,10 +100,23 @@ const StepDoctorGrid: React.FC<StepDoctorGridProps> = ({ department, onSelect, o
                 </div>
 
                 <div className="flex-1 pt-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Star className="text-amber-500 fill-amber-500" size={14} />
-                    <span className="text-xs font-black text-amber-600 dark:text-amber-500/60 uppercase tracking-widest">Verified Expert</span>
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Star className="text-amber-500 fill-amber-500" size={14} />
+                      <span className="text-xs font-black text-amber-600 dark:text-amber-500/60 uppercase tracking-widest">Verified Expert</span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDoctorDetails(doctor);
+                      }}
+                      className="size-8 rounded-lg bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-sky-500 hover:border-sky-500/30 transition-all shadow-sm"
+                      title="Show Details"
+                    >
+                      <Info size={16} />
+                    </button>
                   </div>
+                  
                   <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight group-hover:text-sky-500 transition-colors">
                     {doctor.name}
                   </h2>
@@ -117,8 +132,6 @@ const StepDoctorGrid: React.FC<StepDoctorGridProps> = ({ department, onSelect, o
                   </div>
                 </div>
               </div>
-
-             
             </motion.button>
           ))}
 
@@ -131,8 +144,15 @@ const StepDoctorGrid: React.FC<StepDoctorGridProps> = ({ department, onSelect, o
           )}
         </div>
       </main>
+
+      {/* Doctor Details Modal */}
+      <DoctorDetailsModal 
+        doctor={selectedDoctorDetails} 
+        onClose={() => setSelectedDoctorDetails(null)} 
+      />
     </div>
   );
 };
 
 export default StepDoctorGrid;
+
