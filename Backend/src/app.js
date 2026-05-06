@@ -36,7 +36,11 @@ app.use(
   })
 );
 // Middlewares
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 app.use(helmet());

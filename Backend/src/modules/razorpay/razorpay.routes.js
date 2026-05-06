@@ -9,6 +9,6 @@ router.get('/callback', protect, razorpayController.handleCallback);
 // routes/razorpay.routes.js
 router.get('/config', protect, razorpayController.getWebhookConfig);
 
-router.post('/webhook/:webhookKey', protect, razorpayController.handleWebhook);
+router.post('/webhook/:webhookKey', razorpayController.handleWebhook);
 
 module.exports = router;

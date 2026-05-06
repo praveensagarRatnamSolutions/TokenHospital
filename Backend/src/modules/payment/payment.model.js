@@ -10,8 +10,11 @@ const paymentSchema = new mongoose.Schema(
     tokenId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Token',
-      required: true,
+      required: false,
       index: true,
+    },
+    patientDetails: {
+      type: Object, // Stores name, phone, age, gender temporarily
     },
     patientId: {
       type: mongoose.Schema.Types.ObjectId, // Or ObjectId if you have a Patient model
