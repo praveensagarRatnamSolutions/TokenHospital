@@ -67,4 +67,19 @@ export const kioskApi = {
   },
 };
 
+export const printApi = {
+  sendToPrinter: async (data: {
+    hospital: string;
+    logo: string;
+    doctor: string;
+    patient: string;
+    token: string;
+    department: string;
+  }) => {
+    const response = await axios.post("http://localhost:3001/print", data);
+    console.log("Print API response:", response);
+    return response.data;
+  },
+};
+
 export default api;

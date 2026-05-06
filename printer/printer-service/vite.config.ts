@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [
     react(),
+    
     electron({
       main: {
         // Shortcut of `build.lib.entry`.
@@ -26,4 +27,7 @@ export default defineConfig({
         : {},
     }),
   ],
+  server: {
+    port: 5175,
+  }
 })

@@ -27,6 +27,7 @@ import {
   Droplets,
   Stethoscope,
   Info,
+  Phone,
 } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store/store';
@@ -43,7 +44,7 @@ import DoctorEmergencyModal from './components/DoctorEmergencyModal';
 
 // Helper for phone formatting
 function formatPhone(phone: any) {
-  console.log('Formatting phone:', phone);
+  
   if (!phone) return '';
   if (typeof phone === 'string') {
     if (phone.startsWith('91') && phone.length === 12) {
@@ -502,11 +503,11 @@ export default function DoctorDashboard() {
                       </div>
                       <p
                         className={cn(
-                          'text-xs font-bold',
+                          'text-xs font-bold flex items-center gap-1',
                           currentToken.isEmergency ? 'text-white/80' : 'text-slate-500',
                         )}
                       >
-                        • {formatPhone(currentToken.patientId?.phone)}
+                        <Phone /> {formatPhone(currentToken.patientId?.phone)}
                       </p>
                     </div>
                   </div>
@@ -787,7 +788,7 @@ export default function DoctorDashboard() {
                           nextToken.isEmergency ? "bg-red-500" : "bg-slate-300"
                         )} /> */}
                         <p className="text-xs font-medium text-slate-400 truncate">
-                          {formatPhone(nextToken.patient?.phone?.full) ||
+                          {formatPhone(nextToken.patient?.phone) ||
                             'No contact info'}
                         </p>
                       </div>

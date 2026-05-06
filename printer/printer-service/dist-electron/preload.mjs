@@ -23,5 +23,7 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
 electron.contextBridge.exposeInMainWorld("printerAPI", {
   getPrinters: () => electron.ipcRenderer.invoke("get-printers"),
   savePrinter: (name) => electron.ipcRenderer.send("save-printer", name),
-  getSavedPrinter: () => electron.ipcRenderer.invoke("get-saved-printer")
+  getSavedPrinter: () => electron.ipcRenderer.invoke("get-saved-printer"),
+  getServerStatus: () => electron.ipcRenderer.invoke("get-server-status"),
+  toggleServer: () => electron.ipcRenderer.invoke("toggle-server")
 });

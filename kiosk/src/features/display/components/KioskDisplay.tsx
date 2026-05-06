@@ -88,7 +88,7 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
       case "SUCCESS":
         return (
           <StepTokenSuccess
-            tokenNumber={state.generatedToken?.tokenNumber}
+            tokenNumber={state.generatedToken?.token?.tokenNumber}
             department={state.selectedDept!}
             doctor={state.selectedDoctor!}
             onDone={actions.resetFlow}

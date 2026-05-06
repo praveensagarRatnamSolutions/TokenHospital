@@ -68,7 +68,7 @@ const getDoctorQueue = async (hospitalId, doctorId, date) => {
         hospitalId: new mongoose.Types.ObjectId(hospitalId),
         doctorId: new mongoose.Types.ObjectId(doctorId),
         appointmentDate: targetDate,
-        status: { $in: ['WAITING', 'CALLED'] },
+        status: { $in: ['WAITING'] },
       },
     },
 
@@ -433,8 +433,9 @@ const createToken = async (tokenData) => {
     // 9. Populate response
     const populatedToken = await Token.findById(token[0]._id)
       .populate('departmentId', 'name prefix')
-      .populate('doctorId', 'name')
+      .populate('doctorId', 'name roomNumber education')
       .populate('patientId', 'name phone age gender')
+      .populate('hospitalId', 'name')
       .lean();
 
     // 10. Emit socket
@@ -521,6 +522,10 @@ const getTokens = async (hospitalId, filters = {}) => {
   const limit = parseInt(filters.limit, 10) || 50;
   const skip = (page - 1) * limit;
 
+  let sort = { createdAt: -1 }; // default sort
+  if (filters.isQueue === 'true') {
+    sort = { isEmergency: -1, sortKey: 1 }; // queue-style sort
+  }
   // 🔥 Aggregation pipeline
   const pipeline = [
     { $match: match },
@@ -540,7 +545,6 @@ const getTokens = async (hospitalId, filters = {}) => {
         preserveNullAndEmptyArrays: true,
       },
     },
-
 
     // 👥 Populate patient
     {
@@ -584,7 +588,7 @@ const getTokens = async (hospitalId, filters = {}) => {
     // 👉 Admin view → latest first
     // 👉 If you want queue view → replace with isEmergency/sortKey
     {
-      $sort: { createdAt: -1 },
+      $sort: sort,
       // For queue-style:
       // $sort: { isEmergency: -1, sortKey: 1 }
     },
@@ -599,7 +603,6 @@ const getTokens = async (hospitalId, filters = {}) => {
         appointmentDate: 1,
         createdAt: 1,
 
-        
         'payment.status': 1,
         'payment.method': 1,
         'payment.amount': 1,

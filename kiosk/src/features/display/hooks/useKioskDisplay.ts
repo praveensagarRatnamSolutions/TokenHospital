@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { kioskApi, authApi } from "../../../core/api";
+import { kioskApi, authApi, printApi } from "../../../core/api";
 import { socketService } from "../../../core/api/socket";
 import { dbStore, initDB } from "../../../core/db";
 import { useOnlineStatus } from "../../../core/hooks/useOnlineStatus";
@@ -104,7 +104,7 @@ export const useKioskDisplay = (code: string) => {
   useEffect(() => {
     const init = async () => {
       await initDB();
-      
+
       // Fetch Kiosk
       const fetchKiosk = async () => {
         try {
@@ -204,7 +204,11 @@ export const useKioskDisplay = (code: string) => {
     if (currentUser?.role?.toLowerCase() === "doctor") {
       // Find department from populated doctorId
       const docProfile = currentUser.doctorId;
-      if (docProfile && typeof docProfile === "object" && docProfile.departmentId) {
+      if (
+        docProfile &&
+        typeof docProfile === "object" &&
+        docProfile.departmentId
+      ) {
         const dept = docProfile.departmentId as Department;
         setSelectedDept(dept);
         setStep("DOCTOR");
@@ -236,6 +240,7 @@ export const useKioskDisplay = (code: string) => {
   }) => {
     try {
       const today = new Date().toISOString().split("T")[0];
+
       const response = await kioskApi.createToken({
         departmentId: selectedDept!._id,
         doctorId: selectedDoctor!._id,
@@ -248,10 +253,30 @@ export const useKioskDisplay = (code: string) => {
           phone: data.phone,
         },
       });
+
+      // Store token in state
       setGeneratedToken(response.data);
+
+      // Move to success screen
       setStep("SUCCESS");
+
+      // Use fresh API response directly
+      const tokenData = response.data.token;
+
+      console.log("Generated token data:", tokenData);
+
+      const responsePrint = await printApi.sendToPrinter({
+        hospital: tokenData.hospitalId?.name || "Hospital",
+        logo: tokenData.hospitalId?.logo || "",
+        doctor: tokenData.doctorId?.name || "---",
+        patient: tokenData.patientId?.name || "---",
+        token: tokenData.tokenNumber || "---",
+        department: tokenData.departmentId?.name || "---",
+      });
+
+      console.log("🖨️ Print API response:", responsePrint);
     } catch (err) {
-      console.error("Token generation failed", err);
+      console.error("❌ Token generation failed", err);
     }
   };
 

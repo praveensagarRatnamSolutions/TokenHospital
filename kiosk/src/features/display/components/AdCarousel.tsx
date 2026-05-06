@@ -6,6 +6,7 @@ import { useAdCarousel } from "../hooks/useAdCarousel";
 import type { DeptSlide } from "../hooks/useAdCarousel";
 import DoctorTokenPanel from "./DoctorTokenPanel";
 import { useDoctorAdCarousel } from "../hooks/useDoctorAdCarousel";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 interface AdCarouselProps {
   ads: KioskAd[];
@@ -22,8 +23,13 @@ const AdCarousel: React.FC<AdCarouselProps> = ({
   departments = [],
   theme = "dark",
 }) => {
-  const userData = localStorage.getItem("kiosk_user");
-  const user = userData ? JSON.parse(userData) : null;
+  let user = null;
+  try {
+    const userData = localStorage.getItem("kiosk_user");
+    user = userData ? JSON.parse(userData) : null;
+  } catch (err) {
+    console.error("Error parsing user data from localStorage:", err);
+  }
   const isDoctor = user?.role === "DOCTOR";
 
   const { state, actions } = useAdCarousel(
@@ -154,8 +160,14 @@ const AdSlideView: React.FC<{
   isOnline: boolean;
   onVideoEnd: () => void;
 }> = ({ ad, cloudFrontUrl, isOnline, onVideoEnd }) => {
-  const adData = ad.adId;
-  if (!adData) return null;
+  const adData = ad?.adId;
+  if (!adData || !adData.fileKey) {
+    return (
+      <div className="w-full h-full bg-slate-800 flex items-center justify-center">
+        <span className="text-white/40 text-sm">No media available</span>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -185,6 +197,8 @@ const DeptSlideView: React.FC<{
   totalDepts: number;
   theme: "light" | "dark";
 }> = ({ dept, slideIndex, totalDepts, theme }) => {
+  if (!dept) return null;
+
   const isDark = theme === "dark";
   const now = new Date();
   const timeStr = now.toLocaleTimeString("en-IN", {
@@ -200,10 +214,10 @@ const DeptSlideView: React.FC<{
   });
 
   const totalWaiting = dept.doctors.reduce(
-    (s: number, d: any) => s + d.meta.totalWaiting,
+    (s: number, d: any) => s + (d?.meta?.totalWaiting || 0),
     0,
   );
-  const hasEmergency = dept.doctors.some((d: any) => d.display.emergency);
+  const hasEmergency = dept.doctors.some((d: any) => d?.display?.emergency);
 
   return (
     <div
@@ -380,9 +394,11 @@ const DoctorRow: React.FC<{
   idx: number;
   theme: "light" | "dark";
 }> = ({ doctor, idx, theme }) => {
+  if (!doctor) return null;
+
   const isDark = theme === "dark";
-  const hasEmergency = !!doctor.display.emergency;
-  const isCurrent = doctor.display.current !== "---";
+  const hasEmergency = !!doctor?.display?.emergency;
+  const isCurrent = doctor?.display?.current !== "---";
   const isEvenRow = idx % 2 === 0;
 
   return (
@@ -428,9 +444,9 @@ const DoctorRow: React.FC<{
           <p
             className={`text-lg font-black leading-tight truncate ${isDark ? "text-white" : "text-slate-900"}`}
           >
-            {doctor.name}
+            {doctor?.name || "Unknown"}
           </p>
-          {doctor.room && (
+          {doctor?.room && (
             <p
               className={`text-[10px] font-bold uppercase tracking-widest mt-0.5 ${isDark ? "text-slate-500" : "text-slate-400"}`}
             >
@@ -457,7 +473,7 @@ const DoctorRow: React.FC<{
         className={`px-8 border-r transition-colors duration-500 ${isDark ? "border-white/5" : "border-slate-100"}`}
       >
         <motion.div
-          key={doctor.display.current}
+          key={doctor?.display?.current || "---"}
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 20 }}
@@ -471,7 +487,7 @@ const DoctorRow: React.FC<{
                 : "bg-slate-100 border-slate-200 text-slate-300"
           }`}
         >
-          {doctor.display.current}
+          {doctor?.display?.current || "---"}
         </motion.div>
       </div>
 
@@ -487,7 +503,7 @@ const DoctorRow: React.FC<{
           <span
             className={`text-xl font-black tracking-tighter ${isDark ? "text-slate-400" : "text-slate-700"}`}
           >
-            {doctor.display.next}
+            {doctor?.display?.next || "---"}
           </span>
         </div>
       </div>
@@ -496,7 +512,7 @@ const DoctorRow: React.FC<{
       <div
         className={`px-8 flex flex-wrap gap-1.5 border-r transition-colors duration-500 ${isDark ? "border-white/5" : "border-slate-100"}`}
       >
-        {doctor.queue.slice(0, 3).map((tok: string, i: number) => (
+        {(doctor?.queue || []).slice(0, 3).map((tok: string, i: number) => (
           <span
             key={i}
             className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border transition-colors duration-500 ${
@@ -508,20 +524,21 @@ const DoctorRow: React.FC<{
             {tok}
           </span>
         ))}
-        {doctor.queue.length > 3 && (
+        {(doctor?.queue?.length || 0) > 3 && (
           <span
             className={`text-[10px] font-bold self-center ${isDark ? "text-slate-600" : "text-slate-400"}`}
           >
             +{doctor.queue.length - 3}
           </span>
         )}
-        {doctor.queue.length === 0 && doctor.display.current === "---" && (
-          <span
-            className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? "text-slate-700" : "text-slate-300"}`}
-          >
-            Clear
-          </span>
-        )}
+        {(doctor?.queue?.length || 0) === 0 &&
+          (doctor?.display?.current || "---") === "---" && (
+            <span
+              className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? "text-slate-700" : "text-slate-300"}`}
+            >
+              Clear
+            </span>
+          )}
       </div>
 
       {/* WAIT */}
@@ -531,7 +548,7 @@ const DoctorRow: React.FC<{
             <span
               className={`text-sm font-black ${isDark ? "text-slate-500" : "text-slate-900"}`}
             >
-              {doctor.meta.totalWaiting}{" "}
+              {doctor?.meta?.totalWaiting || 0}{" "}
               <span
                 className={`text-[10px] uppercase font-bold ${isDark ? "text-slate-600" : "text-slate-400"}`}
               >
@@ -547,7 +564,7 @@ const DoctorRow: React.FC<{
             <span
               className={`text-[11px] font-bold ${isDark ? "text-slate-600" : "text-slate-400"}`}
             >
-              {doctor.meta.estimatedWaitTime}
+              {doctor?.meta?.estimatedWaitTime || "--"}
             </span>
           </div>
         </div>
@@ -556,4 +573,12 @@ const DoctorRow: React.FC<{
   );
 };
 
-export default AdCarousel;
+export default function AdCarouselWithErrorBoundary(
+  props: React.ComponentProps<typeof AdCarousel>,
+) {
+  return (
+    <ErrorBoundary>
+      <AdCarousel {...props} />
+    </ErrorBoundary>
+  );
+}

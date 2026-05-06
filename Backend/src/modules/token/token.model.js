@@ -22,6 +22,7 @@ const tokenSchema = new mongoose.Schema(
     },
     hospitalId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hospital',
       required: [true, 'Hospital ID is required'],
     },
     status: {

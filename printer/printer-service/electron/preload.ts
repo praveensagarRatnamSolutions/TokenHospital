@@ -30,4 +30,6 @@ contextBridge.exposeInMainWorld("printerAPI", {
   getPrinters: () => ipcRenderer.invoke("get-printers"),
   savePrinter: (name: string) => ipcRenderer.send("save-printer", name),
   getSavedPrinter: () => ipcRenderer.invoke("get-saved-printer"),
+  getServerStatus: () => ipcRenderer.invoke("get-server-status"),
+  toggleServer: () => ipcRenderer.invoke("toggle-server"),
 })

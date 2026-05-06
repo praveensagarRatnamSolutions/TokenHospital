@@ -49,7 +49,7 @@ export default function AdminDashboard() {
     enabled: !!hospitalId,
     queryFn: async () => {
       const response = await api.get('/api/token', {
-        params: { status: 'WAITING,CALLED' },
+        params: { status: 'WAITING,CALLED' ,isQueue: 'true'},
       });
       return response.data.tokens;
     },
@@ -270,7 +270,7 @@ function DoctorQueueCard({ groupKey, tokens }: any) {
               >
                 <div className="flex items-center gap-3 truncate">
                   <div
-                    className={`size-8 border font-bold rounded-xl flex items-center justify-center text-[10px] shadow-sm ${
+                    className={`size-10 border font-bold rounded-xl flex items-center justify-center text-[10px] shadow-sm ${
                       t.isEmergency
                         ? 'bg-red-600 text-white border-red-700'
                         : t.isPostponed

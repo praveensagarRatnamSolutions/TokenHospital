@@ -40,6 +40,9 @@ const doctorSchema = new mongoose.Schema(
         education: {
             type: String, // e.g. MBBS, MD
         },
+        roomNumber: {
+            type: String,
+        },
 
         // ✅ Availability (day-wise with sessions)
         availability: [

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Ticket, Hospital, User, Clock, Printer, ChevronRight } from 'lucide-react';
-import type { Department, Doctor } from '../../types';
+import type { Department, Doctor } from '../../../core/types';
 
 interface StepTokenSuccessProps {
   tokenNumber: string;
@@ -11,6 +11,7 @@ interface StepTokenSuccessProps {
 }
 
 const StepTokenSuccess: React.FC<StepTokenSuccessProps> = ({ tokenNumber, department, doctor, onDone }) => {
+  console.log('Rendering StepTokenSuccess with:', { tokenNumber, department, doctor });
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 items-center justify-center p-12 overflow-hidden relative transition-colors duration-500">
       {/* Background decoration */}

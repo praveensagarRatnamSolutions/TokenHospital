@@ -1,11 +1,10 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path$3 from "node:path";
 import fs$2 from "fs";
+import require$$0$7 from "os";
 import require$$1$2 from "tty";
 import require$$1$3 from "util";
-import require$$0$7 from "os";
 import require$$1$4 from "path";
 import require$$0$8 from "buffer";
 import require$$1$5 from "string_decoder";
@@ -1553,7 +1552,7 @@ function requireBytes() {
   }
   return bytes.exports;
 }
-var lib$2 = { exports: {} };
+var lib$3 = { exports: {} };
 var safer_1;
 var hasRequiredSafer;
 function requireSafer() {
@@ -12230,10 +12229,10 @@ function requireStreams$1() {
   };
   return streams$1;
 }
-lib$2.exports;
+lib$3.exports;
 var hasRequiredLib$1;
 function requireLib$1() {
-  if (hasRequiredLib$1) return lib$2.exports;
+  if (hasRequiredLib$1) return lib$3.exports;
   hasRequiredLib$1 = 1;
   (function(module) {
     var Buffer2 = requireSafer().Buffer;
@@ -12358,8 +12357,8 @@ function requireLib$1() {
         throw new Error("iconv-lite Streaming API is not enabled. Use iconv.enableStreamingAPI(require('stream')); to enable it.");
       };
     }
-  })(lib$2);
-  return lib$2.exports;
+  })(lib$3);
+  return lib$3.exports;
 }
 /*!
  * unpipe
@@ -12599,7 +12598,7 @@ function requireRawBody() {
   }
   return rawBody;
 }
-var lib$1 = { exports: {} };
+var lib$2 = { exports: {} };
 var bomHandling = {};
 var hasRequiredBomHandling;
 function requireBomHandling() {
@@ -23208,10 +23207,10 @@ function requireStreams() {
   };
   return streams;
 }
-lib$1.exports;
+lib$2.exports;
 var hasRequiredLib;
 function requireLib() {
-  if (hasRequiredLib) return lib$1.exports;
+  if (hasRequiredLib) return lib$2.exports;
   hasRequiredLib = 1;
   (function(module) {
     var Buffer2 = requireSafer().Buffer;
@@ -23336,8 +23335,8 @@ function requireLib() {
         throw new Error("iconv-lite Streaming API is not enabled. Use iconv.enableStreamingAPI(require('stream')); to enable it.");
       };
     }
-  })(lib$1);
-  return lib$1.exports;
+  })(lib$2);
+  return lib$2.exports;
 }
 var onFinished$4 = { exports: {} };
 /*!
@@ -36151,7 +36150,7 @@ var objectInspect = function inspect_(obj, options, depth, seen) {
     var ys = arrObjKeys(obj, inspect2);
     var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
     var protoTag = obj instanceof Object ? "" : "null prototype";
-    var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr$1(obj), 8, -1) : protoTag ? "Object" : "";
+    var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(obj), 8, -1) : protoTag ? "Object" : "";
     var constructorTag = isPlainObject || typeof obj.constructor !== "function" ? "" : obj.constructor.name ? obj.constructor.name + " " : "";
     var tag = constructorTag + (stringTag || protoTag ? "[" + $join.call($concat$1.call([], stringTag || [], protoTag || []), ": ") + "] " : "");
     if (ys.length === 0) {
@@ -36176,25 +36175,25 @@ function canTrustToString(obj) {
   return !toStringTag || !(typeof obj === "object" && (toStringTag in obj || typeof obj[toStringTag] !== "undefined"));
 }
 function isArray$3(obj) {
-  return toStr$1(obj) === "[object Array]" && canTrustToString(obj);
+  return toStr(obj) === "[object Array]" && canTrustToString(obj);
 }
 function isDate$1(obj) {
-  return toStr$1(obj) === "[object Date]" && canTrustToString(obj);
+  return toStr(obj) === "[object Date]" && canTrustToString(obj);
 }
 function isRegExp$1(obj) {
-  return toStr$1(obj) === "[object RegExp]" && canTrustToString(obj);
+  return toStr(obj) === "[object RegExp]" && canTrustToString(obj);
 }
 function isError(obj) {
-  return toStr$1(obj) === "[object Error]" && canTrustToString(obj);
+  return toStr(obj) === "[object Error]" && canTrustToString(obj);
 }
 function isString(obj) {
-  return toStr$1(obj) === "[object String]" && canTrustToString(obj);
+  return toStr(obj) === "[object String]" && canTrustToString(obj);
 }
 function isNumber(obj) {
-  return toStr$1(obj) === "[object Number]" && canTrustToString(obj);
+  return toStr(obj) === "[object Number]" && canTrustToString(obj);
 }
 function isBoolean(obj) {
-  return toStr$1(obj) === "[object Boolean]" && canTrustToString(obj);
+  return toStr(obj) === "[object Boolean]" && canTrustToString(obj);
 }
 function isSymbol(obj) {
   if (hasShammedSymbols) {
@@ -36230,7 +36229,7 @@ var hasOwn$1 = Object.prototype.hasOwnProperty || function(key) {
 function has$3(obj, key) {
   return hasOwn$1.call(obj, key);
 }
-function toStr$1(obj) {
+function toStr(obj) {
   return objectToString.call(obj);
 }
 function nameOf(f) {
@@ -36538,7 +36537,7 @@ var syntax = SyntaxError;
 var uri = URIError;
 var abs$1 = Math.abs;
 var floor$1 = Math.floor;
-var max$2 = Math.max;
+var max$1 = Math.max;
 var min$1 = Math.min;
 var pow$1 = Math.pow;
 var round$1 = Math.round;
@@ -36667,78 +36666,99 @@ function requireObject_getPrototypeOf() {
   Object_getPrototypeOf = $Object2.getPrototypeOf || null;
   return Object_getPrototypeOf;
 }
-var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
-var toStr = Object.prototype.toString;
-var max$1 = Math.max;
-var funcType = "[object Function]";
-var concatty = function concatty2(a, b) {
-  var arr = [];
-  for (var i = 0; i < a.length; i += 1) {
-    arr[i] = a[i];
-  }
-  for (var j = 0; j < b.length; j += 1) {
-    arr[j + a.length] = b[j];
-  }
-  return arr;
-};
-var slicy = function slicy2(arrLike, offset) {
-  var arr = [];
-  for (var i = offset, j = 0; i < arrLike.length; i += 1, j += 1) {
-    arr[j] = arrLike[i];
-  }
-  return arr;
-};
-var joiny = function(arr, joiner) {
-  var str = "";
-  for (var i = 0; i < arr.length; i += 1) {
-    str += arr[i];
-    if (i + 1 < arr.length) {
-      str += joiner;
+var implementation;
+var hasRequiredImplementation;
+function requireImplementation() {
+  if (hasRequiredImplementation) return implementation;
+  hasRequiredImplementation = 1;
+  var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
+  var toStr2 = Object.prototype.toString;
+  var max2 = Math.max;
+  var funcType = "[object Function]";
+  var concatty = function concatty2(a, b) {
+    var arr = [];
+    for (var i = 0; i < a.length; i += 1) {
+      arr[i] = a[i];
     }
-  }
-  return str;
-};
-var implementation$1 = function bind(that) {
-  var target = this;
-  if (typeof target !== "function" || toStr.apply(target) !== funcType) {
-    throw new TypeError(ERROR_MESSAGE + target);
-  }
-  var args = slicy(arguments, 1);
-  var bound;
-  var binder = function() {
-    if (this instanceof bound) {
-      var result = target.apply(
-        this,
+    for (var j = 0; j < b.length; j += 1) {
+      arr[j + a.length] = b[j];
+    }
+    return arr;
+  };
+  var slicy = function slicy2(arrLike, offset) {
+    var arr = [];
+    for (var i = offset, j = 0; i < arrLike.length; i += 1, j += 1) {
+      arr[j] = arrLike[i];
+    }
+    return arr;
+  };
+  var joiny = function(arr, joiner) {
+    var str = "";
+    for (var i = 0; i < arr.length; i += 1) {
+      str += arr[i];
+      if (i + 1 < arr.length) {
+        str += joiner;
+      }
+    }
+    return str;
+  };
+  implementation = function bind2(that) {
+    var target = this;
+    if (typeof target !== "function" || toStr2.apply(target) !== funcType) {
+      throw new TypeError(ERROR_MESSAGE + target);
+    }
+    var args = slicy(arguments, 1);
+    var bound;
+    var binder = function() {
+      if (this instanceof bound) {
+        var result = target.apply(
+          this,
+          concatty(args, arguments)
+        );
+        if (Object(result) === result) {
+          return result;
+        }
+        return this;
+      }
+      return target.apply(
+        that,
         concatty(args, arguments)
       );
-      if (Object(result) === result) {
-        return result;
-      }
-      return this;
-    }
-    return target.apply(
-      that,
-      concatty(args, arguments)
-    );
-  };
-  var boundLength = max$1(0, target.length - args.length);
-  var boundArgs = [];
-  for (var i = 0; i < boundLength; i++) {
-    boundArgs[i] = "$" + i;
-  }
-  bound = Function("binder", "return function (" + joiny(boundArgs, ",") + "){ return binder.apply(this,arguments); }")(binder);
-  if (target.prototype) {
-    var Empty = function Empty2() {
     };
-    Empty.prototype = target.prototype;
-    bound.prototype = new Empty();
-    Empty.prototype = null;
-  }
-  return bound;
-};
-var implementation = implementation$1;
-var functionBind = Function.prototype.bind || implementation;
-var functionCall = Function.prototype.call;
+    var boundLength = max2(0, target.length - args.length);
+    var boundArgs = [];
+    for (var i = 0; i < boundLength; i++) {
+      boundArgs[i] = "$" + i;
+    }
+    bound = Function("binder", "return function (" + joiny(boundArgs, ",") + "){ return binder.apply(this,arguments); }")(binder);
+    if (target.prototype) {
+      var Empty = function Empty2() {
+      };
+      Empty.prototype = target.prototype;
+      bound.prototype = new Empty();
+      Empty.prototype = null;
+    }
+    return bound;
+  };
+  return implementation;
+}
+var functionBind;
+var hasRequiredFunctionBind;
+function requireFunctionBind() {
+  if (hasRequiredFunctionBind) return functionBind;
+  hasRequiredFunctionBind = 1;
+  var implementation2 = requireImplementation();
+  functionBind = Function.prototype.bind || implementation2;
+  return functionBind;
+}
+var functionCall;
+var hasRequiredFunctionCall;
+function requireFunctionCall() {
+  if (hasRequiredFunctionCall) return functionCall;
+  hasRequiredFunctionCall = 1;
+  functionCall = Function.prototype.call;
+  return functionCall;
+}
 var functionApply;
 var hasRequiredFunctionApply;
 function requireFunctionApply() {
@@ -36748,14 +36768,14 @@ function requireFunctionApply() {
   return functionApply;
 }
 var reflectApply = typeof Reflect !== "undefined" && Reflect && Reflect.apply;
-var bind$2 = functionBind;
+var bind$2 = requireFunctionBind();
 var $apply$1 = requireFunctionApply();
-var $call$2 = functionCall;
+var $call$2 = requireFunctionCall();
 var $reflectApply = reflectApply;
 var actualApply = $reflectApply || bind$2.call($call$2, $apply$1);
-var bind$1 = functionBind;
+var bind$1 = requireFunctionBind();
 var $TypeError$4 = type;
-var $call$1 = functionCall;
+var $call$1 = requireFunctionCall();
 var $actualApply = actualApply;
 var callBindApplyHelpers = function callBindBasic(args) {
   if (args.length < 1 || typeof args[0] !== "function") {
@@ -36821,8 +36841,8 @@ function requireHasown() {
   hasRequiredHasown = 1;
   var call = Function.prototype.call;
   var $hasOwn = Object.prototype.hasOwnProperty;
-  var bind3 = functionBind;
-  hasown = bind3.call(call, $hasOwn);
+  var bind2 = requireFunctionBind();
+  hasown = bind2.call(call, $hasOwn);
   return hasown;
 }
 var undefined$1;
@@ -36836,7 +36856,7 @@ var $TypeError$3 = type;
 var $URIError = uri;
 var abs = abs$1;
 var floor = floor$1;
-var max = max$2;
+var max = max$1;
 var min = min$1;
 var pow = pow$1;
 var round = round$1;
@@ -36870,7 +36890,7 @@ var getProto = requireGetProto();
 var $ObjectGPO = requireObject_getPrototypeOf();
 var $ReflectGPO = requireReflect_getPrototypeOf();
 var $apply = requireFunctionApply();
-var $call = functionCall;
+var $call = requireFunctionCall();
 var needsEval = {};
 var TypedArray = typeof Uint8Array === "undefined" || !getProto ? undefined$1 : getProto(Uint8Array);
 var INTRINSICS = {
@@ -37041,13 +37061,13 @@ var LEGACY_ALIASES = {
   "%WeakMapPrototype%": ["WeakMap", "prototype"],
   "%WeakSetPrototype%": ["WeakSet", "prototype"]
 };
-var bind2 = functionBind;
+var bind = requireFunctionBind();
 var hasOwn = requireHasown();
-var $concat = bind2.call($call, Array.prototype.concat);
-var $spliceApply = bind2.call($apply, Array.prototype.splice);
-var $replace = bind2.call($call, String.prototype.replace);
-var $strSlice = bind2.call($call, String.prototype.slice);
-var $exec = bind2.call($call, RegExp.prototype.exec);
+var $concat = bind.call($call, Array.prototype.concat);
+var $spliceApply = bind.call($apply, Array.prototype.splice);
+var $replace = bind.call($call, String.prototype.replace);
+var $strSlice = bind.call($call, String.prototype.slice);
+var $exec = bind.call($call, RegExp.prototype.exec);
 var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
 var reEscapeChar = /\\(\\)?/g;
 var stringToPath = function stringToPath2(string) {
@@ -38158,7 +38178,7 @@ var parse$8 = function(str, opts) {
 var stringify$2 = stringify_1;
 var parse$7 = parse$8;
 var formats = formats$3;
-var lib = {
+var lib$1 = {
   formats,
   parse: parse$7,
   stringify: stringify$2
@@ -38177,7 +38197,7 @@ function requireUrlencoded() {
   var createError2 = httpErrorsExports;
   var debug2 = srcExports("body-parser:urlencoded");
   var read = requireRead();
-  var qs = lib;
+  var qs = lib$1;
   var { normalizeOptions } = requireUtils();
   urlencoded_1 = urlencoded;
   function urlencoded(options) {
@@ -51336,7 +51356,7 @@ var proxyAddrExports = proxyAddr.exports;
   var etag2 = etag_1;
   var mime2 = mimeTypes$2;
   var proxyaddr2 = proxyAddrExports;
-  var qs = lib;
+  var qs = lib$1;
   var querystring = require$$6$2;
   const { Buffer: Buffer2 } = require$$7$2;
   exports$1.methods = METHODS2.map((method) => method.toLowerCase());
@@ -78866,7 +78886,278 @@ var expressExports = express$2.exports;
  */
 var express = expressExports;
 const express$1 = /* @__PURE__ */ getDefaultExportFromCjs(express);
-createRequire(import.meta.url);
+var lib = { exports: {} };
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+function toObject(val) {
+  if (val === null || val === void 0) {
+    throw new TypeError("Object.assign cannot be called with null or undefined");
+  }
+  return Object(val);
+}
+function shouldUseNative() {
+  try {
+    if (!Object.assign) {
+      return false;
+    }
+    var test1 = new String("abc");
+    test1[5] = "de";
+    if (Object.getOwnPropertyNames(test1)[0] === "5") {
+      return false;
+    }
+    var test2 = {};
+    for (var i = 0; i < 10; i++) {
+      test2["_" + String.fromCharCode(i)] = i;
+    }
+    var order2 = Object.getOwnPropertyNames(test2).map(function(n) {
+      return test2[n];
+    });
+    if (order2.join("") !== "0123456789") {
+      return false;
+    }
+    var test3 = {};
+    "abcdefghijklmnopqrst".split("").forEach(function(letter) {
+      test3[letter] = letter;
+    });
+    if (Object.keys(Object.assign({}, test3)).join("") !== "abcdefghijklmnopqrst") {
+      return false;
+    }
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+var objectAssign = shouldUseNative() ? Object.assign : function(target, source) {
+  var from;
+  var to = toObject(target);
+  var symbols;
+  for (var s2 = 1; s2 < arguments.length; s2++) {
+    from = Object(arguments[s2]);
+    for (var key in from) {
+      if (hasOwnProperty.call(from, key)) {
+        to[key] = from[key];
+      }
+    }
+    if (getOwnPropertySymbols) {
+      symbols = getOwnPropertySymbols(from);
+      for (var i = 0; i < symbols.length; i++) {
+        if (propIsEnumerable.call(from, symbols[i])) {
+          to[symbols[i]] = from[symbols[i]];
+        }
+      }
+    }
+  }
+  return to;
+};
+(function() {
+  var assign2 = objectAssign;
+  var vary2 = varyExports;
+  var defaults2 = {
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  };
+  function isString2(s2) {
+    return typeof s2 === "string" || s2 instanceof String;
+  }
+  function isOriginAllowed(origin, allowedOrigin) {
+    if (Array.isArray(allowedOrigin)) {
+      for (var i = 0; i < allowedOrigin.length; ++i) {
+        if (isOriginAllowed(origin, allowedOrigin[i])) {
+          return true;
+        }
+      }
+      return false;
+    } else if (isString2(allowedOrigin)) {
+      return origin === allowedOrigin;
+    } else if (allowedOrigin instanceof RegExp) {
+      return allowedOrigin.test(origin);
+    } else {
+      return !!allowedOrigin;
+    }
+  }
+  function configureOrigin(options, req2) {
+    var requestOrigin = req2.headers.origin, headers = [], isAllowed;
+    if (!options.origin || options.origin === "*") {
+      headers.push([{
+        key: "Access-Control-Allow-Origin",
+        value: "*"
+      }]);
+    } else if (isString2(options.origin)) {
+      headers.push([{
+        key: "Access-Control-Allow-Origin",
+        value: options.origin
+      }]);
+      headers.push([{
+        key: "Vary",
+        value: "Origin"
+      }]);
+    } else {
+      isAllowed = isOriginAllowed(requestOrigin, options.origin);
+      headers.push([{
+        key: "Access-Control-Allow-Origin",
+        value: isAllowed ? requestOrigin : false
+      }]);
+      headers.push([{
+        key: "Vary",
+        value: "Origin"
+      }]);
+    }
+    return headers;
+  }
+  function configureMethods(options) {
+    var methods2 = options.methods;
+    if (methods2.join) {
+      methods2 = options.methods.join(",");
+    }
+    return {
+      key: "Access-Control-Allow-Methods",
+      value: methods2
+    };
+  }
+  function configureCredentials(options) {
+    if (options.credentials === true) {
+      return {
+        key: "Access-Control-Allow-Credentials",
+        value: "true"
+      };
+    }
+    return null;
+  }
+  function configureAllowedHeaders(options, req2) {
+    var allowedHeaders = options.allowedHeaders || options.headers;
+    var headers = [];
+    if (!allowedHeaders) {
+      allowedHeaders = req2.headers["access-control-request-headers"];
+      headers.push([{
+        key: "Vary",
+        value: "Access-Control-Request-Headers"
+      }]);
+    } else if (allowedHeaders.join) {
+      allowedHeaders = allowedHeaders.join(",");
+    }
+    if (allowedHeaders && allowedHeaders.length) {
+      headers.push([{
+        key: "Access-Control-Allow-Headers",
+        value: allowedHeaders
+      }]);
+    }
+    return headers;
+  }
+  function configureExposedHeaders(options) {
+    var headers = options.exposedHeaders;
+    if (!headers) {
+      return null;
+    } else if (headers.join) {
+      headers = headers.join(",");
+    }
+    if (headers && headers.length) {
+      return {
+        key: "Access-Control-Expose-Headers",
+        value: headers
+      };
+    }
+    return null;
+  }
+  function configureMaxAge(options) {
+    var maxAge = (typeof options.maxAge === "number" || options.maxAge) && options.maxAge.toString();
+    if (maxAge && maxAge.length) {
+      return {
+        key: "Access-Control-Max-Age",
+        value: maxAge
+      };
+    }
+    return null;
+  }
+  function applyHeaders(headers, res2) {
+    for (var i = 0, n = headers.length; i < n; i++) {
+      var header3 = headers[i];
+      if (header3) {
+        if (Array.isArray(header3)) {
+          applyHeaders(header3, res2);
+        } else if (header3.key === "Vary" && header3.value) {
+          vary2(res2, header3.value);
+        } else if (header3.value) {
+          res2.setHeader(header3.key, header3.value);
+        }
+      }
+    }
+  }
+  function cors2(options, req2, res2, next) {
+    var headers = [], method = req2.method && req2.method.toUpperCase && req2.method.toUpperCase();
+    if (method === "OPTIONS") {
+      headers.push(configureOrigin(options, req2));
+      headers.push(configureCredentials(options));
+      headers.push(configureMethods(options));
+      headers.push(configureAllowedHeaders(options, req2));
+      headers.push(configureMaxAge(options));
+      headers.push(configureExposedHeaders(options));
+      applyHeaders(headers, res2);
+      if (options.preflightContinue) {
+        next();
+      } else {
+        res2.statusCode = options.optionsSuccessStatus;
+        res2.setHeader("Content-Length", "0");
+        res2.end();
+      }
+    } else {
+      headers.push(configureOrigin(options, req2));
+      headers.push(configureCredentials(options));
+      headers.push(configureExposedHeaders(options));
+      applyHeaders(headers, res2);
+      next();
+    }
+  }
+  function middlewareWrapper(o) {
+    var optionsCallback = null;
+    if (typeof o === "function") {
+      optionsCallback = o;
+    } else {
+      optionsCallback = function(req2, cb) {
+        cb(null, o);
+      };
+    }
+    return function corsMiddleware(req2, res2, next) {
+      optionsCallback(req2, function(err, options) {
+        if (err) {
+          next(err);
+        } else {
+          var corsOptions = assign2({}, defaults2, options);
+          var originCallback = null;
+          if (corsOptions.origin && typeof corsOptions.origin === "function") {
+            originCallback = corsOptions.origin;
+          } else if (corsOptions.origin) {
+            originCallback = function(origin, cb) {
+              cb(null, corsOptions.origin);
+            };
+          }
+          if (originCallback) {
+            originCallback(req2.headers.origin, function(err2, origin) {
+              if (err2 || !origin) {
+                next(err2);
+              } else {
+                corsOptions.origin = origin;
+                cors2(corsOptions, req2, res2, next);
+              }
+            });
+          } else {
+            next();
+          }
+        }
+      });
+    };
+  }
+  lib.exports = middlewareWrapper;
+})();
+var libExports = lib.exports;
+const cors = /* @__PURE__ */ getDefaultExportFromCjs(libExports);
 const __dirname$1 = path$3.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path$3.join(__dirname$1, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -78885,10 +79176,7 @@ function createWindow() {
     }
   });
   win.webContents.on("did-finish-load", () => {
-    win == null ? void 0 : win.webContents.send(
-      "main-process-message",
-      (/* @__PURE__ */ new Date()).toLocaleString()
-    );
+    win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
   });
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
@@ -78911,7 +79199,6 @@ ipcMain.handle("get-printers", async () => {
   if (!win) return [];
   try {
     const printers = await win.webContents.getPrintersAsync();
-    console.log("Printers:", printers);
     return printers;
   } catch (err) {
     console.error("Printer fetch error:", err);
@@ -78939,61 +79226,290 @@ ipcMain.handle("get-saved-printer", () => {
     return null;
   }
 });
-app.whenReady().then(() => {
-  configPath = path$3.join(app.getPath("userData"), "config.json");
-  createWindow();
+let httpServer = null;
+const SERVER_PORT = 3001;
+let SERVER_URL = "http://127.0.0.1:3001";
+function getLocalIP() {
+  const interfaces = require$$0$7.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    const iface = interfaces[name];
+    if (iface) {
+      for (const addr of iface) {
+        if (addr.family === "IPv4" && !addr.internal) {
+          return addr.address;
+        }
+      }
+    }
+  }
+  return "127.0.0.1";
+}
+function startServer() {
+  if (httpServer) return;
   const server = express$1();
+  server.use(cors());
   server.use(express$1.json());
+  server.get("/health", (_req, res2) => {
+    res2.send({ status: "Server is running" });
+  });
   server.post("/print", async (req2, res2) => {
+    console.log("🖨️ Received print request:", req2.body);
     try {
       if (!fs$2.existsSync(configPath)) {
-        return res2.status(400).send("Printer not configured");
+        console.error("❌ Printer config file missing");
+        return res2.status(400).send("Printer not configured. Please select a printer first.");
       }
       const config = JSON.parse(fs$2.readFileSync(configPath, "utf-8"));
       const printerName = config.printer;
+      if (!printerName) {
+        console.error("❌ Printer name empty");
+        return res2.status(400).send("Printer not configured");
+      }
+      const {
+        hospital = "Hospital Service",
+        logo = "",
+        doctor = "---",
+        patient = "---",
+        token = "A-01",
+        department = "General"
+      } = req2.body;
+      console.log("📋 Print Data:", {
+        hospital,
+        token,
+        patient,
+        doctor,
+        department,
+        hasLogo: !!logo
+      });
       const printWindow = new BrowserWindow({
         show: false,
+        autoHideMenuBar: true,
         webPreferences: {
           preload: path$3.join(__dirname$1, "preload.mjs")
         }
       });
       const html = `
-        <html>
-          <body style="font-family: monospace; text-align: center;">
-            <h2>Hospital Token</h2>
-            <h1>${req2.body.token || "A-01"}</h1>
-            <p>${req2.body.department || "General"}</p>
-            <p>${(/* @__PURE__ */ new Date()).toLocaleString()}</p>
-          </body>
-        </html>
-      `;
-      await printWindow.loadURL(
-        "data:text/html;charset=utf-8," + encodeURIComponent(html)
-      );
-      printWindow.webContents.on("did-finish-load", () => {
-        printWindow.webContents.print(
-          {
-            silent: true,
-            deviceName: printerName
-          },
-          (success, errorType) => {
-            if (!success) {
-              console.error("Print failed:", errorType);
-              return res2.status(500).send("Print failed");
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8" />
+
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
             }
-            printWindow.close();
-            res2.send({ status: "Printed successfully" });
+
+            @page {
+              margin: 0;
+            }
+
+            html,
+            body {
+              width: 300px;
+              max-width: 300px;
+              overflow: hidden;
+              background: #fff;
+            }
+
+            body {
+              font-family: Arial, sans-serif;
+              color: #000;
+              padding: 8px;
+              text-align: center;
+              line-height: 1.3;
+            }
+
+            .logo {
+              width: 55px;
+              height: auto;
+              margin: 0 auto 6px;
+              display: block;
+              object-fit: contain;
+            }
+
+            .hospital-name {
+              font-size: 14px;
+              font-weight: bold;
+              text-transform: uppercase;
+              word-wrap: break-word;
+              margin-bottom: 6px;
+            }
+
+            .divider {
+              border-top: 1px dashed #000;
+              margin: 6px 0;
+            }
+
+            .token-label {
+              font-size: 10px;
+              font-weight: bold;
+              margin-bottom: 2px;
+            }
+
+            .token-number {
+              font-size: 26px;
+              font-weight: bold;
+              margin-bottom: 4px;
+              letter-spacing: 1px;
+            }
+
+            .info-section {
+              text-align: left;
+              font-size: 10px;
+              margin-top: 6px;
+            }
+
+            .info-row {
+              margin-bottom: 4px;
+              word-wrap: break-word;
+            }
+
+            .label {
+              font-weight: bold;
+            }
+
+            .footer {
+              margin-top: 8px;
+              padding-top: 6px;
+              border-top: 1px dashed #000;
+              font-size: 8px;
+              text-align: center;
+            }
+
+            .footer-line {
+              margin-top: 2px;
+            }
+          </style>
+        </head>
+
+        <body>
+          ${logo ? `<img src="${logo}" class="logo" onerror="this.style.display='none'" />` : ""}
+
+          <div class="hospital-name">
+            ${hospital}
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="token-label">
+            YOUR TOKEN NUMBER
+          </div>
+
+          <div class="token-number">
+            ${token}
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="info-section">
+            <div class="info-row">
+              <span class="label">Patient:</span>
+              ${patient}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Doctor:</span>
+              ${doctor}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Department:</span>
+              ${department}
+            </div>
+          </div>
+
+          <div class="footer">
+            <div class="footer-line">
+              ${(/* @__PURE__ */ new Date()).toLocaleString()}
+            </div>
+
+            <div class="footer-line">
+              Thank you for your patience
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+      await printWindow.loadURL(
+        `data:text/html;charset=utf-8,${encodeURIComponent(html)}`
+      );
+      await new Promise((resolve3) => setTimeout(resolve3, 1500));
+      console.log("📄 Starting print...");
+      printWindow.webContents.print(
+        {
+          silent: true,
+          printBackground: true,
+          deviceName: printerName
+        },
+        (success, failureReason) => {
+          try {
+            if (!success) {
+              console.error("❌ Print failed:", failureReason);
+              return res2.status(500).send({
+                success: false,
+                message: failureReason || "Print failed"
+              });
+            }
+            console.log("✅ Printed successfully");
+            return res2.send({
+              success: true,
+              message: "Printed successfully"
+            });
+          } catch (error2) {
+            console.error("❌ Response error:", error2);
+          } finally {
+            setTimeout(() => {
+              if (!printWindow.isDestroyed()) {
+                printWindow.close();
+              }
+            }, 1e3);
           }
-        );
-      });
+        }
+      );
     } catch (err) {
-      console.error(err);
-      res2.status(500).send("Error printing");
+      console.error("❌ Print endpoint error:", err);
+      return res2.status(500).send({
+        success: false,
+        message: err instanceof Error ? err.message : String(err)
+      });
     }
   });
-  server.listen(3001, () => {
-    console.log("🖨️ Print server running at http://localhost:3001");
+  const localIP = getLocalIP();
+  SERVER_URL = `http://${localIP}:${SERVER_PORT}`;
+  httpServer = server.listen(SERVER_PORT, "0.0.0.0", () => {
+    console.log(`✅ 🖨️ Print server running at ${SERVER_URL}`);
+    console.log(`✅ Health check: ${SERVER_URL}/health`);
+    console.log(`✅ Network IP: ${localIP}`);
   });
+}
+function stopServer() {
+  if (httpServer) {
+    httpServer.close();
+    httpServer = null;
+    console.log("🖨️ Print server stopped");
+  }
+}
+ipcMain.handle("get-server-status", () => ({
+  running: !!httpServer,
+  port: SERVER_PORT,
+  url: SERVER_URL
+}));
+ipcMain.handle("toggle-server", () => {
+  if (httpServer) {
+    stopServer();
+  } else {
+    startServer();
+  }
+  return {
+    running: !!httpServer,
+    port: SERVER_PORT
+  };
+});
+app.whenReady().then(() => {
+  configPath = path$3.join(app.getPath("userData"), "config.json");
+  createWindow();
+  startServer();
 });
 export {
   MAIN_DIST,
