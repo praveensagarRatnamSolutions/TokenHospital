@@ -1,23 +1,45 @@
-// models/razorpay.model.js
+// modules/razorpay/razorpay.model.js
 const mongoose = require('mongoose');
+const { encrypt, decrypt } = require('../../utils/crypto');
 
-const razorpaySchema = new mongoose.Schema(
-  {
-    hospitalId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Hospital',
-      required: true,
+const razorpayConfigSchema = new mongoose.Schema(
+    {
+        hospitalId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            unique: true,
+        },
+        keyId: { 
+            type: String, 
+            trim: true 
+        },
+        keySecret: { 
+            type: String, 
+            trim: true,
+            set: encrypt,
+            get: decrypt
+        },
+        webhookSecret: { 
+            type: String, 
+            trim: true,
+            set: encrypt,
+            get: decrypt
+        },
+        webhookKey: {
+            type: String,
+            unique: true,
+            sparse: true
+        },
+        enabled: { 
+            type: Boolean, 
+            default: false 
+        }
     },
-    merchantId: String,
-    accessToken: String,
-    refreshToken: String,
-
-    webhookKey: String,
-    webhookSecret: String,
-
-    isActive: { type: Boolean, default: true },
-  },
-  { timestamps: true }
+    {
+        timestamps: true,
+        toJSON: { getters: true },
+        toObject: { getters: true },
+    }
 );
 
-module.exports = mongoose.model('RazorpayAccount', razorpaySchema);
+module.exports = mongoose.model('RazorpayConfig', razorpayConfigSchema);

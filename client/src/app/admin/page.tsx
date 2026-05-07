@@ -44,28 +44,17 @@ export default function AdminDashboard() {
     };
   }, [socket, queryClient]);
 
-  const { data: queueData, isLoading } = useQuery({
+  const { data: queueResponse, isLoading } = useQuery({
     queryKey: ['globalQueue', hospitalId],
     enabled: !!hospitalId,
     queryFn: async () => {
-      const response = await api.get('/api/token', {
-        params: { status: 'WAITING,CALLED' ,isQueue: 'true'},
-      });
-      return response.data.tokens;
+      const response = await api.get('/api/token/global-queue');
+      return response.data;
     },
   });
 
-  const groupedQueue = useMemo(() => {
-    if (!queueData) return {};
-    return queueData.reduce((acc: any, token: any) => {
-      const doctorName = token.doctor?.name || 'Unassigned';
-      const deptName = token.department?.name || 'General';
-      const key = `${doctorName} (${deptName})`;
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(token);
-      return acc;
-    }, {});
-  }, [queueData]);
+  const stats = queueResponse?.stats;
+  const queue = queueResponse?.queue || [];
 
   return (
     <div className="space-y-8 p-8 bg-slate-50/50 dark:bg-slate-950/50 min-h-screen">
@@ -99,19 +88,19 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatusMetric
           title="In Queue"
-          value={queueData?.filter((t: any) => t.status === 'WAITING').length || 0}
+          value={stats?.waitingCount || 0}
           icon={Ticket}
           color="blue"
         />
         <StatusMetric
           title="Active Consultations"
-          value={queueData?.filter((t: any) => t.status === 'CALLED').length || 0}
+          value={stats?.activeCount || 0}
           icon={Activity}
           color="emerald"
         />
         <StatusMetric
           title="Doctors Online"
-          value={Object.keys(groupedQueue).length}
+          value={stats?.doctorsOnline || 0}
           icon={Users}
           color="indigo"
         />
@@ -127,9 +116,14 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {isLoading ? (
           <LoadingPlaceholder />
-        ) : Object.keys(groupedQueue).length > 0 ? (
-          Object.entries(groupedQueue).map(([groupKey, tokens]: [string, any]) => (
-            <DoctorQueueCard key={groupKey} groupKey={groupKey} tokens={tokens} />
+        ) : queue.length > 0 ? (
+          queue.map((docQueue: any) => (
+            <DoctorQueueCard
+              key={docQueue._id}
+              groupKey={`${docQueue.doctorName} (${docQueue.departmentName})`}
+              activeToken={docQueue.activeToken}
+              waitingTokens={docQueue.waitingTokens}
+            />
           ))
         ) : (
           <EmptyState />
@@ -169,10 +163,7 @@ function StatusMetric({ title, value, icon: Icon, color, trend }: any) {
   );
 }
 
-function DoctorQueueCard({ groupKey, tokens }: any) {
-  const activeToken = tokens.find((t: any) => t.status === 'CALLED');
-  const waitingTokens = tokens.filter((t: any) => t.status === 'WAITING');
-
+function DoctorQueueCard({ groupKey, activeToken, waitingTokens }: any) {
   console.log('Rendering DoctorQueueCard for', groupKey, { activeToken, waitingTokens });
 
   return (

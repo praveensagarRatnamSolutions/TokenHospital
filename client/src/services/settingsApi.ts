@@ -4,6 +4,7 @@ export interface RazorpayConfig {
   keyId: string;
   keySecret: string;
   webhookSecret: string;
+  webhookKey?: string;
   enabled: boolean;
 }
 

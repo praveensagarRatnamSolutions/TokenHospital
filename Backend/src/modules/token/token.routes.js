@@ -94,6 +94,7 @@ router.post('/', protect, createTokenValidation, validateRequest, tokenControlle
  */
 router.get('/', protect, tokenController.getTokens);
 router.get('/doctor', protect, tokenController.getDoctorQueue);
+router.get('/global-queue', protect, authorize('ADMIN', 'RECEPTIONIST'), tokenController.getGlobalQueue);
 
 /**
  * @swagger

@@ -290,9 +290,12 @@ const createToken = async (tokenData) => {
       patientId,
       doctorId,
       appointmentDate,
-      paymentMethod, // CASH / UPI / CARD
+      paymentMethod, // Support both names from frontend
+      paymentType,
       isEmergency = false,
     } = tokenData;
+
+    const method = paymentMethod || paymentType; // Use whichever is provided
 
     // 1. Get Hospital (for timezone)
     const hospital = await Hospital.findById(hospitalId).lean();
@@ -391,7 +394,7 @@ const createToken = async (tokenData) => {
           doctorId: assignedDoctorId,
           hospitalId,
           appointmentDate: targetDate,
-          status: status,
+          status: tokenData.status || status, // Use provided status (e.g., 'WAITING' for UPI) or default
           patientId: patient._id,
           isEmergency,
         },
@@ -401,30 +404,46 @@ const createToken = async (tokenData) => {
 
     let payment = null;
 
-    // 8. Create Payment (if needed)
-    if (paymentMethod) {
+    // 8. Handle Payment (Linking or Creating)
+    if (tokenData.existingPaymentId) {
+      // 🔗 Link to existing payment (UPI Flow)
+      payment = await Payment.findByIdAndUpdate(
+        tokenData.existingPaymentId,
+        { 
+          tokenId: token[0]._id,
+          patientId: patient._id, // Sync the patient ID now that it's resolved
+        },
+        { session, new: true }
+      );
+    } else if (method) {
+      // 🆕 Create new payment (Cash Flow)
       payment = await Payment.create(
         [
           {
             hospitalId,
             tokenId: token[0]._id,
             patientId: patient._id,
+            patientDetails, // Store raw details for consistency with UPI
             doctorId: assignedDoctorId,
+            departmentId,
             amount: consultationFee || 0,
-            method: paymentMethod,
-            razorpayOrderId: `order_${token[0]._id}`,
+            method: method.toUpperCase(),
+            razorpayOrderId: method.toUpperCase() === 'UPI' ? `order_${token[0]._id}` : undefined,
             status: 'pending',
           },
         ],
         { session }
       );
+    }
 
-      // // Link payment → token
-      // await Token.findByIdAndUpdate(
-      //   token[0]._id,
-      //   { paymentId: payment[0]._id, status: 'WAITING' },
-      //   { session }
-      // );
+    // Link payment back to token if it exists
+    if (payment) {
+      const paymentId = Array.isArray(payment) ? payment[0]._id : payment._id;
+      await Token.findByIdAndUpdate(
+        token[0]._id,
+        { paymentId: paymentId },
+        { session }
+      );
     }
 
     await session.commitTransaction();
@@ -522,9 +541,9 @@ const getTokens = async (hospitalId, filters = {}) => {
   const limit = parseInt(filters.limit, 10) || 50;
   const skip = (page - 1) * limit;
 
-  let sort = { createdAt: -1 }; // default sort
-  if (filters.isQueue === 'true') {
-    sort = { isEmergency: -1, sortKey: 1 }; // queue-style sort
+  let sort = { isEmergency: -1, sortKey: 1 }; // Default to queue-style sort (Oldest first)
+  if (filters.isQueue === 'false') {
+    sort = { createdAt: -1 }; // Explicitly newest first if requested
   }
   // 🔥 Aggregation pipeline
   const pipeline = [
@@ -644,6 +663,115 @@ const getTokens = async (hospitalId, filters = {}) => {
       page,
       pages: Math.ceil(total / limit),
     },
+  };
+};
+
+/**
+ * Get Global Queue Board data (Grouped by Doctor)
+ * Specifically for the Admin Dashboard
+ */
+const getGlobalQueue = async (hospitalId) => {
+  const hospital = await Hospital.findById(hospitalId).lean();
+  if (!hospital) throw new Error('Hospital not found');
+
+  const timeZone = hospital.timezone || 'Asia/Kolkata';
+  const today = normalizeDate(new Date(), timeZone);
+
+  const pipeline = [
+    {
+      $match: {
+        hospitalId: new mongoose.Types.ObjectId(hospitalId),
+        appointmentDate: today,
+        status: { $in: ['WAITING', 'CALLED'] },
+      },
+    },
+    {
+      $sort: { isEmergency: -1, sortKey: 1 },
+    },
+    // Populate Patient
+    {
+      $lookup: {
+        from: 'patients',
+        localField: 'patientId',
+        foreignField: '_id',
+        as: 'patient',
+      },
+    },
+    { $unwind: '$patient' },
+    // Populate Doctor
+    {
+      $lookup: {
+        from: 'doctors',
+        localField: 'doctorId',
+        foreignField: '_id',
+        as: 'doctor',
+      },
+    },
+    { $unwind: { path: '$doctor', preserveNullAndEmptyArrays: true } },
+    // Populate Department
+    {
+      $lookup: {
+        from: 'departments',
+        localField: 'departmentId',
+        foreignField: '_id',
+        as: 'department',
+      },
+    },
+    { $unwind: '$department' },
+    // Group by Doctor
+    {
+      $group: {
+        _id: '$doctorId',
+        doctorName: { $first: '$doctor.name' },
+        departmentName: { $first: '$department.name' },
+        tokens: { $push: '$$ROOT' },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        doctorName: 1,
+        departmentName: 1,
+        activeToken: {
+          $filter: {
+            input: '$tokens',
+            as: 't',
+            cond: { $eq: ['$$t.status', 'CALLED'] },
+          },
+        },
+        waitingTokens: {
+          $filter: {
+            input: '$tokens',
+            as: 't',
+            cond: { $eq: ['$$t.status', 'WAITING'] },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        doctorName: 1,
+        departmentName: 1,
+        activeToken: { $arrayElemAt: ['$activeToken', 0] },
+        waitingTokens: 1,
+      },
+    },
+  ];
+
+  const queue = await Token.aggregate(pipeline);
+
+  // Calculate Stats
+  const waitingCount = queue.reduce((acc, doc) => acc + doc.waitingTokens.length, 0);
+  const activeCount = queue.reduce((acc, doc) => acc + (doc.activeToken ? 1 : 0), 0);
+
+  return {
+    stats: {
+      waitingCount,
+      activeCount,
+      doctorsOnline: queue.length,
+    },
+    queue,
   };
 };
 
@@ -988,4 +1116,5 @@ module.exports = {
   skipToken,
   callTokenById,
   getDoctorQueue,
+  getGlobalQueue,
 };

@@ -2,28 +2,34 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Payment = require('./payment.model');
 const Doctor = require('../doctor/doctor.model');
-const RazorpayAccount = require('../razorpay/razorpay.model');
-const Hospital = require('../hospital/hospital.model');
+const RazorpayConfig = require('../razorpay/razorpay.model');
+const { decrypt } = require('../../utils/crypto');
 const logger = require('../../config/logger');
 
 /**
- * Get Razorpay client for a specific hospital (OAuth)
+ * Get Razorpay client for a specific hospital (Direct Key/Secret)
  * @param {string} hospitalId
  * @returns {Promise<Razorpay>}
  */
 const getRazorpayClient = async (hospitalId) => {
-  const account = await RazorpayAccount.findOne({ hospitalId, isActive: true });
-  if (!account) {
-    throw new Error('Razorpay is not connected for this hospital. Please connect it in settings.');
+  const config = await RazorpayConfig.findOne({ hospitalId });
+  if (!config || !config.enabled) {
+    throw new Error('Razorpay is not configured for this hospital');
   }
 
-  // We use the platform keys but authenticate with the merchant's accessToken
+  const { keyId, keySecret } = config;
+  if (!keyId || !keySecret) {
+    throw new Error('Razorpay credentials missing for this hospital');
+  }
+
+  // Explicitly decrypt to ensure we have the plaintext secret
+  const decryptedSecret = decrypt(keySecret);
+
+  console.log("decryptedSecret", decryptedSecret);
+
   return new Razorpay({
-    key_id: process.env.RAZORPAY_CLIENT_ID,
-    key_secret: process.env.RAZORPAY_CLIENT_SECRET,
-    headers: {
-      'Authorization': `Bearer ${account.accessToken}`
-    }
+    key_id: keyId,
+    key_secret: decryptedSecret,
   });
 };
 
@@ -47,6 +53,7 @@ const createOrder = async ({
 
   // 2. Get Razorpay Client
   const razorpay = await getRazorpayClient(hospitalId);
+  const config = await RazorpayConfig.findOne({ hospitalId });
 
   // 3. Create Razorpay Order
   const order = await razorpay.orders.create({
@@ -73,7 +80,6 @@ const createOrder = async ({
   });
 
   // 5. Generate QR Code for the payment
-  // Using UPI QR Code API
   let qrCode = null;
   try {
     qrCode = await razorpay.qrCode.create({
@@ -90,11 +96,11 @@ const createOrder = async ({
     });
   } catch (err) {
     logger.error('Failed to generate Razorpay QR Code:', err);
-    // Continue even if QR fails, frontend can still use Order ID for standard checkout
   }
 
   return {
     orderId: order.id,
+    key: config.keyId, // Return key for frontend if needed
     amount: order.amount,
     currency: order.currency,
     qrCode: qrCode ? {
@@ -106,22 +112,18 @@ const createOrder = async ({
 };
 
 /**
- * Verify Razorpay payment signature (Optional for webhooks but kept for safety)
+ * Verify Razorpay payment signature
  */
 const verifyPayment = async (
   hospitalId,
   { razorpay_order_id, razorpay_payment_id, razorpay_signature }
 ) => {
-  const account = await RazorpayAccount.findOne({ hospitalId, isActive: true });
-  if (!account) {
-    throw new Error('Razorpay account not found');
+  const config = await RazorpayConfig.findOne({ hospitalId });
+  if (!config || !config.keySecret) {
+    throw new Error('Razorpay configuration not found');
   }
 
-  // Note: For OAuth, signature verification might still use the platform's secret 
-  // or the merchant's key secret if available. 
-  // In OAuth flow, we rely heavily on webhooks.
-  
-  const secret = process.env.RAZORPAY_CLIENT_SECRET;
+  const secret = config.keySecret;
   const generated_signature = crypto
     .createHmac('sha256', secret)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)

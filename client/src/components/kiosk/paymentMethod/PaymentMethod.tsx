@@ -27,8 +27,14 @@ type CardsType = {
 };
 
 export default function PaymentMethod(props: PaymentMethodProps) {
-  const { handleContinue, handleMethodSelect, selectedMethod, handleBack, isPending } =
-    usePaymentMethod(props);
+  const {
+    handleContinue,
+    handleMethodSelect,
+    selectedMethod,
+    handleBack,
+    isPending,
+    isRazorpayEnabled,
+  } = usePaymentMethod(props);
   const {
     tokenNumber = 'A-104',
     doctorName = 'Dr. Sarah Johnson',
@@ -43,12 +49,12 @@ export default function PaymentMethod(props: PaymentMethodProps) {
       desc: 'Pay at the reception desk',
       icon: <Payments />,
     },
-    {
-      id: 'UPI',
+    ...(isRazorpayEnabled ? [{
+      id: 'UPI' as PaymentMethodType,
       title: 'UPI Payment',
       desc: 'Scan and pay using any UPI app',
       icon: <QrCode />,
-    },
+    }] : []),
   ];
 
   return (

@@ -67,4 +67,73 @@ router.get(
   reportsController.getDoctorReport
 );
 
+/**
+ * @swagger
+ * /api/reports/financial:
+ *   get:
+ *     summary: Get financial summary report
+ *     tags: [Reports]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: range
+ *         schema:
+ *           type: string
+ *           enum: [daily, weekly, monthly]
+ *     responses:
+ *       200:
+ *         description: Financial summary report
+ */
+router.get(
+  '/financial',
+  protect,
+  authorize('ADMIN'),
+  reportsController.getFinancialSummary
+);
+
+/**
+ * @swagger
+ * /api/reports/transactions:
+ *   get:
+ *     summary: Get detailed transaction report
+ *     tags: [Reports]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Detailed transaction report
+ */
+router.get(
+  '/transactions',
+  protect,
+  authorize('ADMIN'),
+  reportsController.getDetailedFinancialReport
+);
+
+/**
+ * @swagger
+ * /api/reports/export-transactions:
+ *   get:
+ *     summary: Export detailed transaction report to Excel/CSV
+ *     tags: [Reports]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get(
+  '/export-transactions',
+  protect,
+  authorize('ADMIN'),
+  reportsController.exportTransactions
+);
+
 module.exports = router;

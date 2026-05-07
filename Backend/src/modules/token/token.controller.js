@@ -226,6 +226,15 @@ const skipToken = async (req, res, next) => {
   }
 };
 
+const getGlobalQueue = async (req, res, next) => {
+  try {
+    const result = await tokenService.getGlobalQueue(req.hospitalId);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createToken,
   getCurrentToken,
@@ -237,4 +246,5 @@ module.exports = {
   skipToken,
   callTokenById,
   getDoctorQueue,
+  getGlobalQueue,
 };

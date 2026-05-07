@@ -56,7 +56,9 @@ const createOrder = async (req, res, next) => {
     });
 
   } catch (error) {
-    logger.error(`Error creating Razorpay order: ${error.message}`);
+    console.log("error", error);
+
+    logger.error(`Error creating Razorpay order: ${error}`);
 
     return res.status(500).json({
       success: false,

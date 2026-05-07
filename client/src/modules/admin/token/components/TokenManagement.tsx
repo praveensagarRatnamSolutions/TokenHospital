@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   Ticket,
   Zap,
+  Smartphone,
+  Banknote,
 } from 'lucide-react';
 import { useTokens, useVerifyCashToken, useCancelToken } from '../hooks';
 import CreateTokenModal from './CreateTokenModal';
@@ -176,11 +178,10 @@ export default function TokenManagement() {
                     <td className="p-6">
                       <div className="flex flex-col gap-1">
                         <span
-                          className={`inline-flex items-center justify-center h-10 px-4 font-black rounded-xl border transition-all ${
-                            token.isEmergency
+                          className={`inline-flex items-center justify-center h-10 px-4 font-black rounded-xl border transition-all ${token.isEmergency
                               ? 'bg-red-600 text-white border-red-700 shadow-md shadow-red-200'
                               : 'bg-primary/10 text-primary border-primary/20'
-                          }`}
+                            }`}
                         >
                           {token.tokenNumber}
                         </span>
@@ -221,23 +222,29 @@ export default function TokenManagement() {
                       <StatusBadge status={token.status} />
                     </td>
                     <td className="p-6 text-center">
-                      {token.payment?.status === 'pending' ? (
-                        <div className="inline-flex flex-col items-center">
-                          <span className="px-3 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[10px] font-black uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" /> Pending Cash
+                      <div className="flex flex-col items-center gap-1.5">
+                        {token.payment?.method === 'UPI' ? (
+                          <span className="px-3 py-1 bg-blue-100/50 text-blue-600 dark:text-blue-400 border border-blue-200/50 rounded-full text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1">
+                            <Smartphone className="w-3 h-3" /> UPI PAID
                           </span>
-                          <button
-                            onClick={() => handleVerifyCash(token._id)}
-                            className="text-[10px] font-bold text-primary hover:underline uppercase tracking-wide"
-                          >
-                            Verify Now
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="px-3 py-1 bg-emerald-100/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 rounded-full text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> Paid
-                        </span>
-                      )}
+                        ) : token.payment?.status === 'pending' || token.status === 'PROVISIONAL' ? (
+                          <div className="inline-flex flex-col items-center">
+                            <span className="px-3 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3" /> PENDING CASH
+                            </span>
+                            <button
+                              onClick={() => handleVerifyCash(token._id)}
+                              className="text-[9px] font-bold text-primary hover:underline uppercase tracking-wide"
+                            >
+                              Verify Received
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="px-3 py-1 bg-emerald-100/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 rounded-full text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1">
+                            <Banknote className="w-3 h-3" /> CASH PAID
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-6 text-right">
                       {token.status !== 'COMPLETED' && token.status !== 'CANCELED' && (

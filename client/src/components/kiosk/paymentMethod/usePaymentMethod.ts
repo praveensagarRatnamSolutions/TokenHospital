@@ -17,11 +17,25 @@ export interface PaymentMethodProps {
   fee?: string;
 }
 
+import { useQuery } from '@tanstack/react-query';
+import api from '@/services/api';
+
 const usePaymentMethod = ({ onNext, onBack }: PaymentMethodProps) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType | null>(null);
   const { mutateAsync, reset, isPending } = useCreateToken();
   const patientDetails = useAppSelector((state) => state.token.patientDetails);
+  const { user } = useAppSelector((state) => state.auth);
+  const hospitalId = user?.hospitalId;
   const dispatch = useAppDispatch();
+
+  // Check if Razorpay is enabled for this hospital
+  const { data: razorpayStatus } = useQuery({
+    queryKey: ['razorpayStatus', hospitalId],
+    queryFn: () => api.get(`/api/razorpay/status?hospitalId=${hospitalId}`).then(res => res.data),
+    enabled: !!hospitalId
+  });
+
+  const isRazorpayEnabled = razorpayStatus?.enabled || false;
 
   const handleContinue = async () => {
     if (!selectedMethod) return;
@@ -67,6 +81,7 @@ const usePaymentMethod = ({ onNext, onBack }: PaymentMethodProps) => {
     selectedMethod,
     handleBack,
     isPending,
+    isRazorpayEnabled,
   };
 };
 

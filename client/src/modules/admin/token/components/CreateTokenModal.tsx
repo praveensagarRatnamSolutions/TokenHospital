@@ -67,34 +67,99 @@ export default function CreateTokenPage() {
   });
   const doctors = docsRes?.doctors || [];
   const selectedDoctor = doctors.find((d: any) => d._id === doctorId);
+
+  // Check if Razorpay is enabled
+  const { data: razorpayRes } = useQuery({
+    queryKey: ['razorpayConfig', hospitalId],
+    queryFn: () => api.get('/api/razorpay/config').then((res) => res.data),
+    enabled: !!hospitalId,
+  });
+  const isRazorpayActive = razorpayRes?.config?.enabled || false;
+
   const createTokenMutation = useCreateToken();
+  const createPaymentMutation = useCreatePaymentOrder();
+  const verifyPaymentMutation = useVerifyOnlinePayment();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!doctorId) return alert('Please select a doctor');
 
     setLoading(true);
     try {
-      const tokenRes = await createTokenMutation.mutateAsync({
-        departmentId,
-        doctorId,
-        appointmentDate: new Date().toISOString().split('T')[0],
-        paymentMethod,
-        patientDetails: {
-          name: patientName,
-          phone: patientPhone,
-          age: parseInt(patientAge),
-          gender: patientGender,
-        },
-        isEmergency,
-      });
+      const patientData = {
+        name: patientName,
+        phone: patientPhone,
+        age: parseInt(patientAge),
+        gender: patientGender,
+      };
 
-      if (paymentMethod !== 'CASH') {
-        // ... Razorpay logic remains same as previous ...
-      } else {
+      if (paymentMethod === 'CASH') {
+        // Direct cash token creation
+        await createTokenMutation.mutateAsync({
+          departmentId,
+          doctorId,
+          appointmentDate: appointmentDate,
+          paymentType: 'CASH',
+          patientDetails: patientData,
+          isEmergency,
+        });
         router.push('/admin/token');
+      } else {
+        // UPI/Online Payment Flow
+        // 1. Create the payment order first
+        const orderRes: any = await createPaymentMutation.mutateAsync({
+          amount: selectedDoctor?.consultationFee || 500,
+          method: paymentMethod,
+          tokenId: 'PENDING',
+          doctorId,
+          departmentId,
+          patientDetails: {
+            ...patientData,
+            appointmentDate // Include date for webhook token creation
+          }
+        });
+
+        if (!orderRes.success && orderRes.message) {
+          throw new Error(orderRes.message);
+        }
+
+        const orderData = orderRes.data || orderRes;
+
+        // 2. Open Razorpay Checkout
+        const options = {
+          key: orderData.key,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: "Hospital Token",
+          description: `Consultation with Dr. ${selectedDoctor?.name}`,
+          order_id: orderData.orderId,
+          handler: async (response: any) => {
+            try {
+              setLoading(true);
+              await verifyPaymentMutation.mutateAsync({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+              router.push('/admin/token');
+            } catch (err) {
+              alert('Payment verification failed. Please check with admin.');
+            } finally {
+              setLoading(false);
+            }
+          },
+          prefill: {
+            name: patientName,
+            contact: typeof patientPhone === 'string' ? patientPhone : patientPhone.full,
+          },
+          theme: { color: "#2563eb" },
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to generate token');
+      alert(error.message || 'Failed to process request');
     } finally {
       setLoading(false);
     }
@@ -129,10 +194,10 @@ export default function CreateTokenPage() {
                   value={patientPhone.full} // ✅ string for UI
                   onChange={(val) => setPatientPhone(val)} // ✅ full object
                   showLabel={false} // ✅ hide internal label since we have our own
-                  
+
                 />
 
-                
+
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
@@ -196,14 +261,16 @@ export default function CreateTokenPage() {
                     <Banknote className="w-5 h-5 mb-1" />
                     <span className="text-xs font-bold">CASH</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setpaymentMethod('UPI')}
-                    className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentMethod === 'UPI' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}
-                  >
-                    <Smartphone className="w-5 h-5 mb-1" />
-                    <span className="text-xs font-bold">UPI</span>
-                  </button>
+                    {isRazorpayActive && (
+                      <button
+                        type="button"
+                        onClick={() => setpaymentMethod('UPI')}
+                        className={`flex-1 flex flex-col items-center p-3 rounded-xl border-2 transition-all ${paymentMethod === 'UPI' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-500'}`}
+                      >
+                        <Smartphone className="w-5 h-5 mb-1" />
+                        <span className="text-xs font-bold">UPI</span>
+                      </button>
+                    )}
                   <button
                     type="button"
                     onClick={() => setpaymentMethod('CARD')}
@@ -258,11 +325,10 @@ export default function CreateTokenPage() {
                     <div
                       key={doc._id}
                       onClick={() => setDoctorId(doc._id)}
-                      className={`p-5 rounded-[2rem] border-2 cursor-pointer transition-all shadow-sm ${
-                        doctorId === doc._id
+                      className={`p-5 rounded-[2rem] border-2 cursor-pointer transition-all shadow-sm ${doctorId === doc._id
                           ? 'border-primary bg-primary/5 shadow-xl'
                           : 'border-slate-200 bg-white hover:shadow-md'
-                      }`}
+                        }`}
                     >
                       {/* TOP SECTION */}
                       <div className="flex gap-4 items-start">
@@ -320,11 +386,10 @@ export default function CreateTokenPage() {
                           {doc.availability.map((day: any) => (
                             <div
                               key={day._id}
-                              className={`p-2 rounded-xl text-xs ${
-                                day.day === today
+                              className={`p-2 rounded-xl text-xs ${day.day === today
                                   ? 'bg-primary/10 border border-primary/30'
                                   : 'bg-slate-50'
-                              }`}
+                                }`}
                             >
                               <div className="flex justify-between font-bold">
                                 <span>{day.day}</span>

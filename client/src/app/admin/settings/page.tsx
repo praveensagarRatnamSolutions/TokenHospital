@@ -70,7 +70,7 @@ export default function AdminSettingsPage() {
           <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">Settings</h1>
           <p className="text-slate-500 font-medium mt-2">Manage your hospital's digital infrastructure and payment gateways.</p>
         </div>
-        
+
         <div className="flex gap-2">
           <button className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
@@ -83,7 +83,7 @@ export default function AdminSettingsPage() {
         {/* Main Configuration Content */}
         <div className="lg:col-span-7 space-y-12">
           {/* Razorpay Section */}
-          <section className="space-y-6">
+          <section className="space-y-6 bg-transparent">
             <div className="flex items-center gap-3">
               <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Payment Gateway</h2>
               <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
@@ -92,14 +92,14 @@ export default function AdminSettingsPage() {
           </section>
 
           {/* Placeholder sections with premium skeleton look */}
-          <section className="space-y-6">
+          <section className="space-y-6 bg-transparent">
             <div className="flex items-center gap-3">
               <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Analytics & Logs</h2>
               <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-8 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800 rounded-[2rem] relative overflow-hidden group">
+              <div className="p-8 bg-slate-50/50 dark:bg-slate-900/30 border border-dark-100 dark:border-slate-800 rounded-[2rem] relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                   <BarChart3 className="w-20 h-20" />
                 </div>
@@ -110,7 +110,7 @@ export default function AdminSettingsPage() {
                 <p className="text-sm font-medium text-slate-400 mt-2">Advanced data visualization settings coming soon.</p>
               </div>
 
-              <div className="p-8 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800 rounded-[2rem] relative overflow-hidden group">
+              <div className="p-8 bg-slate-50/50 dark:bg-slate-900/30 border border-dark-100 dark:border-slate-800 rounded-[2rem] relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                   <Bell className="w-20 h-20" />
                 </div>
@@ -129,7 +129,7 @@ export default function AdminSettingsPage() {
           <div className="p-8 rounded-[2.5rem] bg-slate-900 text-white shadow-2xl relative overflow-hidden">
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/20 blur-[80px] rounded-full" />
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-purple-500/20 blur-[80px] rounded-full" />
-            
+
             <div className="relative z-10 space-y-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/10 backdrop-blur-md">
@@ -137,7 +137,7 @@ export default function AdminSettingsPage() {
                 </div>
                 <h3 className="font-black tracking-tight">Platform Status</h3>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-sm py-2 border-b border-white/10">
                   <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Hospital Engine</span>
@@ -152,13 +152,13 @@ export default function AdminSettingsPage() {
                   <span className="text-blue-400 font-black">ENCRYPTED</span>
                 </div>
               </div>
-              
+
               <p className="text-xs text-slate-400 leading-relaxed pt-4">
                 All changes made to the settings undergo immediate synchronization across your hospital's digital kiosks and appointment portals.
               </p>
             </div>
           </div>
-          
+
           <div className="p-8 rounded-[2rem] bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
             <h4 className="font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest text-xs mb-4">Security Note</h4>
             <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">

@@ -18,6 +18,7 @@ app.use(
         'http://localhost:3001',
         'http://localhost:5173',
         'http://hospitaltoken.ratnamstaging.in',
+        
         process.env.FRONTEND_URL,
       ].filter(Boolean);
 

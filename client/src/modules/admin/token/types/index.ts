@@ -40,9 +40,12 @@ export interface CreateTokenPayload {
 
 export interface CreatePaymentPayload {
   amount: number;
-  tokenId: string;
-  patientId?: string;
   method: 'CASH' | 'UPI' | 'CARD';
+  tokenId: string;
+  doctorId: string;
+  departmentId: string;
+  patientDetails: any;
+  patientId?: string;
   metadata?: any;
 }
 
