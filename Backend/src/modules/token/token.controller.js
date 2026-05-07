@@ -55,6 +55,7 @@ const getTokens = async (req, res, next) => {
       appointmentDate: req.query.appointmentDate,
       page: req.query.page,
       limit: req.query.limit,
+      search: req.query.search,
     };
     const result = await tokenService.getTokens(req.hospitalId, filters);
     res.status(200).json({ success: true, ...result });
@@ -235,6 +236,34 @@ const getGlobalQueue = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Toggle emergency status
+ * @route   PATCH /api/token/:id/emergency
+ * @access  Private
+ */
+const toggleEmergency = async (req, res, next) => {
+    try {
+        const token = await tokenService.toggleEmergency(req.params.id, req.hospitalId);
+        res.status(200).json({ success: true, data: token });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Re-assign doctor
+ * @route   PATCH /api/token/:id/reassign
+ * @access  Private
+ */
+const reassignDoctor = async (req, res, next) => {
+    try {
+        const token = await tokenService.reassignDoctor(req.params.id, req.hospitalId, req.body);
+        res.status(200).json({ success: true, data: token });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
   createToken,
   getCurrentToken,
@@ -247,4 +276,6 @@ module.exports = {
   callTokenById,
   getDoctorQueue,
   getGlobalQueue,
+  toggleEmergency,
+  reassignDoctor,
 };

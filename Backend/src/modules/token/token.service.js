@@ -409,7 +409,7 @@ const createToken = async (tokenData) => {
       // 🔗 Link to existing payment (UPI Flow)
       payment = await Payment.findByIdAndUpdate(
         tokenData.existingPaymentId,
-        { 
+        {
           tokenId: token[0]._id,
           patientId: patient._id, // Sync the patient ID now that it's resolved
         },
@@ -466,7 +466,7 @@ const createToken = async (tokenData) => {
 
       broadcastToHospital(hospitalId, 'queue-updated', populatedToken);
       broadcastKioskQueue(hospitalId);
-    } catch (e) {}
+    } catch (e) { }
 
     return {
       token: populatedToken,
@@ -518,8 +518,20 @@ const getTokens = async (hospitalId, filters = {}) => {
     match.departmentId = new mongoose.Types.ObjectId(filters.departmentId);
   }
 
-  if (filters.doctorId) {
+  if (filters.doctorId && filters.doctorId !== '') {
     match.doctorId = new mongoose.Types.ObjectId(filters.doctorId);
+  }
+
+  if (filters.search && filters.search !== '') {
+    const searchRegex = new RegExp(filters.search, 'i');
+    match.$or = [
+      { tokenNumber: searchRegex },
+      { 'patientDetails.name': searchRegex },
+      { 'patientDetails.phone.full': searchRegex },
+      // Note: searching deep in populated fields like patient.name requires 
+      // adding the match AFTER the lookup stage in the pipeline.
+      // I'll handle that by moving the search match if needed.
+    ];
   }
 
   const date = filters.appointmentDate || new Date();
@@ -541,8 +553,9 @@ const getTokens = async (hospitalId, filters = {}) => {
   const limit = parseInt(filters.limit, 10) || 50;
   const skip = (page - 1) * limit;
 
-  let sort = { isEmergency: -1, sortKey: 1 }; // Default to queue-style sort (Oldest first)
-  if (filters.isQueue === 'false') {
+  let sort = { isEmergency: -1, createdAt: -1 };
+  console.log(filters.isQueue, 'filters.isQueue');
+  if (!filters.isQueue) {
     sort = { createdAt: -1 }; // Explicitly newest first if requested
   }
   // 🔥 Aggregation pipeline
@@ -641,8 +654,10 @@ const getTokens = async (hospitalId, filters = {}) => {
         'doctor.name': 1,
       },
     },
+  ];
 
-    // 📄 Pagination
+  const finalPipeline = [
+    ...pipeline,
     {
       $facet: {
         tokens: [{ $skip: skip }, { $limit: limit }],
@@ -651,16 +666,32 @@ const getTokens = async (hospitalId, filters = {}) => {
     },
   ];
 
-  const result = await Token.aggregate(pipeline);
+  const results = await Token.aggregate(finalPipeline);
 
-  const tokens = result[0]?.tokens || [];
-  const total = result[0]?.totalCount[0]?.count || 0;
+  const tokens = results[0]?.tokens || [];
+  const total = results[0]?.totalCount[0]?.count || 0;
+
+  // 📄 Get Summary Stats for the Dashboard
+  const stats = await Token.aggregate([
+    { $match: { ...match, status: { $in: ['WAITING', 'CALLED'] } } },
+    {
+      $group: {
+        _id: null,
+        totalCreated: { $sum: 1 },
+        emergencyCount: { $sum: { $cond: ['$isEmergency', 1, 0] } },
+        waitingCount: { $sum: { $cond: [{ $eq: ['$status', 'WAITING'] }, 1, 0] } },
+        activeCount: { $sum: { $cond: [{ $eq: ['$status', 'CALLED'] }, 1, 0] } },
+      },
+    },
+  ]);
 
   return {
     tokens,
+    stats: stats[0] || { totalCreated: 0, emergencyCount: 0, waitingCount: 0, activeCount: 0 },
     pagination: {
       total,
       page,
+      limit,
       pages: Math.ceil(total / limit),
     },
   };
@@ -866,7 +897,7 @@ const callNextToken = async (doctorId, hospitalId) => {
         status: 'EMPTY',
       });
       broadcastKioskQueue(hospitalId);
-    } catch (e) {}
+    } catch (e) { }
     return null;
   }
 
@@ -921,7 +952,7 @@ const callTokenById = async (tokenId, hospitalId) => {
 
     broadcastToHospital(hospitalId, 'queue-updated', updatedToken);
     broadcastKioskQueue(hospitalId);
-  } catch (e) {}
+  } catch (e) { }
 
   return updatedToken;
 };
@@ -1022,7 +1053,7 @@ const verifyCashPayment = async (tokenId, hospitalId) => {
 
       broadcastToHospital(hospitalId, 'queue-updated', updatedToken);
       broadcastKioskQueue(hospitalId);
-    } catch (e) {}
+    } catch (e) { }
 
     return {
       token: updatedToken,
@@ -1100,21 +1131,52 @@ const skipToken = async (tokenId, hospitalId, doctorId) => {
     } = require('../../socket/socketHandler');
     broadcastToHospital(hospitalId, 'queue-updated', updated);
     broadcastKioskQueue(hospitalId);
-  } catch (e) {}
+  } catch (e) { }
 
   return updated;
+};
+
+/**
+ * Toggle emergency status of a token
+ */
+const toggleEmergency = async (tokenId, hospitalId) => {
+  const token = await Token.findOne({ _id: tokenId, hospitalId });
+  if (!token) throw new Error('Token not found');
+
+  token.isEmergency = !token.isEmergency;
+  await token.save();
+  return token;
+};
+
+/**
+ * Re-assign a token to a different doctor
+ */
+const reassignDoctor = async (tokenId, hospitalId, { doctorId, departmentId }) => {
+  const token = await Token.findOne({ _id: tokenId, hospitalId });
+  if (!token) throw new Error('Token not found');
+
+  if (token.status === 'COMPLETED' || token.status === 'CANCELED') {
+    throw new Error('Cannot re-assign a finished token');
+  }
+
+  token.doctorId = doctorId;
+  if (departmentId) {
+    token.departmentId = departmentId;
+  }
+
+  await token.save();
+  return token;
 };
 
 module.exports = {
   createToken,
   getCurrentToken,
   getTokens,
+  getDoctorQueue,
   completeToken,
-  callNextToken,
   cancelToken,
   verifyCashPayment,
-  skipToken,
-  callTokenById,
-  getDoctorQueue,
   getGlobalQueue,
+  toggleEmergency,
+  reassignDoctor,
 };

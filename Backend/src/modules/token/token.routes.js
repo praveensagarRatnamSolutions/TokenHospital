@@ -207,27 +207,25 @@ router.patch('/:id/cancel', protect, authorize('ADMIN', 'DOCTOR'), tokenControll
  */
 router.patch('/:id/verify-cash', protect, authorize('ADMIN'), tokenController.verifyCashPayment);
 
+router.patch('/:id/skip', protect, authorize('ADMIN', 'DOCTOR'), tokenController.skipToken);
+
 /**
  * @swagger
- * /api/token/{id}/skip:
+ * /api/token/{id}/emergency:
  *   patch:
- *     summary: Skip a token (postpone it)
+ *     summary: Toggle emergency status
  *     tags: [Token]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Token skipped and set back to WAITING
- *       404:
- *         description: Token not found or not currently active
  */
-router.patch('/:id/skip', protect, authorize('ADMIN', 'DOCTOR'), tokenController.skipToken);
+router.patch('/:id/emergency', protect, authorize('ADMIN', 'RECEPTIONIST'), tokenController.toggleEmergency);
+
+/**
+ * @swagger
+ * /api/token/{id}/reassign:
+ *   patch:
+ *     summary: Re-assign token to another doctor
+ *     tags: [Token]
+ */
+router.patch('/:id/reassign', protect, authorize('ADMIN', 'RECEPTIONIST'), tokenController.reassignDoctor);
 
 module.exports = router;
 

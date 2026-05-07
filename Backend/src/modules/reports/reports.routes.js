@@ -136,4 +136,40 @@ router.get(
   reportsController.exportTransactions
 );
 
+/**
+ * @swagger
+ * /api/reports/doctor-performance:
+ *   get:
+ *     summary: Get detailed doctor performance report
+ *     tags: [Reports]
+ */
+router.get(
+  '/doctor-performance',
+  protect,
+  authorize('ADMIN'),
+  reportsController.getDoctorPerformanceReport
+);
+
+// Export route MUST come before /:doctorId to avoid conflict
+router.get(
+  '/doctor-performance/export',
+  protect,
+  authorize('ADMIN'),
+  reportsController.exportDoctorPerformance
+);
+
+router.get(
+  '/doctor-performance/:doctorId/patients',
+  protect,
+  authorize('ADMIN'),
+  reportsController.getDoctorPatients
+);
+
+router.get(
+  '/doctor-performance/:doctorId/patients/export',
+  protect,
+  authorize('ADMIN'),
+  reportsController.exportDoctorPatients
+);
+
 module.exports = router;

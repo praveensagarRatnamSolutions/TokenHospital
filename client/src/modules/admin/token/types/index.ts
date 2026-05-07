@@ -63,6 +63,12 @@ export interface TokenListResponse {
     page: number;
     pages: number;
   };
+  stats?: {
+    totalCreated: number;
+    emergencyCount: number;
+    waitingCount: number;
+    activeCount: number;
+  };
 }
 
 export interface SingleTokenResponse {

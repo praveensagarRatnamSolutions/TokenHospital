@@ -82,3 +82,27 @@ export const verifyOnlinePayment = async (payload: VerifyPaymentPayload): Promis
     };
   }
 };
+
+export const toggleEmergency = async (id: string): Promise<SingleTokenResponse> => {
+  try {
+    const response = await api.patch<SingleTokenResponse>(`${TOKEN_ENDPOINT}/${id}/emergency`);
+    return response.data;
+  } catch (error: any) {
+    throw {
+      success: false,
+      message: error.response?.data?.message || 'Failed to toggle emergency status',
+    };
+  }
+};
+
+export const reassignDoctor = async (id: string, payload: { doctorId: string; departmentId: string }): Promise<SingleTokenResponse> => {
+  try {
+    const response = await api.patch<SingleTokenResponse>(`${TOKEN_ENDPOINT}/${id}/reassign`, payload);
+    return response.data;
+  } catch (error: any) {
+    throw {
+      success: false,
+      message: error.response?.data?.message || 'Failed to reassign doctor',
+    };
+  }
+};

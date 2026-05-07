@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as tokenApi from '../api/tokenApi';
 import type { CreateTokenPayload, CreatePaymentPayload, VerifyPaymentPayload } from '../types';
 
-export const useTokens = (filters: { appointmentDate?: string; page?: number; limit?: number; status?: string; doctorId?: string; departmentId?: string } = {}) => {
+export const useTokens = (filters: { appointmentDate?: string; page?: number; limit?: number; status?: string; doctorId?: string; departmentId?: string; search?: string; isQueue?: boolean } = {}) => {
   return useQuery({
     queryKey: ['adminTokens', filters],
     queryFn: () => tokenApi.getTokens(filters),
@@ -54,6 +54,29 @@ export const useVerifyOnlinePayment = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: VerifyPaymentPayload) => tokenApi.verifyOnlinePayment(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminTokens'] });
+      queryClient.invalidateQueries({ queryKey: ['globalQueue'] });
+    },
+  });
+};
+
+export const useToggleEmergency = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => tokenApi.toggleEmergency(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminTokens'] });
+      queryClient.invalidateQueries({ queryKey: ['globalQueue'] });
+    },
+  });
+};
+
+export const useReassignDoctor = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: { doctorId: string; departmentId: string } }) =>
+      tokenApi.reassignDoctor(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminTokens'] });
       queryClient.invalidateQueries({ queryKey: ['globalQueue'] });
