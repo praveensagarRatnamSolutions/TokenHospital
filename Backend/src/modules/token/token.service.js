@@ -279,6 +279,7 @@ const callNextToken = async (doctorId, hospitalId) => {
     const tokenObj = nextToken.toObject();
     tokenObj.patient = tokenObj.patientId;
     broadcastToHospital(hospitalId, 'queue-updated', tokenObj);
+    broadcastKioskQueue(hospitalId);
     return tokenObj;
   } else {
     broadcastToHospital(hospitalId, 'queue-updated', { doctorId, status: 'EMPTY' });
@@ -288,6 +289,29 @@ const callNextToken = async (doctorId, hospitalId) => {
       message: "Hi! You have seen all your patients for now. Take a break!" 
     };
   }
+};
+
+const callTokenById = async (tokenId, doctorId, hospitalId) => {
+  // Clear any existing active token for this doctor
+  await Token.updateMany(
+    { doctorId, hospitalId, status: 'CALLED' },
+    { status: 'COMPLETED', completedAt: new Date() }
+  );
+
+  const token = await Token.findOneAndUpdate(
+    { _id: tokenId, hospitalId, status: 'WAITING' },
+    { status: 'CALLED', calledAt: new Date() },
+    { new: true }
+  ).populate('departmentId doctorId patientId');
+
+  if (token) {
+    const tokenObj = token.toObject();
+    tokenObj.patient = tokenObj.patientId;
+    broadcastToHospital(hospitalId, 'queue-updated', tokenObj);
+    broadcastKioskQueue(hospitalId);
+    return tokenObj;
+  }
+  return null;
 };
 
 const skipToken = async (tokenId, hospitalId, doctorId) => {
@@ -399,14 +423,38 @@ const getGlobalQueue = async (hospitalId) => {
   ];
 
   const departments = await Token.aggregate(pipeline);
-  
+
+  // Flatten departments into a flat queue for the main dashboard view
+  const queue = departments.flatMap((dep) =>
+    dep.doctors.map((doc) => ({
+      _id: doc.id,
+      doctorName: doc.name,
+      departmentName: dep.departmentName,
+      activeToken: doc.activeToken,
+      waitingTokens: doc.waitingTokens,
+    }))
+  );
+
   return {
     lastUpdated: new Date(),
     departments,
+    queue, // Provide flat queue for dashboard
     stats: {
-        totalWaiting: departments.reduce((acc, dep) => acc + dep.doctors.reduce((dAcc, doc) => dAcc + doc.waitingTokens.length, 0), 0),
-        doctorsActive: departments.reduce((acc, dep) => acc + dep.doctors.length, 0)
-    }
+      waitingCount: departments.reduce(
+        (acc, dep) =>
+          acc +
+          dep.doctors.reduce((dAcc, doc) => dAcc + doc.waitingTokens.length, 0),
+        0
+      ),
+      activeCount: departments.reduce(
+        (acc, dep) => acc + dep.doctors.filter((doc) => doc.activeToken).length,
+        0
+      ),
+      doctorsOnline: departments.reduce(
+        (acc, dep) => acc + dep.doctors.length,
+        0
+      ),
+    },
   };
 };
 
@@ -491,6 +539,7 @@ module.exports = {
   getGlobalQueue,
   completeToken,
   callNextToken,
+  callTokenById,
   skipToken,
   autoAssignDoctor,
   resolvePatient,

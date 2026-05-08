@@ -16,30 +16,32 @@ const initSocket = (server) => {
 
         // Join a specific hospital room
         socket.on('join-hospital', (hospitalId) => {
-            socket.join(hospitalId);
+            if (!hospitalId) return;
+            socket.join(hospitalId.toString());
             logger.info(`Socket ${socket.id} joined hospital room: ${hospitalId}`);
         });
-
+ 
         // Join a specific kiosk room for targeted updates
         socket.on('join-kiosk', (kioskId) => {
-            socket.join(`kiosk_${kioskId}`);
+            if (!kioskId) return;
+            socket.join(`kiosk_${kioskId.toString()}`);
             logger.info(`Socket ${socket.id} joined kiosk room: kiosk_${kioskId}`);
         });
-
+ 
         socket.on('disconnect', () => {
             logger.info(`Socket disconnected: ${socket.id}`);
         });
     });
-
+ 
     return io;
 };
-
+ 
 /**
  * Broadcast an event to a specific hospital room
  */
 const broadcastToHospital = (hospitalId, eventName, data) => {
-    if (!io) return;
-    io.to(hospitalId).emit(eventName, data);
+    if (!io || !hospitalId) return;
+    io.to(hospitalId.toString()).emit(eventName, data);
 };
 
 /**
