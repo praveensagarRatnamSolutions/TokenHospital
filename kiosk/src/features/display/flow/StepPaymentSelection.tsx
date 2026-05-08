@@ -23,7 +23,7 @@ interface PatientData {
   age: number;
   gender: "Male" | "Female" | "Other";
   phone: PhoneData;
-  paymentMethod: "CASH" | "ONLINE";
+  paymentMethod: "CASH" | "UPI" | "CARD";
 }
 
 interface StepPaymentSelectionProps {
@@ -43,7 +43,7 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
   const [phone, setPhone] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [gender, setGender] = useState<"Male" | "Female" | "Other">("Male");
-  const [method, setMethod] = useState<"CASH" | "ONLINE">("CASH");
+  const [method, setMethod] = useState<"CASH" | "UPI" | "CARD">("CASH");
   const [error, setError] = useState("");
 
   const parsePhoneNumber = (phoneStr: string): PhoneData => {
@@ -251,26 +251,58 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
               </button>
 
               <button
-                onClick={() => setMethod("ONLINE")}
+                onClick={() => setMethod("UPI")}
                 className={`
                   flex flex-col items-center p-8 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden
-                  ${method === "ONLINE" ? "bg-sky-500/10 border-sky-500" : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 hover:border-sky-500/30"}
+                  ${method === "UPI" ? "bg-sky-500/10 border-sky-500" : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 hover:border-sky-500/30"}
                 `}
               >
                 <CreditCard
-                  className={`size-16 mb-4 transition-colors ${method === "ONLINE" ? "text-sky-500" : "text-slate-300 dark:text-white/20"}`}
+                  className={`size-16 mb-4 transition-colors ${method === "UPI" ? "text-sky-500" : "text-slate-300 dark:text-white/20"}`}
                 />
                 <span
-                  className={`text-xl font-black uppercase tracking-widest ${method === "ONLINE" ? "text-slate-900 dark:text-white" : "text-slate-300 dark:text-white/20"}`}
+                  className={`text-xl font-black uppercase tracking-widest ${method === "UPI" ? "text-slate-900 dark:text-white" : "text-slate-300 dark:text-white/20"}`}
                 >
                   Fast Online Pay
                 </span>
                 <span
-                  className={`text-[10px] uppercase font-bold tracking-widest mt-2 ${method === "ONLINE" ? "text-sky-600/60 dark:text-white/40" : "text-slate-200 dark:text-white/10"}`}
+                  className={`text-[10px] uppercase font-bold tracking-widest mt-2 ${method === "UPI" ? "text-sky-600/60 dark:text-white/40" : "text-slate-200 dark:text-white/10"}`}
                 >
                   UPI / Cards / Net Banking
                 </span>
-                {method === "ONLINE" && (
+                {method === "UPI" && (
+                  <motion.div
+                    layoutId="paymentActive"
+                    className="absolute top-4 right-4 text-sky-500"
+                  >
+                    <ShieldCheck size={24} />
+                  </motion.div>
+                )}
+              </button>
+
+              <button
+                onClick={() => setMethod("CARD")}
+                className={`
+                  flex flex-col items-center p-8 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden
+                  ${method === "CARD" ? "bg-sky-500/10 border-sky-500" : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 hover:border-sky-500/30"}
+                `}
+              >
+                <div className="flex gap-2 mb-4">
+                    <CreditCard
+                        className={`size-12 transition-colors ${method === "CARD" ? "text-sky-500" : "text-slate-300 dark:text-white/20"}`}
+                    />
+                </div>
+                <span
+                  className={`text-xl font-black uppercase tracking-widest ${method === "CARD" ? "text-slate-900 dark:text-white" : "text-slate-300 dark:text-white/20"}`}
+                >
+                  Card / Others
+                </span>
+                <span
+                  className={`text-[10px] uppercase font-bold tracking-widest mt-2 ${method === "CARD" ? "text-sky-600/60 dark:text-white/40" : "text-slate-200 dark:text-white/10"}`}
+                >
+                  Net Banking / Wallets
+                </span>
+                {method === "CARD" && (
                   <motion.div
                     layoutId="paymentActive"
                     className="absolute top-4 right-4 text-sky-500"

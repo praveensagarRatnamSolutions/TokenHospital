@@ -98,7 +98,50 @@ const verifyPayment = async (req, res, next) => {
   }
 };
 
+const getPaymentStatus = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const payment = await Payment.findOne({ razorpayOrderId: orderId })
+      .populate({
+        path: 'tokenId',
+        populate: [
+          { path: 'departmentId', select: 'name prefix' },
+          { path: 'doctorId', select: 'name roomNumber education' },
+          { path: 'patientId', select: 'name phone age gender' },
+          { path: 'hospitalId', select: 'name logo' }
+        ]
+      })
+      .lean();
+
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Payment not found" });
+    }
+
+    let waitingCount = 0;
+    if (payment.tokenId) {
+        waitingCount = await Token.countDocuments({
+            hospitalId: payment.hospitalId,
+            doctorId: payment.doctorId,
+            appointmentDate: payment.tokenId.appointmentDate,
+            status: 'WAITING',
+            createdAt: { $lt: payment.tokenId.createdAt }
+        });
+    }
+
+    res.status(200).json({
+      success: true,
+      status: payment.status,
+      token: payment.tokenId, 
+      waitingCount,
+    });
+  } catch (error) {
+    logger.error(`Error getting payment status: ${error.message}`);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
   verifyPayment,
+  getPaymentStatus,
 };

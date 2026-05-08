@@ -9,7 +9,6 @@ interface KioskTableProps {
   onEdit: (kiosk: Kiosk) => void;
   onDelete: (kiosk: Kiosk) => void;
   onToggleActive: (kiosk: Kiosk) => void;
-  isDarkMode?: boolean;
 }
 
 export const KioskTable: React.FC<KioskTableProps> = ({
@@ -17,116 +16,131 @@ export const KioskTable: React.FC<KioskTableProps> = ({
   onEdit,
   onDelete,
   onToggleActive,
-  isDarkMode = false,
 }) => {
-  const textColor = isDarkMode ? 'text-white' : 'text-slate-900';
-  const mutedText = isDarkMode ? 'text-slate-400' : 'text-slate-600';
-  const borderColor = isDarkMode ? 'border-slate-800' : 'border-slate-200';
-  const bgCard = isDarkMode ? 'bg-slate-900/50' : 'bg-white';
+  if (kiosks.length === 0) {
+    return (
+      <div className="py-32 text-center rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Monitor className="mx-auto w-14 h-14 text-slate-200 dark:text-slate-700 mb-4" />
+        <div className="text-lg font-black text-slate-900 dark:text-white">No Kiosks Found</div>
+        <p className="text-slate-400 dark:text-slate-500 mt-1 text-sm font-medium">
+          Add your first kiosk to start displaying content.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className={`overflow-x-auto rounded-xl border ${borderColor} ${bgCard} shadow-sm`}>
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className={`border-b ${borderColor} bg-slate-50/50 dark:bg-slate-800/50`}>
-            <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${mutedText}`}>Device</th>
-            <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${mutedText}`}>Configuration</th>
-            <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${mutedText}`}>Ads</th>
-            <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${mutedText}`}>Status</th>
-            <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${mutedText} text-right text-right-important`}>Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-          {kiosks.map((kiosk) => (
-            <tr key={kiosk._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-              <td className="px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600">
-                    <Monitor size={20} />
-                  </div>
-                  <div>
-                    <div className={`font-bold ${textColor}`}>{kiosk.name}</div>
-                    <div className={`text-xs font-mono px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded inline-block mt-1 ${mutedText}`}>
-                      {kiosk.code}
+    <div className="rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+              <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Device</th>
+              <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Configuration</th>
+              <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Ads</th>
+              <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
+              <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            {kiosks.map((kiosk) => (
+              <tr
+                key={kiosk._id}
+                className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group"
+              >
+                {/* Device */}
+                <td className="px-8 py-5">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                      <Monitor className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-black text-slate-900 dark:text-white">{kiosk.name}</div>
+                      <div className="text-[10px] font-mono font-bold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md inline-block mt-1">
+                        {kiosk.code}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </td>
-              <td className="px-6 py-4">
-                <div className="space-y-1.5">
-                  <div className={`text-sm flex items-center gap-1.5 ${mutedText}`}>
-                    <MapPin size={14} className="text-blue-500" />
-                    <span className="capitalize">{kiosk.locationType.replace('_', ' ')}</span>
+                </td>
+
+                {/* Configuration */}
+                <td className="px-8 py-5">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400">
+                      <MapPin className="w-3.5 h-3.5 text-primary/50" />
+                      <span className="capitalize">{kiosk.locationType.replace('_', ' ')}</span>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {kiosk.departmentIds?.length > 0 && (
+                        <div className="flex items-center gap-1 text-[10px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-black border border-indigo-500/20">
+                          <Users className="w-3 h-3" /> {kiosk.departmentIds.length} Depts
+                        </div>
+                      )}
+                      {kiosk.doctorIds?.length > 0 && (
+                        <div className="flex items-center gap-1 text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-full font-black border border-purple-500/20">
+                          <User className="w-3 h-3" /> {kiosk.doctorIds.length} Doctors
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    {kiosk.departmentIds?.length > 0 && (
-                      <div className="flex items-center gap-1 text-[10px] bg-indigo-500/10 text-indigo-600 px-1.5 py-0.5 rounded-full font-bold">
-                        <Users size={10} /> {kiosk.departmentIds.length} Depts
-                      </div>
-                    )}
-                    {kiosk.doctorIds?.length > 0 && (
-                      <div className="flex items-center gap-1 text-[10px] bg-purple-500/10 text-purple-600 px-1.5 py-0.5 rounded-full font-bold">
-                        <User size={10} /> {kiosk.doctorIds.length} Doctors
-                      </div>
-                    )}
+                </td>
+
+                {/* Ads */}
+                <td className="px-8 py-5">
+                  <div className="font-black text-slate-900 dark:text-white text-sm">
+                    {kiosk.ads?.length || 0} Ads
                   </div>
-                </div>
-              </td>
-              <td className="px-6 py-4">
-                <div className={`text-sm font-bold ${textColor}`}>
-                  {kiosk.ads?.length || 0} Ads
-                </div>
-                <div className={`text-xs ${mutedText}`}>Playlist active</div>
-              </td>
-              <td className="px-6 py-4">
-                <button
-                  onClick={() => onToggleActive(kiosk)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${
-                    kiosk.isActive
-                      ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20'
-                      : 'bg-slate-500/10 text-slate-500 hover:bg-slate-500/20'
-                  }`}
-                >
-                  <Power size={12} />
-                  {kiosk.isActive ? 'Active' : 'Offline'}
-                </button>
-              </td>
-              <td className="px-6 py-4">
-                <div className="flex items-center justify-end gap-2">
+                  <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                    Playlist Active
+                  </div>
+                </td>
+
+                {/* Status */}
+                <td className="px-8 py-5">
                   <button
-                    onClick={() => onEdit(kiosk)}
-                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all"
-                    title="Edit Kiosk"
+                    onClick={() => onToggleActive(kiosk)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+                      kiosk.isActive
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/50'
+                        : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100 dark:bg-slate-800/50 dark:text-slate-500 dark:border-slate-800'
+                    }`}
                   >
-                    <Edit2 size={18} />
+                    <Power className="w-3 h-3" />
+                    {kiosk.isActive ? 'Active' : 'Offline'}
                   </button>
-                  <button
-                    onClick={() => window.open(`/kiosk/${kiosk.code}`, '_blank')}
-                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all"
-                    title="Preview Kiosk"
-                  >
-                    <ExternalLink size={18} />
-                  </button>
-                  <button
-                    onClick={() => onDelete(kiosk)}
-                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all"
-                    title="Delete Kiosk"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {kiosks.length === 0 && (
-        <div className="py-12 text-center">
-          <Monitor size={48} className="mx-auto text-slate-200 dark:text-slate-800 mb-4" />
-          <div className={`text-lg font-bold ${textColor}`}>No Kiosks Found</div>
-          <p className={mutedText}>Add your first kiosk to start displaying content.</p>
-        </div>
-      )}
+                </td>
+
+                {/* Actions */}
+                <td className="px-8 py-5">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => onEdit(kiosk)}
+                      className="p-2.5 text-slate-400 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-xl transition-all"
+                      title="Edit Kiosk"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => window.open(`/kiosk/${kiosk.code}`, '_blank')}
+                      className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-all"
+                      title="Preview Kiosk"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(kiosk)}
+                      className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
+                      title="Delete Kiosk"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

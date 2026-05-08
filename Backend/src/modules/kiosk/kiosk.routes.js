@@ -102,6 +102,15 @@ router.get(
   kioskController.getKioskTokensByHospital
 );
 
+/**
+ * @swagger
+ * /api/kiosk/public-queue/{hospitalId}:
+ *   get:
+ *     summary: Get public queue board for a hospital (No Auth required)
+ *     tags: [Kiosks]
+ */
+router.get('/public-queue/:hospitalId', kioskController.getPublicQueue);
+
 
 /**
  * @swagger

@@ -126,22 +126,72 @@ const deleteKiosk = async (query) => {
 //   return Object.values(departmentMap);
 // };
 
-const getKioskTokenStats = async (hospitalId) => {
+const getKioskTokenStats = async (hospitalId, kioskId = null) => {
   const today = new Date().toISOString().split('T')[0];
 
-  const tokens = await Token.find({
+  const query = {
     hospitalId,
     appointmentDate: today,
     status: { $in: ['WAITING', 'CALLED'] },
-  })
+  };
+
+  // 🏥 Apply Kiosk-specific filters if kioskId is provided
+  if (kioskId) {
+    const kiosk = await Kiosk.findById(kioskId);
+    if (kiosk) {
+      const filters = [];
+      if (kiosk.departmentIds && kiosk.departmentIds.length > 0) {
+        filters.push({ departmentId: { $in: kiosk.departmentIds } });
+      }
+      if (kiosk.doctorIds && kiosk.doctorIds.length > 0) {
+        filters.push({ doctorId: { $in: kiosk.doctorIds } });
+      }
+
+      if (filters.length > 0) {
+        query.$or = filters;
+      }
+    }
+  }
+
+  const tokens = await Token.find(query)
     .populate('departmentId', 'name')
-    .populate('doctorId', 'name roomNumber')
-    .sort({ sortKey: 1 }) // Let MongoDB do the initial sorting
+    .populate('doctorId', 'name roomNumber education')
+    .sort({ sortKey: 1 })
     .lean();
 
   console.log('Tokens fetched for stats:', tokens.length);
 
   const grouped = {};
+
+  // 🔥 Pre-initialize grouped data from Kiosk config to ensure assigned slots 
+  // show as 'Ready' and allow 'Hi, Doctor' messages to work.
+  if (kioskId) {
+    const Kiosk = require('./kiosk.model');
+    const kioskConfig = await Kiosk.findById(kioskId)
+      .populate('departmentIds', 'name')
+      .populate('doctorIds', 'name roomNumber education departmentId')
+      .lean();
+
+    if (kioskConfig) {
+      for (const doc of kioskConfig.doctorIds) {
+        let dept = kioskConfig.departmentIds.find(d => d._id.toString() === doc.departmentId?.toString());
+        if (!dept && doc.departmentId) {
+            dept = await require('../department/department.model').findById(doc.departmentId).lean();
+        }
+
+        if (dept) {
+          const key = `${dept._id}_${doc._id}`;
+          grouped[key] = {
+            dept,
+            doctor: doc,
+            active: null,
+            waiting: [],
+            emergency: null,
+          };
+        }
+      }
+    }
+  }
 
   for (const token of tokens) {
     if (!token.doctorId || !token.departmentId) continue;
@@ -181,27 +231,24 @@ const getKioskTokenStats = async (hospitalId) => {
       acc.push(department);
     }
 
+    const activeToken = item.active?.tokenNumber || null;
+    const nextToken = item.waiting[0]?.tokenNumber || '---';
+
     department.doctors.push({
       id: item.doctor._id.toString(),
       name: item.doctor.name,
+      specialty: item.doctor.education,
       room: item.doctor.roomNumber,
       display: {
-        // If an emergency is 'CALLED', it becomes 'current'
-        // If not, we show it in the emergency slot
         emergency: item.emergency?.tokenNumber || null,
-        current:
-          item.active?.tokenNumber ||
-          (item.waiting.length > 0 ? 'Next Up...' : '---'),
-        next: item.active
-          ? item.waiting[0]?.tokenNumber || '---'
-          : item.waiting[1]?.tokenNumber || '---',
+        current: activeToken || 'Ready',
+        next: nextToken,
       },
-      queue: item.active
-        ? item.waiting.slice(1, 4).map((t) => t.tokenNumber) // Show next 3 if someone is inside
-        : item.waiting.slice(2, 5).map((t) => t.tokenNumber),
+      // The queue starts from the 2nd person in the waiting list (since the 1st is in 'next')
+      queue: item.waiting.slice(1, 6).map((t) => t.tokenNumber),
       meta: {
         totalWaiting: item.waiting.length,
-        estimatedWaitTime: `${item.waiting.length * 5} mins`,
+        estimatedWaitTime: `${item.waiting.length * 10} mins`,
       },
     });
 

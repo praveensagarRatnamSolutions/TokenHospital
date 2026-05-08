@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { DepartmentQueue } from "../types";
+
 import {
   Activity,
   Zap,
@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Stethoscope,
 } from "lucide-react";
+import type { DepartmentQueue } from "../../../core/types";
 
 interface TokenQueueTableProps {
   departments: DepartmentQueue[];
@@ -47,26 +48,24 @@ const TokenQueueTable: React.FC<TokenQueueTableProps> = ({
           <button
             key={dept.id}
             onClick={() => setActiveDeptIdx(idx)}
-            className={`relative flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 ${
-              idx === activeDeptIdx
+            className={`relative flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 ${idx === activeDeptIdx
                 ? isDark
                   ? "bg-white/10 text-white border-b-2 border-sky-400"
                   : "bg-sky-50 text-sky-700 border-b-2 border-sky-500"
                 : isDark
                   ? "text-slate-500 hover:text-slate-300"
                   : "text-slate-400 hover:text-slate-600"
-            }`}
+              }`}
           >
             <Stethoscope size={12} />
             {dept.name}
             <span
-              className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-black ${
-                idx === activeDeptIdx
+              className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-black ${idx === activeDeptIdx
                   ? "bg-sky-500 text-white"
                   : isDark
                     ? "bg-white/10 text-slate-400"
                     : "bg-slate-100 text-slate-500"
-              }`}
+                }`}
             >
               {dept.doctors.reduce((s, d) => s + d.meta.totalWaiting, 0)}
             </span>
@@ -115,11 +114,10 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
   return (
     <motion.div
       layout
-      className={`relative rounded-2xl p-4 flex flex-col gap-3 overflow-hidden transition-all ${
-        isDark
+      className={`relative rounded-2xl p-4 flex flex-col gap-3 overflow-hidden transition-all ${isDark
           ? "bg-white/5 border border-white/8 hover:border-white/15"
           : "bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200"
-      }`}
+        }`}
     >
       {/* Emergency badge */}
       {hasEmergency && (
@@ -138,9 +136,8 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
       {/* Doctor Header */}
       <div className="flex items-start gap-3 pr-8">
         <div
-          className={`size-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
-            isDark ? "bg-sky-500/15 text-sky-400" : "bg-sky-50 text-sky-600"
-          }`}
+          className={`size-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isDark ? "bg-sky-500/15 text-sky-400" : "bg-sky-50 text-sky-600"
+            }`}
         >
           <Stethoscope size={16} />
         </div>
@@ -164,15 +161,14 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
       <div className="flex items-stretch gap-2">
         {/* Current Token */}
         <div
-          className={`flex-1 rounded-xl p-3 flex flex-col items-center justify-center gap-1 ${
-            isCurrent
+          className={`flex-1 rounded-xl p-3 flex flex-col items-center justify-center gap-1 ${isCurrent
               ? isDark
                 ? "bg-teal-500/15 border border-teal-500/25"
                 : "bg-teal-50 border border-teal-200"
               : isDark
                 ? "bg-white/5 border border-white/5"
                 : "bg-slate-50 border border-slate-100"
-          }`}
+            }`}
         >
           <span
             className={`text-[9px] font-black uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}
@@ -183,15 +179,14 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
             key={doctor.display.current}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`text-2xl font-black tracking-tighter ${
-              isCurrent
+            className={`text-2xl font-black tracking-tighter ${isCurrent
                 ? isDark
                   ? "text-teal-400"
                   : "text-teal-600"
                 : isDark
                   ? "text-slate-600"
                   : "text-slate-300"
-            }`}
+              }`}
           >
             {doctor.display.current}
           </motion.span>
@@ -204,11 +199,10 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
 
         {/* Next Token */}
         <div
-          className={`flex-1 rounded-xl p-3 flex flex-col items-center justify-center gap-1 ${
-            isDark
+          className={`flex-1 rounded-xl p-3 flex flex-col items-center justify-center gap-1 ${isDark
               ? "bg-white/5 border border-white/5"
               : "bg-slate-50 border border-slate-100"
-          }`}
+            }`}
         >
           <span
             className={`text-[9px] font-black uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}
@@ -232,11 +226,10 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
           {doctor.queue.slice(0, 6).map((tok, i) => (
             <span
               key={i}
-              className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${
-                isDark
+              className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${isDark
                   ? "bg-white/5 text-slate-400"
                   : "bg-slate-100 text-slate-500"
-              }`}
+                }`}
             >
               {tok}
             </span>

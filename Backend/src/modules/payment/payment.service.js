@@ -79,34 +79,64 @@ const createOrder = async ({
     patientDetails,
   });
 
-  // 5. Generate QR Code for the payment
+  // 5. Generate QR/Link based on method
   let qrCode = null;
+  let paymentLink = null;
+
   try {
-    qrCode = await razorpay.qrCode.create({
-      type: "upi_qr",
-      name: "Hospital Token",
-      usage: "single_use",
-      fixed_amount: true,
-      payment_amount: Math.round(amount * 100),
-      description: `Consultation with Dr. ${doctor.name}`,
-      notes: {
-        paymentId: paymentRecord._id.toString(),
-        orderId: order.id
-      }
-    });
+    if (method === 'UPI') {
+      qrCode = await razorpay.qrCode.create({
+        type: "upi_qr",
+        name: "Hospital Token",
+        usage: "single_use",
+        fixed_amount: true,
+        payment_amount: Math.round(amount * 100),
+        description: `Consultation with Dr. ${doctor.name}`,
+        notes: {
+          paymentId: paymentRecord._id.toString(),
+          orderId: order.id
+        }
+      });
+    } else {
+      // 🔗 Generate Payment Link for Cards/Others
+      paymentLink = await razorpay.paymentLink.create({
+        amount: Math.round(amount * 100),
+        currency: "INR",
+        accept_partial: false,
+        reference_id: order.id,
+        description: `Hospital Token - Dr. ${doctor.name}`,
+        customer: {
+          name: patientDetails.name,
+          contact: patientDetails.phone.full
+        },
+        notify: {
+          sms: false,
+          email: false
+        },
+        reminder_enable: false,
+        notes: {
+          paymentId: paymentRecord._id.toString(),
+          orderId: order.id
+        }
+      });
+    }
   } catch (err) {
-    logger.error('Failed to generate Razorpay QR Code:', err);
+    logger.error('Failed to generate Razorpay Payment asset:', err);
   }
 
   return {
     orderId: order.id,
-    key: config.keyId, // Return key for frontend if needed
+    key: config.keyId,
     amount: order.amount,
     currency: order.currency,
     qrCode: qrCode ? {
       id: qrCode.id,
       imageUrl: qrCode.image_url,
       payload: qrCode.payload // UPI string
+    } : null,
+    paymentLink: paymentLink ? {
+      id: paymentLink.id,
+      url: paymentLink.short_url
     } : null
   };
 };
@@ -149,7 +179,14 @@ const verifyPayment = async (
   return true;
 };
 
+const getPaymentByOrderId = async (razorpayOrderId) => {
+  return await Payment.findOne({ razorpayOrderId })
+    .populate('tokenId')
+    .lean();
+};
+
 module.exports = {
   createOrder,
   verifyPayment,
+  getPaymentByOrderId,
 };

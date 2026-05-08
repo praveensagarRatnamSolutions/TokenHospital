@@ -20,12 +20,11 @@ const initSocket = (server) => {
             logger.info(`Socket ${socket.id} joined hospital room: ${hospitalId}`);
         });
 
-        // Kiosk devices join hospital room via query param on connect
-        const hospitalId = socket.handshake.query?.hospitalId;
-        if (hospitalId) {
-            socket.join(hospitalId);
-            logger.info(`Kiosk socket ${socket.id} auto-joined hospital room: ${hospitalId}`);
-        }
+        // Join a specific kiosk room for targeted updates
+        socket.on('join-kiosk', (kioskId) => {
+            socket.join(`kiosk_${kioskId}`);
+            logger.info(`Socket ${socket.id} joined kiosk room: kiosk_${kioskId}`);
+        });
 
         socket.on('disconnect', () => {
             logger.info(`Socket disconnected: ${socket.id}`);
@@ -44,16 +43,27 @@ const broadcastToHospital = (hospitalId, eventName, data) => {
 };
 
 /**
- * Broadcast the full grouped token queue to all kiosk displays in a hospital.
- * This fetches fresh stats and emits 'kiosk-queue-updated' with department-grouped data.
+ * Broadcast the grouped token queue to all kiosks.
+ * Fetches filtered data for each kiosk individually to respect their assigned depts/doctors.
  */
 const broadcastKioskQueue = async (hospitalId) => {
     if (!io) return;
     try {
         const kioskService = require('../modules/kiosk/kiosk.service');
-        const stats = await kioskService.getKioskTokenStats(hospitalId);
-        io.to(hospitalId.toString()).emit('kiosk-queue-updated', stats);
-        logger.info(`Broadcasted kiosk-queue-updated to hospital ${hospitalId}`);
+        const Kiosk = require('../modules/kiosk/kiosk.model');
+        
+        // Find all active kiosks for this hospital
+        const kiosks = await Kiosk.find({ hospitalId: hospitalId.toString(), isActive: true }).select('_id');
+
+        for (const kiosk of kiosks) {
+            const kioskId = kiosk._id.toString();
+            const stats = await kioskService.getKioskTokenStats(hospitalId, kioskId);
+            
+            // Emit to the specific kiosk room
+            io.to(`kiosk_${kioskId}`).emit('kiosk-queue-updated', stats);
+        }
+        
+        logger.info(`Broadcasted targeted kiosk-queue-updated to ${kiosks.length} kiosks in hospital ${hospitalId}`);
     } catch (e) {
         logger.error(`Failed to broadcast kiosk queue: ${e.message}`);
     }

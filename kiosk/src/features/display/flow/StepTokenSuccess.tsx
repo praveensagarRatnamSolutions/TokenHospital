@@ -7,10 +7,11 @@ interface StepTokenSuccessProps {
   tokenNumber: string;
   department: Department;
   doctor: Doctor;
+  waitingCount: number;
   onDone: () => void;
 }
 
-const StepTokenSuccess: React.FC<StepTokenSuccessProps> = ({ tokenNumber, department, doctor, onDone }) => {
+const StepTokenSuccess: React.FC<StepTokenSuccessProps> = ({ tokenNumber, department, doctor, waitingCount, onDone }) => {
   console.log('Rendering StepTokenSuccess with:', { tokenNumber, department, doctor });
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 items-center justify-center p-12 overflow-hidden relative transition-colors duration-500">
@@ -71,12 +72,17 @@ const StepTokenSuccess: React.FC<StepTokenSuccessProps> = ({ tokenNumber, depart
         <div className="flex items-center justify-center gap-8 text-slate-400 dark:text-white/30 mb-16 font-bold uppercase tracking-widest text-xs">
           <div className="flex items-center gap-2">
             <Clock size={16} />
-            <span>Est: 15-20 Min</span>
+            <span>Est: {waitingCount > 0 ? `${waitingCount * 10}-${(waitingCount + 1) * 10}` : "5-10"} Min</span>
+          </div>
+          <div className="size-1 rounded-full bg-slate-300 dark:bg-white/10" />
+          <div className="flex items-center gap-2">
+            <User size={16} />
+            <span>{waitingCount} People Ahead</span>
           </div>
           <div className="size-1 rounded-full bg-slate-300 dark:bg-white/10" />
           <div className="flex items-center gap-2">
             <Ticket size={16} />
-            <span>Counter 04</span>
+            <span>Room: {doctor.roomNumber || "TBD"}</span>
           </div>
         </div>
 

@@ -17,6 +17,7 @@ export type KioskStep =
   | "DEPARTMENT"
   | "DOCTOR"
   | "PAYMENT"
+  | "UPI_PAYMENT"
   | "SUCCESS";
 
 export const useKioskDisplay = (code: string) => {
@@ -40,6 +41,8 @@ export const useKioskDisplay = (code: string) => {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [generatedToken, setGeneratedToken] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [paymentOrder, setPaymentOrder] = useState<any>(null);
+  const [waitingCount, setWaitingCount] = useState<number>(0);
 
   const isOnline = useOnlineStatus();
   useSync(isOnline);
@@ -52,13 +55,15 @@ export const useKioskDisplay = (code: string) => {
     }
 
     // Set new timeout (only if not on LANDING or SUCCESS steps)
-    if (step !== "LANDING") {
+    if (step !== "LANDING" && step !== "UPI_PAYMENT") {
       idleTimeoutRef.current = setTimeout(() => {
         console.log("Kiosk idle timeout - returning to landing");
         setStep("LANDING");
         setSelectedDept(null);
         setSelectedDoctor(null);
         setGeneratedToken(null);
+        setPaymentOrder(null);
+        setWaitingCount(0);
       }, IDLE_TIMEOUT);
     }
   };
@@ -152,6 +157,9 @@ export const useKioskDisplay = (code: string) => {
     if (kiosk?.hospitalId && isOnline) {
       socketService.connect(kiosk.hospitalId);
 
+      // Join kiosk-specific room for targeted updates
+      socketService.emit("join-kiosk", kiosk._id);
+
       // Grouped department queue for the kiosk display
       socketService.on("kiosk-queue-updated", (data: DepartmentQueue[]) => {
         console.log("Received queue update via socket", data);
@@ -161,7 +169,7 @@ export const useKioskDisplay = (code: string) => {
 
       // Initial fetch of grouped queue
       kioskApi
-        .getTokenQueue(kiosk.hospitalId)
+        .getTokenQueue(kiosk.hospitalId, kiosk._id)
         .then((res) => {
           setDepartmentQueue(res.data || []);
         })
@@ -236,9 +244,31 @@ export const useKioskDisplay = (code: string) => {
       country: string;
       nationalNumber: string;
     };
-    paymentMethod: "CASH" | "ONLINE";
+    paymentMethod: "CASH" | "UPI" | "CARD";
   }) => {
     try {
+      if (data.paymentMethod === "UPI" || data.paymentMethod === "CARD") {
+        // 💳 Online Flow: Create order and show QR
+        const response = await kioskApi.createPaymentOrder({
+          doctorId: selectedDoctor!._id,
+          departmentId: selectedDept!._id,
+          method: data.paymentMethod,
+          patientDetails: {
+            name: data.name,
+            age: data.age,
+            gender: data.gender,
+            phone: data.phone,
+          },
+        });
+
+        if (response.success) {
+          setPaymentOrder(response.data);
+          setStep("UPI_PAYMENT");
+        }
+        return;
+      }
+
+      // 💵 Cash Flow: Create token directly
       const today = new Date().toISOString().split("T")[0];
 
       const response = await kioskApi.createToken({
@@ -256,6 +286,7 @@ export const useKioskDisplay = (code: string) => {
 
       // Store token in state
       setGeneratedToken(response.data);
+      setWaitingCount(response.waitingCount || 0);
 
       // Move to success screen
       setStep("SUCCESS");
@@ -265,7 +296,7 @@ export const useKioskDisplay = (code: string) => {
 
       console.log("Generated token data:", tokenData);
 
-      const responsePrint = await printApi.sendToPrinter({
+      await printApi.sendToPrinter({
         hospital: tokenData.hospitalId?.name || "Hospital",
         logo: tokenData.hospitalId?.logo || "",
         doctor: tokenData.doctorId?.name || "---",
@@ -273,10 +304,33 @@ export const useKioskDisplay = (code: string) => {
         token: tokenData.tokenNumber || "---",
         department: tokenData.departmentId?.name || "---",
       });
-
-      console.log("🖨️ Print API response:", responsePrint);
     } catch (err) {
-      console.error("❌ Token generation failed", err);
+      console.error("❌ Process failed", err);
+    }
+  };
+
+  const handleUPIComplete = async (data: any) => {
+    // data might be the token object directly or { token, waitingCount }
+    const token = data.token || data;
+    const count = data.waitingCount || 0;
+
+    setGeneratedToken({ token });
+    setWaitingCount(count);
+    setStep("SUCCESS");
+    setPaymentOrder(null);
+
+    // Print the token
+    try {
+      await printApi.sendToPrinter({
+        hospital: token.hospitalId?.name || "Hospital",
+        logo: token.hospitalId?.logo || "",
+        doctor: token.doctorId?.name || "---",
+        patient: token.patientId?.name || "---",
+        token: token.tokenNumber || "---",
+        department: token.departmentId?.name || "---",
+      });
+    } catch (err) {
+      console.error("Printing failed after UPI", err);
     }
   };
 
@@ -285,6 +339,8 @@ export const useKioskDisplay = (code: string) => {
     setSelectedDept(null);
     setSelectedDoctor(null);
     setGeneratedToken(null);
+    setPaymentOrder(null);
+    setWaitingCount(0);
   };
 
   return {
@@ -303,6 +359,8 @@ export const useKioskDisplay = (code: string) => {
       selectedDoctor,
       generatedToken,
       isOnline,
+      paymentOrder,
+      waitingCount,
     },
     actions: {
       setShowMenu,
@@ -314,6 +372,7 @@ export const useKioskDisplay = (code: string) => {
       handleDeptSelect,
       handleDoctorSelect,
       handlePaymentProceed,
+      handleUPIComplete,
       resetFlow,
       setStep,
     },

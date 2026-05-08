@@ -66,19 +66,19 @@ const getTokens = async (req, res, next) => {
 
 const getDoctorQueue = async (req, res, next) => {
   try {
-    const { doctorId, date } = req.query;
+    const { doctorId, date, status, limit } = req.query;
 
-    console.log('Doctor ID:', req.query);
+    console.log('Doctor Queue Request:', req.query);
 
-    const tokens = await tokenService.getDoctorQueue(
+    const result = await tokenService.getDoctorQueue(
       req.hospitalId,
       doctorId,
-      date
+      { date, status, limit }
     );
 
     res.status(200).json({
       success: true,
-      tokens,
+      ...result,
     });
   } catch (error) {
     next(error);

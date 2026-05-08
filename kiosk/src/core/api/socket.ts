@@ -30,6 +30,10 @@ class SocketService {
     this.socket?.off(event);
   }
 
+  emit(event: string, data: any) {
+    this.socket?.emit(event, data);
+  }
+
   disconnect() {
     this.socket?.disconnect();
     this.socket = null;

@@ -121,42 +121,44 @@ export default function DoctorReportsPage() {
         </div>
 
         {/* Date Filters + Export */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <Card className="p-2 rounded-2xl border-slate-200 dark:border-slate-800 flex gap-2 shadow-sm bg-white dark:bg-slate-900">
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              <input
-                type="date"
-                value={dateRange.startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="h-10 pl-9 pr-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <div className="flex items-center text-slate-300 font-black text-sm px-1">→</div>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              <input
-                type="date"
-                value={dateRange.endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="h-10 pl-9 pr-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-          </Card>
 
-          <button
-            onClick={handleExport}
-            disabled={exporting || isLoading || report.length === 0}
-            className="h-10 px-5 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all hover:scale-[1.02]"
-          >
-            {exporting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4" />
-            )}
-            Export Excel
-          </button>
+      </div>
+
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="p-2 rounded-2xl border-slate-200 dark:border-slate-800 flex gap-2 shadow-sm bg-white dark:bg-slate-900">
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="date"
+              value={dateRange.startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="h-10 pl-9 pr-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div className="flex items-center text-slate-300 font-black text-sm px-1">→</div>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="date"
+              value={dateRange.endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="h-10 pl-9 pr-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
         </div>
+
+        <button
+          onClick={handleExport}
+          disabled={exporting || isLoading || report.length === 0}
+          className="h-10 px-5 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all hover:scale-[1.02]"
+        >
+          {exporting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
+          Export Excel
+        </button>
       </div>
 
       {/* Overview Stats */}

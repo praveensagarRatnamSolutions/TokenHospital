@@ -59,9 +59,22 @@ export const kioskApi = {
     const response = await api.post("/api/token", data);
     return response.data;
   },
-  getTokenQueue: async (hospitalId: string) => {
+  createPaymentOrder: async (data: {
+    doctorId: string;
+    departmentId: string;
+    patientDetails: any;
+    method: string;
+  }) => {
+    const response = await api.post("/api/payment/create-order", data);
+    return response.data;
+  },
+  checkPaymentStatus: async (orderId: string) => {
+    const response = await api.get(`/api/payment/status/${orderId}`);
+    return response.data;
+  },
+  getTokenQueue: async (hospitalId: string, kioskId?: string) => {
     const response = await api.get("/api/kiosk/token", {
-      params: { hospitalId },
+      params: { hospitalId, kioskId },
     });
     return response.data;
   },

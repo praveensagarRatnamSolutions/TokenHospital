@@ -20,6 +20,7 @@ import {
 import StepDepartmentGrid from "../flow/StepDepartmentGrid";
 import StepDoctorGrid from "../flow/StepDoctorGrid";
 import StepPaymentSelection from "../flow/StepPaymentSelection";
+import StepUPIPayment from "../flow/StepUPIPayment";
 import StepTokenSuccess from "../flow/StepTokenSuccess";
 
 interface KioskDisplayProps {
@@ -85,12 +86,21 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
             onBack={() => actions.setStep("DOCTOR")}
           />
         );
+      case "UPI_PAYMENT":
+        return (
+          <StepUPIPayment
+            paymentData={state.paymentOrder}
+            onComplete={actions.handleUPIComplete}
+            onBack={() => actions.setStep("PAYMENT")}
+          />
+        );
       case "SUCCESS":
         return (
           <StepTokenSuccess
             tokenNumber={state.generatedToken?.token?.tokenNumber}
             department={state.selectedDept!}
             doctor={state.selectedDoctor!}
+            waitingCount={state.waitingCount}
             onDone={actions.resetFlow}
           />
         );

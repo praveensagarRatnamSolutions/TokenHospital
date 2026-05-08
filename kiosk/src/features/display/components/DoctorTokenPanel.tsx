@@ -1,5 +1,6 @@
 import { ChevronRight, ArrowDown, Users, Clock } from "lucide-react";
 import type { DepartmentQueue, DoctorQueueDisplay } from "../../../core/types";
+import { motion } from 'framer-motion'
 
 interface DoctorTokenPanelProps {
   doctorId: string;
@@ -25,71 +26,93 @@ const DoctorTokenPanel = ({ doctorId, departments }: DoctorTokenPanelProps) => {
     ...queue.slice(0, 3).map((q: string) => ({ label: q, type: "upcoming" })),
   ];
 
+  // ✅ Check if queue is empty
+  const hasNoTokens = (display.current === "Ready" || !display.current) &&
+    (display.next === "---" || !display.next) &&
+    queue.length === 0;
+
   return (
     <div className="flex items-center justify-between h-full w-full p-8 rounded-3xl border border-white/5 shadow-2xl">
-      {/* 🟢 CIRCLE SEQUENCE */}
-      <div className="flex items-center gap-4">
-        {steps.map((step, i) => (
-          <div key={i} className="flex items-center">
-            <div className="flex flex-col items-center relative">
-              {/* CURRENT Indicator */}
-              {step.type === "current" && (
-                <div className="absolute -top-10 animate-bounce">
-                  <ArrowDown
-                    size={32}
-                    className={`${
-                      isEmergencyCurrent
+      {/* 🟢 CIRCLE SEQUENCE OR EMPTY STATE */}
+      <div className="flex items-center gap-4 w-full">
+        {hasNoTokens ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-6"
+          >
+            <div className="size-20 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
+              <span className="text-3xl">👋</span>
+            </div>
+            <div>
+              <h3 className="text-2xl font-black text-white uppercase tracking-widest">
+                Hi, Doctor!
+              </h3>
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-sm mt-1">
+                Your queue is currently empty. Have a great day!
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          steps.map((step, i) => (
+            <div key={i} className="flex items-center">
+              <div className="flex flex-col items-center relative">
+                {/* CURRENT Indicator */}
+                {step.type === "current" && (
+                  <div className="absolute -top-10 animate-bounce">
+                    <ArrowDown
+                      size={32}
+                      className={`${isEmergencyCurrent
                         ? "text-red-500 fill-red-500/20"
                         : "text-emerald-500 fill-emerald-500/20"
-                    }`}
-                  />
-                </div>
-              )}
+                        }`}
+                    />
+                  </div>
+                )}
 
-              {/* 🎯 CIRCLE */}
-              <div
-                className={`
-                  flex items-center justify-center rounded-full transition-all duration-500 text-center
-                  ${
-                    step.type === "current"
+                {/* 🎯 CIRCLE */}
+                <div
+                  className={`
+                    flex items-center justify-center rounded-full transition-all duration-500 text-center
+                    ${step.type === "current"
                       ? isEmergencyCurrent
                         ? "w-28 h-28 bg-red-600 text-white mx-auto text-2xl font-black shadow-[0_0_40px_rgba(239,68,68,0.5)] ring-8 ring-red-500/30 animate-pulse"
                         : "w-28 h-28 bg-emerald-500 text-white mx-auto text-2xl font-black shadow-[0_0_40px_rgba(16,185,129,0.4)] ring-8 ring-emerald-500/20"
                       : step.type === "next"
                         ? "w-20 h-20 bg-amber-500 text-black text-xl font-bold ring-4 ring-amber-500/20"
                         : "w-18 h-18 bg-slate-800 text-blue-400 text-l font-bold border border-blue-700"
-                  }
-                `}
-              >
-                {step.label}
-              </div>
+                    }
+                  `}
+                >
+                  {step.label}
+                </div>
 
-              {/* LABEL */}
-              <span
-                className={`mt-2 text-1xl font-bold tracking-[0.2em] uppercase ${
-                  step.type === "current"
+                {/* LABEL */}
+                <span
+                  className={`mt-2 text-1xl font-bold tracking-[0.2em] uppercase ${step.type === "current"
                     ? isEmergencyCurrent
                       ? "text-red-400"
                       : "text-emerald-400"
                     : "text-slate-500"
-                }`}
-              >
-                {step.type === "current"
-                  ? isEmergencyCurrent
-                    ? "Emergency"
-                    : "Serving"
-                  : step.type === "next"
-                    ? "Next"
-                    : ""}
-              </span>
-            </div>
+                    }`}
+                >
+                  {step.type === "current"
+                    ? isEmergencyCurrent
+                      ? "Emergency"
+                      : "Serving"
+                    : step.type === "next"
+                      ? "Next"
+                      : ""}
+                </span>
+              </div>
 
-            {/* ➡️ Separator */}
-            {i < steps.length - 1 && (
-              <ChevronRight size={34} className="mx-5 text-slate-800" />
-            )}
-          </div>
-        ))}
+              {/* ➡️ Separator */}
+              {i < steps.length - 1 && (
+                <ChevronRight size={34} className="mx-5 text-slate-800" />
+              )}
+            </div>
+          ))
+        )}
       </div>
 
       {/* 📊 META STATS */}

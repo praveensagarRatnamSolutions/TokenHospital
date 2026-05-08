@@ -82,4 +82,19 @@ router.post("/create-order", paymentController.createOrder);
  */
 router.post("/verify-payment", paymentController.verifyPayment);
 
+/**
+ * @swagger
+ * /api/payment/status/{orderId}:
+ *   get:
+ *     summary: Get payment status by Razorpay Order ID
+ *     tags: [Payment]
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ */
+router.get("/status/:orderId", paymentController.getPaymentStatus);
+
 module.exports = router;
