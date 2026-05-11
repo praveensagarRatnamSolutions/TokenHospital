@@ -63,6 +63,33 @@ const hospitalSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // --- Subscription & Plan Fields ---
+    planId: {
+      type: String,
+      default: 'BASIC',
+      index: true,
+    },
+    subscriptionStatus: {
+      type: String,
+      enum: ['TRIAL', 'ACTIVE', 'EXPIRED', 'CANCELLED', 'GRACE_PERIOD'],
+      default: 'TRIAL',
+    },
+    trialEndDate: {
+      type: Date,
+    },
+    subscriptionId: {
+      type: String, // Razorpay Subscription ID
+      sparse: true,
+    },
+    customerId: {
+      type: String, // Razorpay Customer ID
+      sparse: true,
+    },
+    // --- Compliance ---
+    gstNumber: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,

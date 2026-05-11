@@ -1,6 +1,14 @@
 const Department = require('./department.model');
+const Hospital = require('../hospital/hospital.model');
+const { getHospitalLimits, isSubscriptionValid } = require('../hospital/subscription.utils');
 
 const createDepartment = async (departmentData) => {
+    const { hospitalId } = departmentData;
+
+    // Hospital check for data integrity
+    const hospitalExists = await Hospital.exists({ _id: hospitalId });
+    if (!hospitalExists) throw new Error('Hospital not found');
+
     const department = await Department.create(departmentData);
     return department;
 };

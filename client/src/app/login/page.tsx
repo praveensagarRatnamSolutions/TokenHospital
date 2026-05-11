@@ -106,29 +106,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          {/* <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-lg mb-4">
-            <span className="text-2xl font-bold text-blue-600">🏥</span>
-          </div> */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Hospital Token System</h1>
-          <p className="text-gray-600">Sign in to your account</p>
+    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Abstract Background Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse delay-700" />
+      
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo Section */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-2xl shadow-blue-500/20 mb-4">
+            <span className="text-3xl font-bold text-white">H</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Hospital Token <span className="text-blue-500">SaaS</span></h1>
+          <p className="text-slate-400 mt-2">Precision queue management for healthcare.</p>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        {/* Main Card with Glassmorphism */}
+        <div className="bg-slate-900/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-800 p-8">
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700 font-medium">{error}</p>
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
+              <div className="w-1 h-8 bg-red-500 rounded-full" />
+              <p className="text-sm text-red-400 font-medium">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-300 ml-1">
                 Email Address
               </label>
               <input
@@ -137,14 +141,13 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
+                placeholder="admin@hospital.com"
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
               />
             </div>
 
-            {/* Password Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-300 ml-1">
                 Password
               </label>
               <div className="relative">
@@ -155,12 +158,12 @@ export default function LoginPage() {
                   onChange={handleChange}
                   required
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all pr-12 text-gray-900 placeholder-gray-400"
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -171,54 +174,50 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Remember & Forgot */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="rounded border-gray-300" />
-                <span className="text-gray-600">Remember me</span>
+            <div className="flex items-center justify-between text-sm px-1">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-offset-slate-900" />
+                <span className="text-slate-400 group-hover:text-slate-200 transition-colors">Keep me signed in</span>
               </label>
-              <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
+              <a href="#" className="text-blue-400 hover:text-blue-300 font-semibold transition-colors">
                 Forgot password?
               </a>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-lg hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
             >
-              {loading && <Loader className="w-5 h-5 animate-spin" />}
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? <Loader className="w-6 h-6 animate-spin" /> : 'Sign In to Portal'}
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs font-medium text-blue-900 mb-2">Demo Credentials (Password: password123):</p>
-            <div className="text-xs text-blue-800 space-y-1">
-              <p><strong>SuperAdmin:</strong> superadmin@system.com</p>
-              <p><strong>Hospital Admin:</strong> admin@anupama.com</p>
-              <p><strong>Doctor:</strong> smith@anupama.com</p>
+          {/* Demo Credentials Box */}
+          <div className="mt-8 p-5 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
+            <p className="text-[10px] uppercase tracking-widest font-bold text-blue-400 mb-3">Developer Sandbox</p>
+            <div className="grid grid-cols-1 gap-2 text-xs">
+              <div className="flex justify-between text-slate-400"><span>SuperAdmin:</span> <span className="text-blue-300 font-mono">superadmin@system.com</span></div>
+              <div className="flex justify-between text-slate-400"><span>Admin:</span> <span className="text-blue-300 font-mono">admin@anupama.com</span></div>
             </div>
           </div>
 
-          {/* Sign Up Link */}
-          <div className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
+          {/* Secondary Action */}
+          <div className="mt-8 text-center text-slate-400 text-sm">
+            New hospital?{' '}
             <a
               href="/register"
-              className="text-blue-600 hover:text-blue-700 font-semibold"
+              className="text-white font-bold hover:text-blue-400 transition-colors"
             >
-              Sign up here
+              Create an account
             </a>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-8 text-center text-sm text-gray-600">
-          <p>&copy; 2026 Hospital Token System. All rights reserved.</p>
-        </div>
+        {/* Brand Footer */}
+        <p className="mt-10 text-center text-slate-500 text-xs tracking-wide">
+          POWERED BY <span className="text-slate-300 font-bold">HOSPITAL TOKEN ENGINE</span> &copy; 2026
+        </p>
       </div>
     </div>
   );

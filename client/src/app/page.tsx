@@ -6,6 +6,7 @@ import Features from '@/components/home/Features';
 import Footer from '@/components/home/Footer';
 import Hero from '@/components/home/Hero';
 import Navbar from '@/components/home/Navbar';
+import Pricing from '@/components/home/Pricing';
 import Testimonials from '@/components/home/Testimonials';
 import HowItWorks from '@/components/home/Workflow';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,8 @@ export default function HomePage() {
       <Features />
 
       <HowItWorks />
+
+      <Pricing />
 
       <DashboardShowcase />
 

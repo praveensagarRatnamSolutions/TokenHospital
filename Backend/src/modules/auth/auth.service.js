@@ -26,12 +26,18 @@ const registerUser = async (userData) => {
       role: "ADMIN",
     }], { session });
 
-    // 3. Create Hospital
+    // 3. Create Hospital with 25-day Free Trial
+    const trialEndDate = new Date();
+    trialEndDate.setDate(trialEndDate.getDate() + 25);
+
     const [hospital] = await Hospital.create([{
       name: hospitalName,
       email,
       phone,
       createdBy: admin._id,
+      trialEndDate,
+      planId: 'PRO', // Give Pro features during trial
+      subscriptionStatus: 'TRIAL',
     }], { session });
 
     // 4. Link hospital to admin

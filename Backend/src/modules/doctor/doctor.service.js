@@ -1,8 +1,16 @@
 const Doctor = require('./doctor.model');
 const User = require('../auth/auth.model');
 const Token = require('../token/token.model');
+const Hospital = require('../hospital/hospital.model');
+const { getHospitalLimits, isSubscriptionValid } = require('../hospital/subscription.utils');
 
 const createDoctor = async (doctorData, options = {}) => {
+  const { hospitalId } = doctorData;
+
+  // Hospital check is still good for data integrity if hospitalId is passed directly
+  const hospitalExists = await Hospital.exists({ _id: hospitalId });
+  if (!hospitalExists) throw new Error('Hospital not found');
+
   const doctor = await Doctor.create([doctorData], options);
   return doctor[0];
 };

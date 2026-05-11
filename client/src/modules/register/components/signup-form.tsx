@@ -57,48 +57,72 @@ export default function SignupForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Admin Section */}
-      <FieldGroup>
-        <Field>
-          <FieldLabel className='text-sm font-medium text-gray-700'>Name</FieldLabel>
-          <Input   className="border border-[#d1d5db]" placeholder="Enter name" {...register('name')} />
-          {errors.name && <FieldError>{errors.name.message}</FieldError>}
-        </Field>
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-1.5">
+          <label className='text-sm font-semibold text-slate-300 ml-1'>Full Name</label>
+          <input 
+            className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            placeholder="John Doe" 
+            {...register('name')} 
+          />
+          {errors.name && <p className="text-xs text-red-400 mt-1 ml-1">{errors.name.message}</p>}
+        </div>
 
-        <Field>
-          <FieldLabel className='text-sm font-medium text-gray-700'>Email</FieldLabel>
-          <Input className="border border-[#d1d5db]"  placeholder="Enter email" {...register('email')} />
-          {errors.email && <FieldError>{errors.email.message}</FieldError>}
-        </Field>
+        <div className="space-y-1.5">
+          <label className='text-sm font-semibold text-slate-300 ml-1'>Email Address</label>
+          <input 
+            className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            placeholder="admin@hospital.com" 
+            {...register('email')} 
+          />
+          {errors.email && <p className="text-xs text-red-400 mt-1 ml-1">{errors.email.message}</p>}
+        </div>
 
-        <Field>
-          <FieldLabel className='text-sm font-medium text-gray-700'>Password</FieldLabel>
-          <Input className="border border-[#d1d5db]"  type="password" placeholder="Enter password" {...register('password')} />
-          {errors.password && <FieldError>{errors.password.message}</FieldError>}
-        </Field>
-      </FieldGroup>
+        <div className="space-y-1.5">
+          <label className='text-sm font-semibold text-slate-300 ml-1'>Create Password</label>
+          <input 
+            className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            type="password" 
+            placeholder="••••••••" 
+            {...register('password')} 
+          />
+          {errors.password && <p className="text-xs text-red-400 mt-1 ml-1">{errors.password.message}</p>}
+        </div>
+      </div>
 
       {/* Hospital Section */}
-      <FieldGroup>
-        <Field>
-          <FieldLabel className='text-sm font-medium text-gray-700'>Hospital Name</FieldLabel>
-          <Input className="border border-[#d1d5db]"  placeholder="Hospital name" {...register('hospitalName')} />
-          {errors.hospitalName && <FieldError>{errors.hospitalName.message}</FieldError>}
-        </Field>
-
-        <Field>
-          <PhoneNumberInput
-            value={watch('phone.full')} // ✅ string for UI
-            onChange={(val) => setValue('phone', val)} // ✅ full object
+      <div className="grid grid-cols-1 gap-4 pt-2">
+        <div className="space-y-1.5">
+          <label className='text-sm font-semibold text-slate-300 ml-1'>Hospital Name</label>
+          <input 
+            className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            placeholder="City Medical Center" 
+            {...register('hospitalName')} 
           />
-          {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
-        </Field>
-      </FieldGroup>
+          {errors.hospitalName && <p className="text-xs text-red-400 mt-1 ml-1">{errors.hospitalName.message}</p>}
+        </div>
 
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Creating...' : 'Create Account'}
-      </Button>
+        <div className="space-y-1.5">
+          <label className='text-sm font-semibold text-slate-300 ml-1'>Contact Number</label>
+          <div className="[&_input]:bg-slate-800/50 [&_input]:border-slate-700 [&_input]:text-white [&_input]:rounded-2xl [&_input]:py-3.5">
+            <PhoneNumberInput
+              value={watch('phone.full')}
+              onChange={(val) => setValue('phone', val)}
+            />
+          </div>
+          {errors.phone && <p className="text-xs text-red-400 mt-1 ml-1">{errors.phone.message}</p>}
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-lg hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
+        disabled={isPending}
+      >
+        {isPending ? 'Provisioning System...' : 'Create Hospital Account'}
+      </button>
     </form>
   );
 }

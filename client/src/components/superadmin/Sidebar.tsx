@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { LayoutDashboard, Building2, BarChart3, Settings, Menu } from 'lucide-react';
+import { LayoutDashboard, Building2, BarChart3, Settings, Menu, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
   { name: 'Dashboard', href: '/superadmin', icon: LayoutDashboard, exact: true },
   { name: 'Hospitals', href: '/superadmin/hospitals', icon: Building2, exact: false },
+  { name: 'Subscription Plans', href: '/superadmin/plans', icon: CreditCard, exact: false },
   { name: 'Reports', href: '/superadmin/reports', icon: BarChart3, exact: false },
   { name: 'Settings', href: '/superadmin/settings', icon: Settings, exact: false },
 ];

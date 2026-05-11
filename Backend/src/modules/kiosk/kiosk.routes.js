@@ -7,6 +7,7 @@ const {
 } = require('./kiosk.validations');
 const { validateRequest } = require('../auth/auth.validations');
 const { protect, authorize } = require('../../middlewares/authMiddleware');
+const { checkLimit } = require('../../middlewares/limitMiddleware');
 
 /**
  * @swagger
@@ -37,6 +38,7 @@ router.post(
   '/',
   protect,
   authorize('ADMIN', 'DOCTOR'),
+  checkLimit('kiosk'),
   createKioskValidation,
   validateRequest,
   kioskController.createKiosk

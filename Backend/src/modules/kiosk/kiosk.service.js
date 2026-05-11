@@ -1,10 +1,18 @@
 const Kiosk = require('./kiosk.model');
 const Token = require('../token/token.model');
+const Hospital = require('../hospital/hospital.model');
+const { getHospitalLimits, isSubscriptionValid } = require('../hospital/subscription.utils');
 
 /**
  * @desc Create a new kiosk
  */
 const createKiosk = async (kioskData) => {
+  const { hospitalId } = kioskData;
+
+  // Hospital integrity check
+  const hospitalExists = await Hospital.exists({ _id: hospitalId });
+  if (!hospitalExists) throw new Error('Hospital not found');
+
   return await Kiosk.create(kioskData);
 };
 
@@ -127,6 +135,16 @@ const deleteKiosk = async (query) => {
 // };
 
 const getKioskTokenStats = async (hospitalId, kioskId = null) => {
+  // 1. Fetch Hospital to check plan and status
+  const hospital = await Hospital.findById(hospitalId);
+  if (!hospital) throw new Error('Hospital not found');
+
+  // 2. Check if subscription is valid and Kiosk is allowed
+  const limits = getHospitalLimits(hospital);
+  if (!isSubscriptionValid(hospital) || !limits.allowKiosk) {
+    throw new Error('Access Denied: Your plan does not allow Kiosk access or has expired.');
+  }
+
   const today = new Date().toISOString().split('T')[0];
 
   const query = {

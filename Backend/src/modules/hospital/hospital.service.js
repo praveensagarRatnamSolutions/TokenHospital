@@ -11,6 +11,10 @@ const createHospital = async (hospitalData, createdById) => {
     throw new Error('Hospital with this email already exists');
   }
 
+  // Set trial end date to 25 days from today
+  const trialEndDate = new Date();
+  trialEndDate.setDate(trialEndDate.getDate() + 25);
+
   const hospital = await Hospital.create({
     name,
     email,
@@ -20,6 +24,9 @@ const createHospital = async (hospitalData, createdById) => {
     licenseNumber,
     createdBy: createdById,
     isActive: true,
+    trialEndDate,
+    planId: 'PRO', // Give Pro features during trial
+    subscriptionStatus: 'TRIAL',
   });
 
   return hospital;
@@ -64,6 +71,9 @@ const createHospitalBySuperAdmin = async (hospitalData, superAdminId) => {
     );
 
     // 3. Create the Hospital
+    const trialEndDate = new Date();
+    trialEndDate.setDate(trialEndDate.getDate() + 25);
+
     const [hospital] = await Hospital.create(
       [
         {
@@ -75,6 +85,9 @@ const createHospitalBySuperAdmin = async (hospitalData, superAdminId) => {
           licenseNumber,
           createdBy: superAdminId, // Track that a Super Admin created this
           isActive: true,
+          trialEndDate,
+          planId: 'PRO',
+          subscriptionStatus: 'TRIAL',
         },
       ],
       { session }

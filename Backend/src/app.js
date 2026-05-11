@@ -18,7 +18,7 @@ app.use(
         'http://localhost:3001',
         'http://localhost:5173',
         'http://hospitaltoken.ratnamstaging.in',
-        
+
         process.env.FRONTEND_URL,
       ].filter(Boolean);
 
@@ -110,6 +110,7 @@ app.use('/api/reports', require('./modules/reports/reports.routes'));
 app.use('/api/settings', require('./modules/settings/settings.routes'));
 app.use('/api/payment', require('./modules/payment/payment.routes'));
 app.use('/api/kiosk', require('./modules/kiosk/kiosk.routes'));
+app.use('/api/subscription', require('./modules/subscription/subscription.routes'));
 
 // Global Error Handler
 app.use(errorHandler);

@@ -7,6 +7,7 @@ const {
 } = require('./department.validations');
 const { validateRequest } = require('../auth/auth.validations');
 const { protect, authorize } = require('../../middlewares/authMiddleware');
+const { checkLimit } = require('../../middlewares/limitMiddleware');
 
 /**
  * @swagger
@@ -46,6 +47,7 @@ router.post(
   '/',
   protect,
   authorize('ADMIN'),
+  checkLimit('departments'),
   createDepartmentValidation,
   validateRequest,
   departmentController.createDepartment
