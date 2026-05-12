@@ -2,7 +2,7 @@ const User = require('./auth.model');
 const Hospital = require('../hospital/hospital.model');
 const { generateToken } = require('../../utils/jwt');
 
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const registerUser = async (userData) => {
   const { name, email, password, hospitalName, phone } = userData;
@@ -15,24 +15,34 @@ const registerUser = async (userData) => {
     // 1. Check if user already exists
     const userExists = await User.findOne({ email }).session(session);
     if (userExists) {
-      throw new Error("Account already exists with this email");
+      throw new Error('Account already exists with this email');
     }
 
     // 2. Create Admin (Notice the .session(session) passed to all ops)
-    const [admin] = await User.create([{
-      name,
-      email,
-      password,
-      role: "ADMIN",
-    }], { session });
+    const [admin] = await User.create(
+      [
+        {
+          name,
+          email,
+          password,
+          role: 'ADMIN',
+        },
+      ],
+      { session }
+    );
 
     // 3. Create Hospital
-    const [hospital] = await Hospital.create([{
-      name: hospitalName,
-      email,
-      phone,
-      createdBy: admin._id,
-    }], { session });
+    const [hospital] = await Hospital.create(
+      [
+        {
+          name: hospitalName,
+          email,
+          phone,
+          createdBy: admin._id,
+        },
+      ],
+      { session }
+    );
 
     // 4. Link hospital to admin
     admin.hospitalId = hospital._id;
@@ -82,21 +92,73 @@ const createUser = async (userData, session = null) => {
 
   const userExists = await User.findOne({ email }).session(session);
   if (userExists) {
-    throw new Error("User with this email already exists");
+    throw new Error('User with this email already exists');
   }
 
-  const [user] = await User.create([{
-    name,
-    email,
-    password,
-    role,
-    hospitalId,
-    profilePic
-  }], { session });
+  const [user] = await User.create(
+    [
+      {
+        name,
+        email,
+        password,
+        role,
+        hospitalId,
+        profilePic,
+      },
+    ],
+    { session }
+  );
 
   return user;
 };
 
+const updateUserProfile = async (userId, updateData) => {
+  const user = await User.findById(userId).select('+password');
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  if (updateData.email && updateData.email !== user.email) {
+    const existingUser = await User.findOne({ email: updateData.email });
+    if (existingUser) {
+      throw new Error('Email already in use');
+    }
+    user.email = updateData.email;
+  }
+
+  if (updateData.name !== undefined) {
+    user.name = updateData.name;
+  }
+
+  if (updateData.profilePic !== undefined) {
+    user.profilePic = updateData.profilePic;
+  }
+
+  if (updateData.password) {
+    if (!updateData.currentPassword) {
+      throw new Error('Current password is required to change password');
+    }
+
+    const isMatch = await user.matchPassword(updateData.currentPassword);
+    if (!isMatch) {
+      throw new Error('Current password is incorrect');
+    }
+
+    user.password = updateData.password;
+  }
+
+  await user.save();
+
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    hospitalId: user.hospitalId,
+    doctorId: user.doctorId || null,
+    profilePic: user.profilePic,
+  };
+};
 
 const refreshUserToken = async (refreshToken) => {
   const jwt = require('jsonwebtoken');
@@ -120,5 +182,5 @@ module.exports = {
   loginUser,
   createUser,
   refreshUserToken,
+  updateUserProfile,
 };
-

@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { LogOut, User, Bell, Search, Settings } from 'lucide-react';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -18,11 +19,19 @@ import { RootState } from '@/store/store';
 import { logout } from '@/store/slices/authSlice';
 import { useRouter } from 'next/navigation';
 import { DoctorSidebar } from '@/components/doctor/DoctorSidebar';
+import { authApi } from '@/services/authApi';
 
 export default function DoctorLayoutClient({ children }: { children: React.ReactNode }) {
   const { user } = useAppSelector((state: RootState) => state.auth);
+  const queryClient = useQueryClient();
 
-  console.log('user', user);
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ['authUser'],
+      queryFn: authApi.getCurrentUser,
+      staleTime: 1000 * 60 * 5,
+    });
+  }, [queryClient]);
 
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -70,7 +79,7 @@ export default function DoctorLayoutClient({ children }: { children: React.React
                   </div>
                   <div className="hidden sm:block text-left">
                     <p className="text-xs font-black text-slate-900 dark:text-white leading-none mb-1">
-                    {user?.name}
+                      {user?.name}
                     </p>
                     <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest leading-none">
                       Specialist

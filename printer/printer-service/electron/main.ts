@@ -169,21 +169,78 @@ function startServer() {
       // REQUEST DATA
       // =========================
       const {
-        hospital = "Hospital Service",
-        logo = "",
-        doctor = "---",
-        patient = "---",
-        token = "A-01",
-        department = "General",
+        hospital = {},
+        patient = {},
+        doctor = {},
+        token = {},
+        department = {},
+        payment = {},
       } = req.body;
 
+      const hospitalName: string =
+        typeof hospital === "string"
+          ? hospital
+          : hospital.name || "Hospital Service";
+      const logo: string =
+        typeof hospital === "string"
+          ? ""
+          : hospital.logo || hospital.logoUrl || "";
+      const patientName: string =
+        typeof patient === "string" ? patient : patient.name || "---";
+      const patientPhone: string =
+        typeof patient === "string"
+          ? patient
+          : patient.phone?.full || patient.phone || "N/A";
+      const patientAge: number | string = patient.age ?? "--";
+      const patientGender: string = patient.gender || "--";
+      const doctorName: string =
+        typeof doctor === "string" ? doctor : doctor.name || "---";
+      const doctorSpecialization: string =
+        doctor.specialization || doctor.education || "General";
+
+      const doctorRoomFloor: string = doctor.roomFloor || null;
+
+      const tokenNumber: string =
+        typeof token === "string"
+          ? token
+          : token.number || token.tokenNumber || "A-01";
+      const tokenSequence: number | string =
+        token.sequence ?? token.sequenceNumber ?? "--";
+      const tokenStatus: string = (token.status || "WAITING")
+        .toString()
+        .toUpperCase();
+      const departmentName: string =
+        typeof department === "string"
+          ? department
+          : department.name || "General";
+      const paymentAmount: number | string = payment.amount ?? "--";
+      const paymentCurrency: string = payment.currency || "INR";
+      const paymentMethod: string = payment.method || "--";
+      const paymentStatus: string = payment.status || "--";
+      const paymentTransactionId: string =
+        payment.transactionId ||
+        payment.razorpayPaymentId ||
+        payment.razorpayOrderId ||
+        "--";
+
       console.log("📋 Print Data:", {
-        hospital,
-        token,
-        patient,
-        doctor,
-        department,
-        hasLogo: !!logo,
+        hospitalName,
+        logo,
+        doctorName,
+        doctorSpecialization,
+        patientName,
+        patientPhone,
+        patientAge,
+        patientGender,
+        tokenNumber,
+        tokenSequence,
+        tokenStatus,
+        departmentName,
+        paymentAmount,
+        paymentCurrency,
+        paymentMethod,
+        paymentStatus,
+        paymentTransactionId,
       });
 
       // =========================
@@ -304,7 +361,7 @@ function startServer() {
           }
 
           <div class="hospital-name">
-            ${hospital}
+            ${hospitalName}
           </div>
 
           <div class="divider"></div>
@@ -314,7 +371,11 @@ function startServer() {
           </div>
 
           <div class="token-number">
-            ${token}
+            ${tokenNumber}
+          </div>
+
+          <div class="token-label" style="font-size: 11px; margin-top: 2px; letter-spacing: 0.5px;">
+            Seq: ${tokenSequence} · Status: ${tokenStatus}
           </div>
 
           <div class="divider"></div>
@@ -322,17 +383,54 @@ function startServer() {
           <div class="info-section">
             <div class="info-row">
               <span class="label">Patient:</span>
-              ${patient}
+              ${patientName}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Phone:</span>
+              ${patientPhone}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Age / Gender:</span>
+              ${patientAge} / ${patientGender}
             </div>
 
             <div class="info-row">
               <span class="label">Doctor:</span>
-              ${doctor}
+              ${doctorName}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Specialization:</span>
+              ${doctorSpecialization}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Room Floor:</span>
+              ${doctorRoomFloor || "--"}
             </div>
 
             <div class="info-row">
               <span class="label">Department:</span>
-              ${department}
+              ${departmentName}
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="info-section">
+            <div class="info-row">
+              <span class="label">Payment:</span>
+              ${paymentMethod} · ${paymentCurrency} ${paymentAmount}
+            </div>
+            <div class="info-row">
+              <span class="label">Txn ID:</span>
+              ${paymentTransactionId}
+            </div>
+            <div class="info-row">
+              <span class="label">Pay Status:</span>
+              ${paymentStatus}
             </div>
           </div>
 

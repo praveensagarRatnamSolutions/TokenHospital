@@ -42,6 +42,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
     departmentId: '',
     experience: 0,
     consultationFee: 0,
+    roomFloor: '',
 
     isAvailable: true,
     availability: [
@@ -524,6 +525,20 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
                     className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none"
                     type="text"
                     placeholder="MBBS, MD (Internal Medicine)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-on-surface-variant block">
+                    Room / Floor
+                  </label>
+                  <input
+                    name="roomFloor"
+                    value={formData.roomFloor || ''}
+                    onChange={handleInputChange}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none"
+                    type="text"
+                    placeholder="e.g. Room 101, Floor 2"
                   />
                 </div>
 

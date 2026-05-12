@@ -56,7 +56,13 @@ const { protect, authorize } = require('../../middlewares/authMiddleware');
  *       201:
  *         description: Token created
  */
-router.post('/', protect, createTokenValidation, validateRequest, tokenController.createToken);
+router.post(
+  '/',
+  protect,
+  createTokenValidation,
+  validateRequest,
+  tokenController.createToken
+);
 
 /**
  * @swagger
@@ -94,7 +100,34 @@ router.post('/', protect, createTokenValidation, validateRequest, tokenControlle
  */
 router.get('/', protect, tokenController.getTokens);
 router.get('/doctor', protect, tokenController.getDoctorQueue);
-router.get('/global-queue', protect, authorize('ADMIN', 'RECEPTIONIST'), tokenController.getGlobalQueue);
+router.get(
+  '/global-queue',
+  protect,
+  authorize('ADMIN', 'RECEPTIONIST'),
+  tokenController.getGlobalQueue
+);
+
+/**
+ * @swagger
+ * /api/token/{id}/print:
+ *   get:
+ *     summary: Get printable token details by id
+ *     tags: [Token]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Printable token object
+ *       404:
+ *         description: Token not found
+ */
+router.get('/:id/print', protect, tokenController.printTokenById);
 
 /**
  * @swagger
@@ -136,7 +169,12 @@ router.get('/current', protect, tokenController.getCurrentToken);
  *       404:
  *         description: Token not found or not active
  */
-router.patch('/:id/complete', protect, authorize('ADMIN', 'DOCTOR'), tokenController.completeToken);
+router.patch(
+  '/:id/complete',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  tokenController.completeToken
+);
 
 /**
  * @swagger
@@ -160,8 +198,18 @@ router.patch('/:id/complete', protect, authorize('ADMIN', 'DOCTOR'), tokenContro
  *       200:
  *         description: Next token called or no tokens in queue
  */
-router.post('/next', protect, authorize('ADMIN', 'DOCTOR'), tokenController.callNextToken);
-router.post('/:id/call', protect, authorize('ADMIN', 'DOCTOR'), tokenController.callTokenById);
+router.post(
+  '/next',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  tokenController.callNextToken
+);
+router.post(
+  '/:id/call',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  tokenController.callTokenById
+);
 
 /**
  * @swagger
@@ -183,7 +231,12 @@ router.post('/:id/call', protect, authorize('ADMIN', 'DOCTOR'), tokenController.
  *       404:
  *         description: Token not found or already completed
  */
-router.patch('/:id/cancel', protect, authorize('ADMIN', 'DOCTOR'), tokenController.cancelToken);
+router.patch(
+  '/:id/cancel',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  tokenController.cancelToken
+);
 
 /**
  * @swagger
@@ -205,9 +258,19 @@ router.patch('/:id/cancel', protect, authorize('ADMIN', 'DOCTOR'), tokenControll
  *       404:
  *         description: Token not found or not in PROVISIONAL status
  */
-router.patch('/:id/verify-cash', protect, authorize('ADMIN'), tokenController.verifyCashPayment);
+router.patch(
+  '/:id/verify-cash',
+  protect,
+  authorize('ADMIN'),
+  tokenController.verifyCashPayment
+);
 
-router.patch('/:id/skip', protect, authorize('ADMIN', 'DOCTOR'), tokenController.skipToken);
+router.patch(
+  '/:id/skip',
+  protect,
+  authorize('ADMIN', 'DOCTOR'),
+  tokenController.skipToken
+);
 
 /**
  * @swagger
@@ -216,7 +279,12 @@ router.patch('/:id/skip', protect, authorize('ADMIN', 'DOCTOR'), tokenController
  *     summary: Toggle emergency status
  *     tags: [Token]
  */
-router.patch('/:id/emergency', protect, authorize('ADMIN', 'RECEPTIONIST'), tokenController.toggleEmergency);
+router.patch(
+  '/:id/emergency',
+  protect,
+  authorize('ADMIN', 'RECEPTIONIST'),
+  tokenController.toggleEmergency
+);
 
 /**
  * @swagger
@@ -225,7 +293,11 @@ router.patch('/:id/emergency', protect, authorize('ADMIN', 'RECEPTIONIST'), toke
  *     summary: Re-assign token to another doctor
  *     tags: [Token]
  */
-router.patch('/:id/reassign', protect, authorize('ADMIN', 'RECEPTIONIST'), tokenController.reassignDoctor);
+router.patch(
+  '/:id/reassign',
+  protect,
+  authorize('ADMIN', 'RECEPTIONIST'),
+  tokenController.reassignDoctor
+);
 
 module.exports = router;
-

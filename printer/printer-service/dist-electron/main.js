@@ -36150,7 +36150,7 @@ var objectInspect = function inspect_(obj, options, depth, seen) {
     var ys = arrObjKeys(obj, inspect2);
     var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
     var protoTag = obj instanceof Object ? "" : "null prototype";
-    var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(obj), 8, -1) : protoTag ? "Object" : "";
+    var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr$1(obj), 8, -1) : protoTag ? "Object" : "";
     var constructorTag = isPlainObject || typeof obj.constructor !== "function" ? "" : obj.constructor.name ? obj.constructor.name + " " : "";
     var tag = constructorTag + (stringTag || protoTag ? "[" + $join.call($concat$1.call([], stringTag || [], protoTag || []), ": ") + "] " : "");
     if (ys.length === 0) {
@@ -36175,25 +36175,25 @@ function canTrustToString(obj) {
   return !toStringTag || !(typeof obj === "object" && (toStringTag in obj || typeof obj[toStringTag] !== "undefined"));
 }
 function isArray$3(obj) {
-  return toStr(obj) === "[object Array]" && canTrustToString(obj);
+  return toStr$1(obj) === "[object Array]" && canTrustToString(obj);
 }
 function isDate$1(obj) {
-  return toStr(obj) === "[object Date]" && canTrustToString(obj);
+  return toStr$1(obj) === "[object Date]" && canTrustToString(obj);
 }
 function isRegExp$1(obj) {
-  return toStr(obj) === "[object RegExp]" && canTrustToString(obj);
+  return toStr$1(obj) === "[object RegExp]" && canTrustToString(obj);
 }
 function isError(obj) {
-  return toStr(obj) === "[object Error]" && canTrustToString(obj);
+  return toStr$1(obj) === "[object Error]" && canTrustToString(obj);
 }
 function isString(obj) {
-  return toStr(obj) === "[object String]" && canTrustToString(obj);
+  return toStr$1(obj) === "[object String]" && canTrustToString(obj);
 }
 function isNumber(obj) {
-  return toStr(obj) === "[object Number]" && canTrustToString(obj);
+  return toStr$1(obj) === "[object Number]" && canTrustToString(obj);
 }
 function isBoolean(obj) {
-  return toStr(obj) === "[object Boolean]" && canTrustToString(obj);
+  return toStr$1(obj) === "[object Boolean]" && canTrustToString(obj);
 }
 function isSymbol(obj) {
   if (hasShammedSymbols) {
@@ -36229,7 +36229,7 @@ var hasOwn$1 = Object.prototype.hasOwnProperty || function(key) {
 function has$3(obj, key) {
   return hasOwn$1.call(obj, key);
 }
-function toStr(obj) {
+function toStr$1(obj) {
   return objectToString.call(obj);
 }
 function nameOf(f) {
@@ -36537,7 +36537,7 @@ var syntax = SyntaxError;
 var uri = URIError;
 var abs$1 = Math.abs;
 var floor$1 = Math.floor;
-var max$1 = Math.max;
+var max$2 = Math.max;
 var min$1 = Math.min;
 var pow$1 = Math.pow;
 var round$1 = Math.round;
@@ -36666,13 +36666,13 @@ function requireObject_getPrototypeOf() {
   Object_getPrototypeOf = $Object2.getPrototypeOf || null;
   return Object_getPrototypeOf;
 }
-var implementation;
+var implementation$1;
 var hasRequiredImplementation;
 function requireImplementation() {
-  if (hasRequiredImplementation) return implementation;
+  if (hasRequiredImplementation) return implementation$1;
   hasRequiredImplementation = 1;
   var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
-  var toStr2 = Object.prototype.toString;
+  var toStr = Object.prototype.toString;
   var max2 = Math.max;
   var funcType = "[object Function]";
   var concatty = function concatty2(a, b) {
@@ -36702,9 +36702,9 @@ function requireImplementation() {
     }
     return str;
   };
-  implementation = function bind2(that) {
+  implementation$1 = function bind2(that) {
     var target = this;
-    if (typeof target !== "function" || toStr2.apply(target) !== funcType) {
+    if (typeof target !== "function" || toStr.apply(target) !== funcType) {
       throw new TypeError(ERROR_MESSAGE + target);
     }
     var args = slicy(arguments, 1);
@@ -36740,17 +36740,10 @@ function requireImplementation() {
     }
     return bound;
   };
-  return implementation;
+  return implementation$1;
 }
-var functionBind;
-var hasRequiredFunctionBind;
-function requireFunctionBind() {
-  if (hasRequiredFunctionBind) return functionBind;
-  hasRequiredFunctionBind = 1;
-  var implementation2 = requireImplementation();
-  functionBind = Function.prototype.bind || implementation2;
-  return functionBind;
-}
+var implementation = requireImplementation();
+var functionBind = Function.prototype.bind || implementation;
 var functionCall;
 var hasRequiredFunctionCall;
 function requireFunctionCall() {
@@ -36768,12 +36761,12 @@ function requireFunctionApply() {
   return functionApply;
 }
 var reflectApply = typeof Reflect !== "undefined" && Reflect && Reflect.apply;
-var bind$2 = requireFunctionBind();
+var bind$2 = functionBind;
 var $apply$1 = requireFunctionApply();
 var $call$2 = requireFunctionCall();
 var $reflectApply = reflectApply;
 var actualApply = $reflectApply || bind$2.call($call$2, $apply$1);
-var bind$1 = requireFunctionBind();
+var bind$1 = functionBind;
 var $TypeError$4 = type;
 var $call$1 = requireFunctionCall();
 var $actualApply = actualApply;
@@ -36841,7 +36834,7 @@ function requireHasown() {
   hasRequiredHasown = 1;
   var call = Function.prototype.call;
   var $hasOwn = Object.prototype.hasOwnProperty;
-  var bind2 = requireFunctionBind();
+  var bind2 = functionBind;
   hasown = bind2.call(call, $hasOwn);
   return hasown;
 }
@@ -36856,7 +36849,7 @@ var $TypeError$3 = type;
 var $URIError = uri;
 var abs = abs$1;
 var floor = floor$1;
-var max = max$1;
+var max = max$2;
 var min = min$1;
 var pow = pow$1;
 var round = round$1;
@@ -37061,7 +37054,7 @@ var LEGACY_ALIASES = {
   "%WeakMapPrototype%": ["WeakMap", "prototype"],
   "%WeakSetPrototype%": ["WeakSet", "prototype"]
 };
-var bind = requireFunctionBind();
+var bind = functionBind;
 var hasOwn = requireHasown();
 var $concat = bind.call($call, Array.prototype.concat);
 var $spliceApply = bind.call($apply, Array.prototype.splice);
@@ -78884,8 +78877,8 @@ var expressExports = express$2.exports;
  * Copyright(c) 2014-2015 Douglas Christopher Wilson
  * MIT Licensed
  */
-var express = expressExports;
-const express$1 = /* @__PURE__ */ getDefaultExportFromCjs(express);
+var express$1 = expressExports;
+const express = /* @__PURE__ */ getDefaultExportFromCjs(express$1);
 var lib = { exports: {} };
 /*
 object-assign
@@ -79245,13 +79238,14 @@ function getLocalIP() {
 }
 function startServer() {
   if (httpServer) return;
-  const server = express$1();
+  const server = express();
   server.use(cors());
-  server.use(express$1.json());
+  server.use(express.json());
   server.get("/health", (_req, res2) => {
     res2.send({ status: "Server is running" });
   });
   server.post("/print", async (req2, res2) => {
+    var _a;
     console.log("🖨️ Received print request:", req2.body);
     try {
       if (!fs$2.existsSync(configPath)) {
@@ -79265,20 +79259,49 @@ function startServer() {
         return res2.status(400).send("Printer not configured");
       }
       const {
-        hospital = "Hospital Service",
-        logo = "",
-        doctor = "---",
-        patient = "---",
-        token = "A-01",
-        department = "General"
+        hospital = {},
+        patient = {},
+        doctor = {},
+        token = {},
+        department = {},
+        payment = {}
       } = req2.body;
+      const hospitalName = typeof hospital === "string" ? hospital : hospital.name || "Hospital Service";
+      const logo = typeof hospital === "string" ? "" : hospital.logo || hospital.logoUrl || "";
+      const patientName = typeof patient === "string" ? patient : patient.name || "---";
+      const patientPhone = typeof patient === "string" ? patient : ((_a = patient.phone) == null ? void 0 : _a.full) || patient.phone || "N/A";
+      const patientAge = patient.age ?? "--";
+      const patientGender = patient.gender || "--";
+      const doctorName = typeof doctor === "string" ? doctor : doctor.name || "---";
+      const doctorSpecialization = doctor.specialization || doctor.education || "General";
+      con;
+      const tokenNumber = typeof token === "string" ? token : token.number || token.tokenNumber || "A-01";
+      const tokenSequence = token.sequence ?? token.sequenceNumber ?? "--";
+      const tokenStatus = (token.status || "WAITING").toString().toUpperCase();
+      const departmentName = typeof department === "string" ? department : department.name || "General";
+      const paymentAmount = payment.amount ?? "--";
+      const paymentCurrency = payment.currency || "INR";
+      const paymentMethod = payment.method || "--";
+      const paymentStatus = payment.status || "--";
+      const paymentTransactionId = payment.transactionId || payment.razorpayPaymentId || payment.razorpayOrderId || "--";
       console.log("📋 Print Data:", {
-        hospital,
-        token,
-        patient,
-        doctor,
-        department,
-        hasLogo: !!logo
+        hospitalName,
+        logo,
+        doctorName,
+        doctorSpecialization,
+        patientName,
+        patientPhone,
+        patientAge,
+        patientGender,
+        tokenNumber,
+        tokenSequence,
+        tokenStatus,
+        departmentName,
+        paymentAmount,
+        paymentCurrency,
+        paymentMethod,
+        paymentStatus,
+        paymentTransactionId
       });
       const printWindow = new BrowserWindow({
         show: false,
@@ -79387,7 +79410,7 @@ function startServer() {
           ${logo ? `<img src="${logo}" class="logo" onerror="this.style.display='none'" />` : ""}
 
           <div class="hospital-name">
-            ${hospital}
+            ${hospitalName}
           </div>
 
           <div class="divider"></div>
@@ -79397,7 +79420,11 @@ function startServer() {
           </div>
 
           <div class="token-number">
-            ${token}
+            ${tokenNumber}
+          </div>
+
+          <div class="token-label" style="font-size: 11px; margin-top: 2px; letter-spacing: 0.5px;">
+            Seq: ${tokenSequence} · Status: ${tokenStatus}
           </div>
 
           <div class="divider"></div>
@@ -79405,17 +79432,49 @@ function startServer() {
           <div class="info-section">
             <div class="info-row">
               <span class="label">Patient:</span>
-              ${patient}
+              ${patientName}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Phone:</span>
+              ${patientPhone}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Age / Gender:</span>
+              ${patientAge} / ${patientGender}
             </div>
 
             <div class="info-row">
               <span class="label">Doctor:</span>
-              ${doctor}
+              ${doctorName}
+            </div>
+
+            <div class="info-row">
+              <span class="label">Specialization:</span>
+              ${doctorSpecialization}
             </div>
 
             <div class="info-row">
               <span class="label">Department:</span>
-              ${department}
+              ${departmentName}
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="info-section">
+            <div class="info-row">
+              <span class="label">Payment:</span>
+              ${paymentMethod} · ${paymentCurrency} ${paymentAmount}
+            </div>
+            <div class="info-row">
+              <span class="label">Txn ID:</span>
+              ${paymentTransactionId}
+            </div>
+            <div class="info-row">
+              <span class="label">Pay Status:</span>
+              ${paymentStatus}
             </div>
           </div>
 

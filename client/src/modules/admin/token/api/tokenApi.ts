@@ -6,6 +6,7 @@ import type {
   VerifyPaymentPayload,
   TokenListResponse,
   SingleTokenResponse,
+  PrintTokenResponse,
 } from '../types';
 
 const TOKEN_ENDPOINT = '/api/token';
@@ -13,7 +14,9 @@ const PAYMENT_ENDPOINT = '/api/payment';
 
 export const getTokens = async (filters: any = {}): Promise<TokenListResponse> => {
   try {
-    const response = await api.get<TokenListResponse>(TOKEN_ENDPOINT, { params: filters });
+    const response = await api.get<TokenListResponse>(TOKEN_ENDPOINT, {
+      params: filters,
+    });
     return response.data;
   } catch (error: any) {
     throw {
@@ -23,7 +26,9 @@ export const getTokens = async (filters: any = {}): Promise<TokenListResponse> =
   }
 };
 
-export const createToken = async (payload: CreateTokenPayload): Promise<SingleTokenResponse> => {
+export const createToken = async (
+  payload: CreateTokenPayload,
+): Promise<SingleTokenResponse> => {
   try {
     const response = await api.post<SingleTokenResponse>(TOKEN_ENDPOINT, payload);
     return response.data;
@@ -37,7 +42,9 @@ export const createToken = async (payload: CreateTokenPayload): Promise<SingleTo
 
 export const cancelToken = async (id: string): Promise<SingleTokenResponse> => {
   try {
-    const response = await api.patch<SingleTokenResponse>(`${TOKEN_ENDPOINT}/${id}/cancel`);
+    const response = await api.patch<SingleTokenResponse>(
+      `${TOKEN_ENDPOINT}/${id}/cancel`,
+    );
     return response.data;
   } catch (error: any) {
     throw {
@@ -49,12 +56,26 @@ export const cancelToken = async (id: string): Promise<SingleTokenResponse> => {
 
 export const verifyCashPayment = async (id: string): Promise<SingleTokenResponse> => {
   try {
-    const response = await api.patch<SingleTokenResponse>(`${TOKEN_ENDPOINT}/${id}/verify-cash`);
+    const response = await api.patch<SingleTokenResponse>(
+      `${TOKEN_ENDPOINT}/${id}/verify-cash`,
+    );
     return response.data;
   } catch (error: any) {
     throw {
       success: false,
       message: error.response?.data?.message || 'Failed to verify cash payment',
+    };
+  }
+};
+
+export const getPrintTokenById = async (id: string): Promise<PrintTokenResponse> => {
+  try {
+    const response = await api.get<PrintTokenResponse>(`${TOKEN_ENDPOINT}/${id}/print`);
+    return response.data;
+  } catch (error: any) {
+    throw {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch print details',
     };
   }
 };
@@ -71,7 +92,9 @@ export const createPaymentOrder = async (payload: CreatePaymentPayload): Promise
   }
 };
 
-export const verifyOnlinePayment = async (payload: VerifyPaymentPayload): Promise<any> => {
+export const verifyOnlinePayment = async (
+  payload: VerifyPaymentPayload,
+): Promise<any> => {
   try {
     const response = await api.post(`${PAYMENT_ENDPOINT}/verify-payment`, payload);
     return response.data;
@@ -85,7 +108,9 @@ export const verifyOnlinePayment = async (payload: VerifyPaymentPayload): Promis
 
 export const toggleEmergency = async (id: string): Promise<SingleTokenResponse> => {
   try {
-    const response = await api.patch<SingleTokenResponse>(`${TOKEN_ENDPOINT}/${id}/emergency`);
+    const response = await api.patch<SingleTokenResponse>(
+      `${TOKEN_ENDPOINT}/${id}/emergency`,
+    );
     return response.data;
   } catch (error: any) {
     throw {
@@ -95,9 +120,15 @@ export const toggleEmergency = async (id: string): Promise<SingleTokenResponse> 
   }
 };
 
-export const reassignDoctor = async (id: string, payload: { doctorId: string; departmentId: string }): Promise<SingleTokenResponse> => {
+export const reassignDoctor = async (
+  id: string,
+  payload: { doctorId: string; departmentId: string },
+): Promise<SingleTokenResponse> => {
   try {
-    const response = await api.patch<SingleTokenResponse>(`${TOKEN_ENDPOINT}/${id}/reassign`, payload);
+    const response = await api.patch<SingleTokenResponse>(
+      `${TOKEN_ENDPOINT}/${id}/reassign`,
+      payload,
+    );
     return response.data;
   } catch (error: any) {
     throw {

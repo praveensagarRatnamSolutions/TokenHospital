@@ -17,11 +17,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? 'bg-white backdrop-blur-xl border-b shadow-sm' : 'bg-transparent border-b'
-        }`}
-      >
+      <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-white backdrop-blur-xl border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* LOGO */}
           <Link href="/" className="text-lg sm:text-xl font-bold">
@@ -33,7 +29,7 @@ export default function Navbar() {
           </Link>
 
           {/* DESKTOP MENU */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <nav className="hidden text-black md:flex items-center gap-8 text-sm font-medium">
             <Link href="#" className="hover:text-blue-600 transition">
               Features
             </Link>
@@ -50,13 +46,15 @@ export default function Navbar() {
 
           {/* RIGHT SIDE (Desktop) */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login" className="text-sm hover:text-blue-600">
+            <Link href="/login" className="text-sm text-black hover:text-blue-600">
               Login
             </Link>
 
-            <button className="px-5 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 hover:scale-105 transition">
-              Get Started
-            </button>
+            <Link href="/register">
+              <button className="px-5 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 hover:scale-105 transition">
+                Get Started
+              </button>
+            </Link>
           </div>
 
           {/* MOBILE BUTTON */}

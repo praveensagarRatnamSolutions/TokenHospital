@@ -37,6 +37,7 @@ export interface Doctor {
   experience: number;
   education?: string;
   consultationFee: number;
+  roomFloor?: string; // Room number and floor information
   availability: AvailabilitySlot[];
 
   currentToken?: number;
