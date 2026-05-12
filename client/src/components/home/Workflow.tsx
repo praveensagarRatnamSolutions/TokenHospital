@@ -28,7 +28,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="relative py-20 px-6 bg-[#131793] overflow-hidden">
+    <section id='workflow' className="relative py-20 px-6 bg-[#131793] overflow-hidden">
       
       {/* BACKGROUND GRADIENT LAYER */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#131793] via-[#0b0e63] to-[#0091DD]" />

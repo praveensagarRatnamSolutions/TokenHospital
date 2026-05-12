@@ -122,7 +122,7 @@ export default function DoctorLayoutClient({ children }: { children: React.React
 
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="rounded-xl px-3 py-2 cursor-pointer gap-3 text-red-600 dark:text-red-400 focus:bg-red-50 dark:focus:bg-red-950 font-bold"
+                    className="rounded-xl px-3 py-2 cursor-pointer gap-3 text-red-600 dark:text-red-400 focus:bg-red-500 dark:focus:bg-red-950 font-bold"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Terminal Exit</span>
@@ -142,6 +142,7 @@ export default function DoctorLayoutClient({ children }: { children: React.React
           </main>
         </div>
       </div>
+      
     </ProtectedRoute>
   );
 }

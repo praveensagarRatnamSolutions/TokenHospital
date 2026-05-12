@@ -38,7 +38,7 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="relative py-24 px-6 overflow-hidden bg-white">
+    <section id="features" className="relative py-24 px-6 overflow-hidden bg-white">
       {/* --- ENHANCED BACKGROUND LAYER --- */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Main Light Blue Slope */}
