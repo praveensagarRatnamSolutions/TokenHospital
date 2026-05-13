@@ -1,7 +1,9 @@
 {
   "name": "printer-service",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Hospital Token Printer Service",
+  "author": "HospitalToken",
   "type": "module",
   "scripts": {
     "dev": "vite",

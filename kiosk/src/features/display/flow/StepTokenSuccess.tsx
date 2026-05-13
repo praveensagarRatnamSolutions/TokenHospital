@@ -20,7 +20,7 @@ const StepTokenSuccess: React.FC<StepTokenSuccessProps> = ({ tokenNumber, depart
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-sky-500/5 dark:bg-sky-500/5 blur-[200px]" />
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="max-w-3xl w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[4rem] p-16 text-center shadow-2xl relative z-10"
@@ -37,12 +37,12 @@ const StepTokenSuccess: React.FC<StepTokenSuccessProps> = ({ tokenNumber, depart
             {/* Ticket Cutouts */}
             <div className="absolute -left-6 top-1/2 -translate-y-1/2 size-12 rounded-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10" />
             <div className="absolute -right-6 top-1/2 -translate-y-1/2 size-12 rounded-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10" />
-            
+
             <div className="flex flex-col items-center">
               <span className="text-xs font-black text-sky-600 dark:text-sky-400 uppercase tracking-[0.5em] mb-4">Your Token Number</span>
               <span className="text-8xl font-black text-slate-900 dark:text-white tracking-tighter mb-4">{tokenNumber}</span>
               <div className="h-0.5 w-full bg-slate-100 dark:bg-white/5 border-b border-dashed border-slate-300 dark:border-white/20 mb-8" />
-              
+
               <div className="grid grid-cols-2 gap-12 w-full">
                 <div className="flex flex-col items-start gap-2">
                   <div className="flex items-center gap-2 text-slate-300 dark:text-white/20 uppercase text-[10px] font-black tracking-widest">
@@ -61,7 +61,7 @@ const StepTokenSuccess: React.FC<StepTokenSuccessProps> = ({ tokenNumber, depart
               </div>
             </div>
           </div>
-          
+
           {/* Print Status */}
           <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-teal-500 text-white flex items-center gap-4 shadow-xl shadow-teal-500/20">
             <Printer size={18} className="animate-bounce" />
@@ -82,11 +82,11 @@ const StepTokenSuccess: React.FC<StepTokenSuccessProps> = ({ tokenNumber, depart
           <div className="size-1 rounded-full bg-slate-300 dark:bg-white/10" />
           <div className="flex items-center gap-2">
             <Ticket size={16} />
-            <span>Room: {doctor.roomNumber || "TBD"}</span>
+            <span>Room: {doctor.roomFloor || "TBD"}</span>
           </div>
         </div>
 
-        <button 
+        <button
           onClick={onDone}
           className="w-full h-24 rounded-[3rem] bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-900 dark:text-white flex items-center justify-center gap-4 transition-all shadow-lg active:scale-95"
         >

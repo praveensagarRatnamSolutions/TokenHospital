@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   ChevronRight,
 } from "lucide-react";
+import VirtualKeyboard from "../components/VirtualKeyboard";
 import type { Department, Doctor } from "../../../core/types";
 
 interface PhoneData {
@@ -45,6 +46,35 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
   const [gender, setGender] = useState<"Male" | "Female" | "Other">("Male");
   const [method, setMethod] = useState<"CASH" | "UPI" | "CARD">("CASH");
   const [error, setError] = useState("");
+  const [focusedField, setFocusedField] = useState<"name" | "phone" | "age" | null>(null);
+  const [showKeyboard, setShowKeyboard] = useState(false);
+
+  const handleKeyPress = (key: string) => {
+    if (!focusedField) return;
+
+    if (key === "backspace") {
+      if (focusedField === "name") setName((prev) => prev.slice(0, -1));
+      if (focusedField === "phone") setPhone((prev) => prev.slice(0, -1));
+      if (focusedField === "age") {
+        const val = age.toString().slice(0, -1);
+        setAge(val ? parseInt(val) : "");
+      }
+      return;
+    }
+
+    if (focusedField === "name") setName((prev) => prev + key);
+    if (focusedField === "phone") {
+      if (phone.length < 10 && /^\d$/.test(key)) {
+        setPhone((prev) => prev + key);
+      }
+    }
+    if (focusedField === "age") {
+      if (/^\d$/.test(key)) {
+        const newVal = parseInt(age.toString() + key);
+        if (newVal <= 150) setAge(newVal);
+      }
+    }
+  };
 
   const parsePhoneNumber = (phoneStr: string): PhoneData => {
     // Parse phone number to extract country code and national number
@@ -117,7 +147,7 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
       </header>
 
       {/* Main Form Content */}
-      <main className="flex-1 overflow-y-auto p-12">
+      <main className={`flex-1 overflow-y-auto p-12 transition-all duration-500 ${showKeyboard ? "pb-[400px]" : "pb-12"}`}>
         <div className="max-w-4xl mx-auto space-y-12 pb-20">
           {/* Patient Details Section */}
           <section className="space-y-6">
@@ -142,8 +172,13 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
                   />
                   <input
                     type="text"
+                    inputMode="none"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    onFocus={() => {
+                      setFocusedField("name");
+                      setShowKeyboard(true);
+                    }}
                     placeholder="e.g. John Doe"
                     className="w-full bg-slate-50 dark:bg-white/5 border-2 border-slate-200 dark:border-white/10 rounded-[2rem] py-6 pl-16 pr-8 text-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-sky-500 transition-all placeholder:text-slate-300 dark:placeholder:text-white/10"
                   />
@@ -161,8 +196,13 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
                   />
                   <input
                     type="tel"
+                    inputMode="none"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
+                    onFocus={() => {
+                      setFocusedField("phone");
+                      setShowKeyboard(true);
+                    }}
                     placeholder="10-digit number"
                     maxLength={10}
                     className="w-full bg-slate-50 dark:bg-white/5 border-2 border-slate-200 dark:border-white/10 rounded-[2rem] py-6 pl-16 pr-8 text-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-sky-500 transition-all placeholder:text-slate-300 dark:placeholder:text-white/10"
@@ -177,10 +217,15 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
                 <div className="relative group">
                   <input
                     type="number"
+                    inputMode="none"
                     value={age}
                     onChange={(e) =>
                       setAge(e.target.value ? parseInt(e.target.value) : "")
                     }
+                    onFocus={() => {
+                      setFocusedField("age");
+                      setShowKeyboard(true);
+                    }}
                     placeholder="e.g. 30"
                     min="1"
                     max="150"
@@ -193,17 +238,25 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
                 <label className="block text-xs font-black text-slate-400 dark:text-white/30 uppercase tracking-[0.2em] ml-2">
                   Gender
                 </label>
-                <select
-                  value={gender}
-                  onChange={(e) =>
-                    setGender(e.target.value as "Male" | "Female" | "Other")
-                  }
-                  className="w-full bg-slate-50 dark:bg-white/5 border-2 border-slate-200 dark:border-white/10 rounded-[2rem] py-6 px-8 text-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-sky-500 transition-all"
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
+                <div className="grid grid-cols-3 gap-4">
+                  {(["Male", "Female", "Other"] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setGender(option)}
+                      className={`
+                        py-6 rounded-[2rem] border-2 font-bold text-xl transition-all
+                        ${
+                          gender === option
+                            ? "bg-sky-500 border-sky-500 text-white shadow-lg shadow-sky-500/20"
+                            : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white hover:border-sky-500/30"
+                        }
+                      `}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
@@ -337,6 +390,14 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
           </button>
         </div>
       </main>
+
+      <VirtualKeyboard
+        isVisible={showKeyboard}
+        layout={focusedField === "name" ? "default" : "numeric"}
+        onKeyPress={handleKeyPress}
+        onClose={() => setShowKeyboard(false)}
+        lockLayout={true}
+      />
     </div>
   );
 };

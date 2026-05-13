@@ -103,6 +103,7 @@ export default function TokenManagement() {
   const cancelTokenMutation = useCancelToken();
   const toggleEmergencyMutation = useToggleEmergency();
   const printTokenMutation = usePrintTokenById();
+  
 
   const handlePrintToken = async (id: string) => {
     try {
