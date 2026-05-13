@@ -6,7 +6,12 @@
   "scripts": {
     "client": "npm run dev --prefix client",
     "server": "npm run dev --prefix Backend",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "sst:dev": "sst dev",
+    "sst:deploy:uat": "sst deploy --stage uat",
+    "sst:deploy:prod": "sst deploy --stage production",
+    "sst:remove:uat": "sst remove --stage uat",
+    "sst:remove:prod": "sst remove --stage production"
   },
   "repository": {
     "type": "git",
@@ -21,6 +26,9 @@
   "homepage": "https://github.com/praveensagarRatnamSolutions/TokenHospital#readme",
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "cross-env": "^10.1.0"
+    "cross-env": "^10.1.0",
+    "@types/node": "^20",
+    "sst": "^3.0.0",
+    "typescript": "^5.0.0"
   }
 }

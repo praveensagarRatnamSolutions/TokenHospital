@@ -142,3 +142,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# SST
+.sst/
+sst-env.d.ts
+
+# OpenNext build output
+.open-next/
