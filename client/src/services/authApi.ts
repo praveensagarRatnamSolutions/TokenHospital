@@ -57,9 +57,25 @@ export const authApi = {
   getCurrentUser: async () => {
     try {
       const response = await api.get('/api/auth/me');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('API getCurrentUser error:', error);
+      throw error;
+    }
+  },
+
+  updateProfile: async (profileData: {
+    name?: string;
+    email?: string;
+    profilePic?: string;
+    password?: string;
+    currentPassword?: string;
+  }) => {
+    try {
+      const response = await api.put('/api/auth/me', profileData);
+      return response.data.data;
+    } catch (error) {
+      console.error('API updateProfile error:', error);
       throw error;
     }
   },

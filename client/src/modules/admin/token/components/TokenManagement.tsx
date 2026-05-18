@@ -22,14 +22,15 @@ import {
   XCircle,
   UserPlus,
   ShieldCheck,
-  ZapOff
+  ZapOff,
 } from 'lucide-react';
 import {
   useTokens,
   useVerifyCashToken,
   useCancelToken,
   useToggleEmergency,
-  useReassignDoctor
+  useReassignDoctor,
+  usePrintTokenById,
 } from '../hooks';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
@@ -46,7 +47,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 export default function TokenManagement() {
   const { user } = useAppSelector((state: RootState) => state.auth);
@@ -80,7 +81,12 @@ export default function TokenManagement() {
   });
 
   const tokens = tokensRes?.tokens || [];
-  const stats = tokensRes?.stats || { totalCreated: 0, emergencyCount: 0, waitingCount: 0, activeCount: 0 };
+  const stats = tokensRes?.stats || {
+    totalCreated: 0,
+    emergencyCount: 0,
+    waitingCount: 0,
+    activeCount: 0,
+  };
   const pagination = tokensRes?.pagination;
 
   // 2. Fetch Doctors for filter
@@ -89,13 +95,47 @@ export default function TokenManagement() {
     queryFn: async () => {
       const res = await api.get('/api/doctor');
       return res.data.doctors || res.data.data || [];
-    }
+    },
   });
 
   // Mutations
   const verifyCashMutation = useVerifyCashToken();
   const cancelTokenMutation = useCancelToken();
   const toggleEmergencyMutation = useToggleEmergency();
+  const printTokenMutation = usePrintTokenById();
+  
+
+  const handlePrintToken = async (id: string) => {
+    try {
+      const response = await printTokenMutation.mutateAsync(id);
+      const printDetails = response.data;
+
+      if (!printDetails) {
+        throw new Error('No printable data returned');
+      }
+
+      // Send to printer service
+      const printResponse = await fetch('http://localhost:3001/print', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(printDetails),
+      });
+
+      if (!printResponse.ok) {
+        const errorData = await printResponse.json();
+        throw new Error(errorData.message || 'Print failed');
+      }
+
+      const result = await printResponse.json();
+      console.log('Print successful:', result);
+      alert('Token printed successfully!');
+    } catch (err: any) {
+      console.error('Print error:', err);
+      alert(err.message || 'Failed to print token');
+    }
+  };
 
   const handleToggleEmergency = async (id: string) => {
     try {
@@ -120,7 +160,8 @@ export default function TokenManagement() {
             Token <span className="text-primary italic font-serif">Management</span>
           </h1>
           <p className="text-slate-500 dark:text-slate-400 font-medium mt-2 max-w-lg">
-            Manage live patient flows, re-assign doctors, and handle emergency priorities with precision.
+            Manage live patient flows, re-assign doctors, and handle emergency priorities
+            with precision.
           </p>
         </div>
         <div className="flex gap-3">
@@ -128,18 +169,43 @@ export default function TokenManagement() {
             onClick={() => router.push('/admin/token/create')}
             className="h-14 px-8 bg-primary text-white font-black rounded-2xl hover:scale-[1.02] transition-all shadow-xl shadow-primary/20 flex items-center gap-2 group"
           >
-            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />{' '}
-            Create Token
+            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> Create
+            Token
           </Button>
         </div>
       </div>
 
       {/* Summary Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Tokens" value={stats.totalCreated} icon={Ticket} color="blue" sub="Today's total traffic" />
-        <StatCard title="Emergency" value={stats.emergencyCount} icon={Zap} color="red" sub="Critical cases" pulse={stats.emergencyCount > 0} />
-        <StatCard title="In Queue" value={stats.waitingCount} icon={Clock} color="amber" sub="Awaiting consultation" />
-        <StatCard title="Active Now" value={stats.activeCount} icon={Activity} color="emerald" sub="With doctors" />
+        <StatCard
+          title="Total Tokens"
+          value={stats.totalCreated}
+          icon={Ticket}
+          color="blue"
+          sub="Today's total traffic"
+        />
+        <StatCard
+          title="Emergency"
+          value={stats.emergencyCount}
+          icon={Zap}
+          color="red"
+          sub="Critical cases"
+          pulse={stats.emergencyCount > 0}
+        />
+        <StatCard
+          title="In Queue"
+          value={stats.waitingCount}
+          icon={Clock}
+          color="amber"
+          sub="Awaiting consultation"
+        />
+        <StatCard
+          title="Active Now"
+          value={stats.activeCount}
+          icon={Activity}
+          color="emerald"
+          sub="With doctors"
+        />
       </div>
 
       {/* Search & Filters */}
@@ -160,13 +226,19 @@ export default function TokenManagement() {
             <Stethoscope className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
             <select
               value={doctorId}
-              onChange={(e) => { setDoctorId(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setDoctorId(e.target.value);
+                setPage(1);
+              }}
               className="w-full h-14 pl-12 pr-10 bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-bold text-slate-700 dark:text-slate-200"
             >
               <option value="">All Doctors</option>
-              {Array.isArray(doctorsData) && doctorsData.map((d: any) => (
-                <option key={d._id} value={d._id}>{d.name}</option>
-              ))}
+              {Array.isArray(doctorsData) &&
+                doctorsData.map((d: any) => (
+                  <option key={d._id} value={d._id}>
+                    {d.name}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -175,7 +247,10 @@ export default function TokenManagement() {
             <input
               type="date"
               value={dateFilter}
-              onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setDateFilter(e.target.value);
+                setPage(1);
+              }}
               className="h-14 pl-12 pr-4 bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-700 dark:text-slate-200"
             />
           </div>
@@ -188,11 +263,21 @@ export default function TokenManagement() {
           <table className="w-full text-left border-separate border-spacing-0">
             <thead>
               <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Patient & Token</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Assignment</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">Status</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">Payment</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Actions</th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  Patient & Token
+                </th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  Assignment
+                </th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">
+                  Status
+                </th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">
+                  Payment
+                </th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -207,7 +292,9 @@ export default function TokenManagement() {
               ) : tokens.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-8 py-32 text-center">
-                    <p className="text-slate-400 font-medium italic">No tokens found for the selected criteria.</p>
+                    <p className="text-slate-400 font-medium italic">
+                      No tokens found for the selected criteria.
+                    </p>
                   </td>
                 </tr>
               ) : (
@@ -219,19 +306,25 @@ export default function TokenManagement() {
                     {/* Patient & Token Info */}
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
-                        <div className={`size-14 rounded-2xl flex flex-col items-center justify-center font-black border transition-all ${token.isEmergency
-                          ? 'bg-red-600 text-white border-red-700 shadow-lg shadow-red-200 dark:shadow-none'
-                          : 'bg-white dark:bg-slate-900 text-primary border-slate-200 dark:border-slate-800'
-                          }`}>
-
+                        <div
+                          className={`size-14 rounded-2xl flex flex-col items-center justify-center font-black border transition-all ${
+                            token.isEmergency
+                              ? 'bg-red-600 text-white border-red-700 shadow-lg shadow-red-200 dark:shadow-none'
+                              : 'bg-white dark:bg-slate-900 text-primary border-slate-200 dark:border-slate-800'
+                          }`}
+                        >
                           <span className="text-sm">{token.tokenNumber}</span>
                         </div>
                         <div>
                           <h4 className="font-black text-slate-900 dark:text-white capitalize leading-tight">
-                            {token.patient?.name || token.patientDetails?.name || 'Unknown'}
+                            {token.patient?.name ||
+                              token.patientDetails?.name ||
+                              'Unknown'}
                           </h4>
                           <p className="text-xs font-bold text-slate-400 mt-0.5">
-                            {token.patient?.phone?.full || token.patientDetails?.phone?.full || 'N/A'}
+                            {token.patient?.phone?.full ||
+                              token.patientDetails?.phone?.full ||
+                              'N/A'}
                           </p>
                         </div>
                       </div>
@@ -258,7 +351,10 @@ export default function TokenManagement() {
                     {/* Payment Info */}
                     <td className="px-8 py-6">
                       <div className="flex justify-center">
-                        <PaymentStatus token={token} onVerify={(id: string) => verifyCashMutation.mutate(id)} />
+                        <PaymentStatus
+                          token={token}
+                          onVerify={(id: string) => verifyCashMutation.mutate(id)}
+                        />
                       </div>
                     </td>
 
@@ -268,7 +364,10 @@ export default function TokenManagement() {
                         <DropdownMenuTrigger className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors outline-none">
                           <MoreVertical className="w-5 h-5 text-slate-400" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-slate-200 dark:border-slate-800 shadow-xl">
+                        <DropdownMenuContent
+                          align="end"
+                          className="w-56 p-2 rounded-2xl border-slate-200 dark:border-slate-800 shadow-xl"
+                        >
                           <DropdownMenuGroup>
                             <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 py-2">
                               Token Actions
@@ -281,24 +380,43 @@ export default function TokenManagement() {
                               onClick={() => handleToggleEmergency(token._id)}
                             >
                               {token.isEmergency ? (
-                                <><ZapOff className="w-4 h-4 text-slate-400" /> Mark Normal</>
+                                <>
+                                  <ZapOff className="w-4 h-4 text-slate-400" /> Mark
+                                  Normal
+                                </>
                               ) : (
-                                <><Zap className="w-4 h-4 text-red-500 fill-red-500" /> Mark Emergency</>
+                                <>
+                                  <Zap className="w-4 h-4 text-red-500 fill-red-500" />{' '}
+                                  Mark Emergency
+                                </>
                               )}
                             </DropdownMenuItem>
 
                             {/* Re-assign Doctor */}
-                            {(token.status === 'WAITING' || token.status === 'PROVISIONAL') && (
+                            {(token.status === 'WAITING' ||
+                              token.status === 'PROVISIONAL') && (
                               <DropdownMenuItem
                                 className="rounded-xl px-3 py-2.5 cursor-pointer flex items-center gap-3 font-bold text-sm"
-                                onClick={() => { setActiveToken(token); setIsReassignOpen(true); }}
+                                onClick={() => {
+                                  setActiveToken(token);
+                                  setIsReassignOpen(true);
+                                }}
                               >
-                                <UserPlus className="w-4 h-4 text-blue-500" /> Re-assign Doctor
+                                <UserPlus className="w-4 h-4 text-blue-500" /> Re-assign
+                                Doctor
                               </DropdownMenuItem>
                             )}
 
+                            {/* Print Token */}
+                            <DropdownMenuItem
+                              className="rounded-xl px-3 py-2.5 cursor-pointer flex items-center gap-3 font-bold text-sm"
+                              onClick={() => handlePrintToken(token._id)}
+                            >
+                              <Ticket className="w-4 h-4 text-slate-500" /> Print Token
+                            </DropdownMenuItem>
+
                             {/* Verify Payment */}
-                            {(token.status === 'PROVISIONAL') && (
+                            {token.status === 'PROVISIONAL' && (
                               <DropdownMenuItem
                                 className="rounded-xl px-3 py-2.5 cursor-pointer flex items-center gap-3 font-bold text-sm text-emerald-600"
                                 onClick={() => verifyCashMutation.mutate(token._id)}
@@ -310,10 +428,14 @@ export default function TokenManagement() {
                             <DropdownMenuSeparator />
 
                             {/* Cancel Token */}
-                            {(token.status === 'WAITING' || token.status === 'PROVISIONAL') && (
+                            {(token.status === 'WAITING' ||
+                              token.status === 'PROVISIONAL') && (
                               <DropdownMenuItem
                                 className="rounded-xl px-3 py-2.5 cursor-pointer flex items-center gap-3 font-bold text-sm text-red-500 focus:bg-red-50 dark:focus:bg-red-900/20"
-                                onClick={() => { if (confirm('Cancel this token?')) cancelTokenMutation.mutate(token._id) }}
+                                onClick={() => {
+                                  if (confirm('Cancel this token?'))
+                                    cancelTokenMutation.mutate(token._id);
+                                }}
                               >
                                 <XCircle className="w-4 h-4" /> Cancel Token
                               </DropdownMenuItem>
@@ -364,15 +486,23 @@ function StatCard({ title, value, icon: Icon, color, sub, pulse }: any) {
   };
 
   return (
-    <Card className={`p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-500 ${pulse ? 'ring-2 ring-red-500 animate-pulse' : ''}`}>
+    <Card
+      className={`p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-500 ${pulse ? 'ring-2 ring-red-500 animate-pulse' : ''}`}
+    >
       <div className="flex justify-between items-start mb-4">
         <div className={`p-3 rounded-2xl border ${colors[color]}`}>
           <Icon className="w-6 h-6" />
         </div>
-        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Live</span>
+        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+          Live
+        </span>
       </div>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{title}</p>
-      <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-1">{value}</h3>
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+        {title}
+      </p>
+      <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-1">
+        {value}
+      </h3>
       <p className="text-[10px] font-bold text-slate-400 italic leading-none">{sub}</p>
     </Card>
   );
@@ -380,15 +510,22 @@ function StatCard({ title, value, icon: Icon, color, sub, pulse }: any) {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: any = {
-    WAITING: 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800',
-    PROVISIONAL: 'bg-slate-50 text-slate-400 border-slate-100 dark:bg-slate-900/50 dark:border-slate-800',
-    CALLED: 'bg-indigo-50 text-indigo-600 border-indigo-100 animate-pulse dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800',
-    COMPLETED: 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800',
-    CANCELED: 'bg-red-50 text-red-400 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800',
+    WAITING:
+      'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800',
+    PROVISIONAL:
+      'bg-slate-50 text-slate-400 border-slate-100 dark:bg-slate-900/50 dark:border-slate-800',
+    CALLED:
+      'bg-indigo-50 text-indigo-600 border-indigo-100 animate-pulse dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800',
+    COMPLETED:
+      'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800',
+    CANCELED:
+      'bg-red-50 text-red-400 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800',
   };
 
   return (
-    <span className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-[0.1em] inline-flex items-center justify-center min-w-[100px] ${styles[status]}`}>
+    <span
+      className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-[0.1em] inline-flex items-center justify-center min-w-[100px] ${styles[status]}`}
+    >
       {status}
     </span>
   );

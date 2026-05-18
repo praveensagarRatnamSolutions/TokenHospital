@@ -81,15 +81,13 @@ export const kioskApi = {
 };
 
 export const printApi = {
-  sendToPrinter: async (data: {
-    hospital: string;
-    logo: string;
-    doctor: string;
-    patient: string;
-    token: string;
-    department: string;
-  }) => {
-    const response = await axios.post("http://localhost:3001/print", data);
+  getPrintData: async (tokenId: string) => {
+    const response = await api.get(`/api/token/${tokenId}/print`);
+    return response.data;
+  },
+  sendToPrinter: async (data: any) => {
+    const printServiceUrl = import.meta.env.VITE_PRINT_SERVICE_URL || "http://localhost:3001";
+    const response = await axios.post(printServiceUrl + "/print", data);
     console.log("Print API response:", response);
     return response.data;
   },

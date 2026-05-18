@@ -296,14 +296,14 @@ export const useKioskDisplay = (code: string) => {
 
       console.log("Generated token data:", tokenData);
 
-      await printApi.sendToPrinter({
-        hospital: tokenData.hospitalId?.name || "Hospital",
-        logo: tokenData.hospitalId?.logo || "",
-        doctor: tokenData.doctorId?.name || "---",
-        patient: tokenData.patientId?.name || "---",
-        token: tokenData.tokenNumber || "---",
-        department: tokenData.departmentId?.name || "---",
-      });
+      try {
+        const printRes = await printApi.getPrintData(tokenData._id);
+        if (printRes.success && printRes.data) {
+          await printApi.sendToPrinter(printRes.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch or send print data", err);
+      }
     } catch (err) {
       console.error("❌ Process failed", err);
     }
@@ -321,14 +321,10 @@ export const useKioskDisplay = (code: string) => {
 
     // Print the token
     try {
-      await printApi.sendToPrinter({
-        hospital: token.hospitalId?.name || "Hospital",
-        logo: token.hospitalId?.logo || "",
-        doctor: token.doctorId?.name || "---",
-        patient: token.patientId?.name || "---",
-        token: token.tokenNumber || "---",
-        department: token.departmentId?.name || "---",
-      });
+      const printRes = await printApi.getPrintData(token._id);
+      if (printRes.success && printRes.data) {
+        await printApi.sendToPrinter(printRes.data);
+      }
     } catch (err) {
       console.error("Printing failed after UPI", err);
     }

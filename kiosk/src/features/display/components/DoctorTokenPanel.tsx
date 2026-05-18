@@ -1,4 +1,4 @@
-import { ChevronRight, ArrowDown, Users, Clock } from "lucide-react";
+import { ChevronRight, ArrowDown } from "lucide-react";
 import type { DepartmentQueue, DoctorQueueDisplay } from "../../../core/types";
 import { motion } from 'framer-motion'
 
@@ -14,7 +14,7 @@ const DoctorTokenPanel = ({ doctorId, departments }: DoctorTokenPanelProps) => {
 
   if (!doctor) return null;
 
-  const { display, queue = [], meta } = doctor;
+  const { display, queue = [] } = doctor;
 
   // ✅ Check if current token is emergency
   const isEmergencyCurrent =

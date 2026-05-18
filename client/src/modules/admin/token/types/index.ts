@@ -1,12 +1,14 @@
 export interface TokenPatientDetails {
   _id?: string;
   name: string;
-  phone: string | {
-    full: string;
-    countryCode?: string;
-    country?: string;
-    nationalNumber?: string;
-  };
+  phone:
+    | string
+    | {
+        full: string;
+        countryCode?: string;
+        country?: string;
+        nationalNumber?: string;
+      };
   age?: number;
   gender?: 'Male' | 'Female' | 'Other';
 }
@@ -15,8 +17,8 @@ export interface Token {
   _id: string;
   tokenNumber: string;
   sequenceNumber: number;
-  departmentId: { _id: string; name: string; prefix: string; } | string;
-  doctorId: { _id: string; name: string; } | string | null;
+  departmentId: { _id: string; name: string; prefix: string } | string;
+  doctorId: { _id: string; name: string } | string | null;
   hospitalId: string;
   patientId: TokenPatientDetails | string;
   status: 'PROVISIONAL' | 'WAITING' | 'CALLED' | 'COMPLETED' | 'CANCELED';
@@ -74,4 +76,45 @@ export interface TokenListResponse {
 export interface SingleTokenResponse {
   success: boolean;
   data: Token;
+}
+
+export interface PrintTokenDetails {
+  hospital: {
+    name: string | null;
+    logo: string | null;
+  };
+  patient: {
+    name: string | null;
+    phone:
+      | string
+      | { full: string; countryCode?: string; country?: string; nationalNumber?: string }
+      | null;
+    age: number | null;
+    gender: string | null;
+  };
+  doctor: {
+    name: string | null;
+    specialization: string | null;
+    roomFloor: string | null;
+  };
+  token: {
+    number: string | null;
+    sequence: number | null;
+    status: string | null;
+  };
+  department: {
+    name: string | null;
+  };
+  payment: {
+    amount: number | null;
+    currency: string | null;
+    method: string | null;
+    status: string | null;
+    transactionId: string | null;
+  } | null;
+}
+
+export interface PrintTokenResponse {
+  success: boolean;
+  data: PrintTokenDetails;
 }

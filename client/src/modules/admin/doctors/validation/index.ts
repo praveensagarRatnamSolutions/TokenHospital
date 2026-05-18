@@ -9,21 +9,27 @@ export const doctorSchema = z.object({
   experience: z.number().min(0, 'Experience must be 0 or more'),
   consultationFee: z.number().min(0, 'Consultation fee must be 0 or more'),
   isAvailable: z.boolean().default(true),
+  education: z.string().optional(),
+  roomFloor: z.string().optional(),
 
-  availability: z.array(z.object({
-    day: z.string(),
-    from: z.string(),
-    to: z.string(),
-  })),
+  availability: z.array(
+    z.object({
+      day: z.string(),
+      from: z.string(),
+      to: z.string(),
+    }),
+  ),
   tokenConfig: z.object({
     maxPerDay: z.number().min(1, 'Max tokens must be at least 1'),
     avgTimePerPatient: z.number().min(1, 'Avg time must be at least 1'),
   }),
-  breaks: z.array(z.object({
-    from: z.string(),
-    to: z.string(),
-    label: z.string().optional(),
-  })),
+  breaks: z.array(
+    z.object({
+      from: z.string(),
+      to: z.string(),
+      label: z.string().optional(),
+    }),
+  ),
 });
 
 export type DoctorFormData = z.infer<typeof doctorSchema>;

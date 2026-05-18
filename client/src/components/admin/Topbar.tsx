@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Search, Bell, User, LogOut, Settings } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logout } from '@/store/slices/authSlice';
@@ -12,12 +14,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuGroup, // Added this
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 
 export function Topbar() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
+
+  const navigateToProfile = () => router.push('/admin/profile');
+  const navigateToSettings = () => router.push('/admin/settings');
 
   return (
     <header className="h-16 border-b bg-white dark:bg-slate-950 flex items-center justify-between px-4 md:px-8 shadow-sm gap-4">
@@ -55,7 +61,9 @@ export function Topbar() {
               <User className="w-4 h-4" />
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-sm font-semibold leading-none">{user?.name || 'Administrator'}</p>
+              <p className="text-sm font-semibold leading-none">
+                {user?.name || 'Administrator'}
+              </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 {user?.email || 'admin@hospital.com'}
               </p>
@@ -67,18 +75,18 @@ export function Topbar() {
             <DropdownMenuGroup>
               <DropdownMenuLabel>Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={navigateToProfile}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={navigateToSettings}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            
+
             <DropdownMenuSeparator />
-            
+
             <DropdownMenuItem
               onClick={() => dispatch(logout())}
               className="text-red-600 dark:text-red-400 focus:bg-red-50 dark:focus:bg-red-950"

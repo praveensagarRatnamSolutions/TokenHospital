@@ -9,16 +9,10 @@ import Navbar from '@/components/home/Navbar';
 import Pricing from '@/components/home/Pricing';
 import Testimonials from '@/components/home/Testimonials';
 import HowItWorks from '@/components/home/Workflow';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
 
 export default function HomePage() {
   return (
-    <div className="bg-white text-gray-900">
-
-      <Navbar />
-
+    <div>
       <Hero />
 
       <Features />
@@ -32,8 +26,6 @@ export default function HomePage() {
       <Testimonials />
 
       <CTA />
-
-      <Footer />
     </div>
   );
 }

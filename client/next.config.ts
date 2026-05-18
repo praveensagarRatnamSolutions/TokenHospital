@@ -1,9 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  typescript: {
+    // Next.js 16 generates .next/types/*.ts files with .js references that
+    // fail resolution during OpenNext builds — type checking runs in CI instead
+    ignoreBuildErrors: true,
+  },
   images: {
-    domains: ['images.unsplash.com'],
+    unoptimized: true, // avoids Windows path bug in OpenNext image-optimization Lambda
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+    ],
   },
 };
 

@@ -9,7 +9,18 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
+
+// localStorage is not available in Lambda/SSR — use a no-op on the server
+const createNoopStorage = () => ({
+  getItem(_key: string) { return Promise.resolve(null); },
+  setItem(_key: string, value: unknown) { return Promise.resolve(value); },
+  removeItem(_key: string) { return Promise.resolve(); },
+});
+
+const storage = typeof window !== 'undefined'
+  ? createWebStorage('local')
+  : createNoopStorage();
 import authReducer from './slices/authSlice';
 import tokenReducer from './slices/tokenSlice';
 

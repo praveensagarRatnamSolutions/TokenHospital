@@ -1,17 +1,18 @@
-// src/components/forms/signup-form.tsx
 'use client';
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field';
+
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import PhoneNumberInput from '@/components/common/phone-input';
+
 import signupSchema from '../validation/validation';
 import { registerAdmin } from '../api/auth.api';
 
@@ -19,7 +20,9 @@ type FormData = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
   const router = useRouter();
+
   const [isPending, setIsPending] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
 
   const {
     register,
@@ -45,9 +48,12 @@ export default function SignupForm() {
 
   const onSubmit = async (data: FormData) => {
     setIsPending(true);
+
     try {
       await registerAdmin(data);
+
       alert('Account created 🚀');
+
       router.push('/admin');
     } catch (err: any) {
       alert(err.response?.data?.message || 'Error');
@@ -57,71 +63,108 @@ export default function SignupForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Admin Section */}
-      <div className="grid grid-cols-1 gap-4">
-        <div className="space-y-1.5">
-          <label className='text-sm font-semibold text-slate-300 ml-1'>Full Name</label>
-          <input 
-            className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-            placeholder="John Doe" 
-            {...register('name')} 
-          />
-          {errors.name && <p className="text-xs text-red-400 mt-1 ml-1">{errors.name.message}</p>}
-        </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <FieldGroup className="space-y-1">
+        {/* Name */}
+        <Field>
+          <FieldLabel className="mb-1 block text-sm font-semibold text-slate-700">
+            Full Name
+          </FieldLabel>
 
-        <div className="space-y-1.5">
-          <label className='text-sm font-semibold text-slate-300 ml-1'>Email Address</label>
-          <input 
-            className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-            placeholder="admin@hospital.com" 
-            {...register('email')} 
+          <Input
+            placeholder="Enter your name"
+            {...register('name')}
+            className="h-14 rounded-2xl border border-slate-300 bg-slate-50 px-4 text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
           />
-          {errors.email && <p className="text-xs text-red-400 mt-1 ml-1">{errors.email.message}</p>}
-        </div>
 
-        <div className="space-y-1.5">
-          <label className='text-sm font-semibold text-slate-300 ml-1'>Create Password</label>
-          <input 
-            className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-            type="password" 
-            placeholder="••••••••" 
-            {...register('password')} 
+          {errors.name && <FieldError>{errors.name.message}</FieldError>}
+        </Field>
+
+        {/* Email */}
+        <Field>
+          <FieldLabel className="mb-1 block text-sm font-semibold text-slate-700">
+            Email Address
+          </FieldLabel>
+
+          <Input
+            placeholder="admin@hospital.com"
+            {...register('email')}
+            className="h-14 rounded-2xl border border-slate-300 bg-slate-50 px-4 text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
           />
-          {errors.password && <p className="text-xs text-red-400 mt-1 ml-1">{errors.password.message}</p>}
-        </div>
-      </div>
 
-      {/* Hospital Section */}
-      <div className="grid grid-cols-1 gap-4 pt-2">
-        <div className="space-y-1.5">
-          <label className='text-sm font-semibold text-slate-300 ml-1'>Hospital Name</label>
-          <input 
-            className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl px-5 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-            placeholder="City Medical Center" 
-            {...register('hospitalName')} 
-          />
-          {errors.hospitalName && <p className="text-xs text-red-400 mt-1 ml-1">{errors.hospitalName.message}</p>}
-        </div>
+          {errors.email && <FieldError>{errors.email.message}</FieldError>}
+        </Field>
 
-        <div className="space-y-1.5">
-          <label className='text-sm font-semibold text-slate-300 ml-1'>Contact Number</label>
-          <div className="[&_input]:bg-slate-800/50 [&_input]:border-slate-700 [&_input]:text-white [&_input]:rounded-2xl [&_input]:py-3.5">
-            <PhoneNumberInput
-              value={watch('phone.full')}
-              onChange={(val) => setValue('phone', val)}
+        {/* Password */}
+        <Field>
+          <FieldLabel className="mb-1 block text-sm font-semibold text-slate-700">
+            Password
+          </FieldLabel>
+
+          <div className="relative">
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Enter password"
+              {...register('password')}
+              className="h-14 rounded-2xl border border-slate-300 bg-slate-50 px-4 pr-12 text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
             />
-          </div>
-          {errors.phone && <p className="text-xs text-red-400 mt-1 ml-1">{errors.phone.message}</p>}
-        </div>
-      </div>
 
-      <button 
-        type="submit" 
-        className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-lg hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+
+          {errors.password && <FieldError>{errors.password.message}</FieldError>}
+        </Field>
+
+        {/* Hospital Name */}
+        <Field>
+          <FieldLabel className="mb-1 block text-sm font-semibold text-slate-700">
+            Hospital Name
+          </FieldLabel>
+
+          <Input
+            placeholder="Apollo Hospital"
+            {...register('hospitalName')}
+            className="h-14 rounded-2xl border border-slate-300 bg-slate-50 px-4 text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+          />
+
+          {errors.hospitalName && <FieldError>{errors.hospitalName.message}</FieldError>}
+        </Field>
+
+        {/* Phone */}
+        <Field>
+          <FieldLabel className="mb-1 block text-sm font-semibold text-slate-700">
+            Phone Number
+          </FieldLabel>
+
+          <PhoneNumberInput
+            value={watch('phone.full')}
+            onChange={(val) => setValue('phone', val)}
+            showLabel={false}
+          />
+
+          {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
+        </Field>
+      </FieldGroup>
+
+      {/* Submit */}
+      <button
+        type="submit"
         disabled={isPending}
+        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-base font-semibold text-white shadow-lg shadow-blue-200 transition-all hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isPending ? 'Provisioning System...' : 'Create Hospital Account'}
+        {isPending && <Loader2 className="h-5 w-5 animate-spin" />}
+
+        {isPending ? 'Creating Account...' : 'Create Account'}
       </button>
     </form>
   );

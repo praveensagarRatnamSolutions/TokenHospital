@@ -45,6 +45,7 @@ export interface Doctor {
   specialization?: string;
   profilePic?: string;
   departmentId: string | Department;
+  roomFloor?: string;
   isAvailable: boolean;
   experience?: number;
   availability?: DayAvailability[];

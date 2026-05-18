@@ -45,7 +45,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <StoreProvider>
           <QueryProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              
+              {children}
+              
+              </ThemeProvider>
           </QueryProvider>
         </StoreProvider>
       </body>

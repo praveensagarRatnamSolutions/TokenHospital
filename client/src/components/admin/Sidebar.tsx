@@ -16,7 +16,8 @@ import {
   Monitor,
   ChevronDown,
   ChevronRight,
-  Circle
+  Circle,
+  User,
 } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 import { cn } from '@/lib/utils';
@@ -24,19 +25,20 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const adminNavItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Profile', href: '/admin/profile', icon: User },
   { name: 'Doctors', href: '/admin/doctors', icon: Users },
   { name: 'Departments', href: '/admin/departments', icon: Building2 },
   { name: 'Tokens', href: '/admin/token', icon: Ticket },
   { name: 'Ads', href: '/admin/ads', icon: MonitorPlay },
   { name: 'Kiosks', href: '/admin/kiosks', icon: Monitor },
-  { 
-    name: 'Reports', 
-    href: '/admin/reports', 
+  {
+    name: 'Reports',
+    href: '/admin/reports',
     icon: BarChart3,
     children: [
       { name: 'Financial Reports', href: '/admin/reports' },
       { name: 'Doctor Reports', href: '/admin/reports/doctors' },
-    ]
+    ],
   },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
@@ -51,15 +53,15 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
   // Auto-expand if current route is a child
   useEffect(() => {
-    adminNavItems.forEach(item => {
-      if (item.children?.some(child => pathname === child.href)) {
-        setExpandedItems(prev => ({ ...prev, [item.name]: true }));
+    adminNavItems.forEach((item) => {
+      if (item.children?.some((child) => pathname === child.href)) {
+        setExpandedItems((prev) => ({ ...prev, [item.name]: true }));
       }
     });
   }, [pathname]);
 
   const toggleExpand = (name: string) => {
-    setExpandedItems(prev => ({ ...prev, [name]: !prev[name] }));
+    setExpandedItems((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
   return (
@@ -69,7 +71,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           {isSuperAdmin ? 'HOSPITAL DASH' : 'HOSPITAL ADMIN'}
         </span>
       </div>
-      
+
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
         {isSuperAdmin && (
           <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
@@ -108,7 +110,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <item.icon className={cn("w-5 h-5", isParentActive ? "text-primary" : "text-slate-400")} />
+                    <item.icon
+                      className={cn(
+                        'w-5 h-5',
+                        isParentActive ? 'text-primary' : 'text-slate-400',
+                      )}
+                    />
                     <span>{item.name}</span>
                   </div>
                   {isExpanded ? (
@@ -117,7 +124,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                     <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
                   )}
                 </button>
-                
+
                 {isExpanded && (
                   <div className="ml-9 space-y-1 animate-in slide-in-from-top-2 duration-200">
                     {item.children?.map((child) => {
@@ -135,10 +142,14 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                           )}
                         >
                           {/* Vertical Line indicator */}
-                          <div className={cn(
-                            "absolute -left-3 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full transition-all",
-                            isChildActive ? "bg-primary" : "bg-slate-200 dark:bg-slate-800"
-                          )} />
+                          <div
+                            className={cn(
+                              'absolute -left-3 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full transition-all',
+                              isChildActive
+                                ? 'bg-primary'
+                                : 'bg-slate-200 dark:bg-slate-800',
+                            )}
+                          />
                           <span>{child.name}</span>
                         </Link>
                       );
@@ -161,7 +172,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900',
               )}
             >
-              <item.icon className={cn("w-5 h-5", isExactActive ? "text-primary" : "text-slate-400")} />
+              <item.icon
+                className={cn(
+                  'w-5 h-5',
+                  isExactActive ? 'text-primary' : 'text-slate-400',
+                )}
+              />
               <span>{item.name}</span>
             </Link>
           );

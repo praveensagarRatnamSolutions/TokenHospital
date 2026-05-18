@@ -64,17 +64,36 @@ const getTokens = async (req, res, next) => {
   }
 };
 
+const printTokenById = async (req, res, next) => {
+  try {
+    const printData = await tokenService.getPrintTokenById(
+      req.params.id,
+      req.hospitalId
+    );
+
+    if (!printData) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Token not found' });
+    }
+
+    res.status(200).json({ success: true, data: printData });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getDoctorQueue = async (req, res, next) => {
   try {
     const { doctorId, date, status, limit } = req.query;
 
     console.log('Doctor Queue Request:', req.query);
 
-    const result = await tokenService.getDoctorQueue(
-      req.hospitalId,
-      doctorId,
-      { date, status, limit }
-    );
+    const result = await tokenService.getDoctorQueue(req.hospitalId, doctorId, {
+      date,
+      status,
+      limit,
+    });
 
     res.status(200).json({
       success: true,
@@ -242,12 +261,15 @@ const getGlobalQueue = async (req, res, next) => {
  * @access  Private
  */
 const toggleEmergency = async (req, res, next) => {
-    try {
-        const token = await tokenService.toggleEmergency(req.params.id, req.hospitalId);
-        res.status(200).json({ success: true, data: token });
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const token = await tokenService.toggleEmergency(
+      req.params.id,
+      req.hospitalId
+    );
+    res.status(200).json({ success: true, data: token });
+  } catch (error) {
+    next(error);
+  }
 };
 
 /**
@@ -256,18 +278,23 @@ const toggleEmergency = async (req, res, next) => {
  * @access  Private
  */
 const reassignDoctor = async (req, res, next) => {
-    try {
-        const token = await tokenService.reassignDoctor(req.params.id, req.hospitalId, req.body);
-        res.status(200).json({ success: true, data: token });
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const token = await tokenService.reassignDoctor(
+      req.params.id,
+      req.hospitalId,
+      req.body
+    );
+    res.status(200).json({ success: true, data: token });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {
   createToken,
   getCurrentToken,
   getTokens,
+  printTokenById,
   completeToken,
   callNextToken,
   cancelToken,

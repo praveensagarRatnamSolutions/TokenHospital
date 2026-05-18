@@ -2,9 +2,24 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as tokenApi from '../api/tokenApi';
-import type { CreateTokenPayload, CreatePaymentPayload, VerifyPaymentPayload } from '../types';
+import type {
+  CreateTokenPayload,
+  CreatePaymentPayload,
+  VerifyPaymentPayload,
+} from '../types';
 
-export const useTokens = (filters: { appointmentDate?: string; page?: number; limit?: number; status?: string; doctorId?: string; departmentId?: string; search?: string; isQueue?: boolean } = {}) => {
+export const useTokens = (
+  filters: {
+    appointmentDate?: string;
+    page?: number;
+    limit?: number;
+    status?: string;
+    doctorId?: string;
+    departmentId?: string;
+    search?: string;
+    isQueue?: boolean;
+  } = {},
+) => {
   return useQuery({
     queryKey: ['adminTokens', filters],
     queryFn: () => tokenApi.getTokens(filters),
@@ -44,6 +59,12 @@ export const useVerifyCashToken = () => {
   });
 };
 
+export const usePrintTokenById = () => {
+  return useMutation({
+    mutationFn: (id: string) => tokenApi.getPrintTokenById(id),
+  });
+};
+
 export const useCreatePaymentOrder = () => {
   return useMutation({
     mutationFn: (payload: CreatePaymentPayload) => tokenApi.createPaymentOrder(payload),
@@ -75,8 +96,13 @@ export const useToggleEmergency = () => {
 export const useReassignDoctor = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: { doctorId: string; departmentId: string } }) =>
-      tokenApi.reassignDoctor(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: { doctorId: string; departmentId: string };
+    }) => tokenApi.reassignDoctor(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminTokens'] });
       queryClient.invalidateQueries({ queryKey: ['globalQueue'] });

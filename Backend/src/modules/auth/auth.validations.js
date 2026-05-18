@@ -40,8 +40,25 @@ const loginValidation = [
   check('password', 'Password is required').exists(),
 ];
 
+const updateProfileValidation = [
+  check('name', 'Name must be a string').optional().trim(),
+  check('email', 'Please include a valid email')
+    .optional()
+    .isEmail()
+    .normalizeEmail(),
+  check('profilePic', 'Profile pic must be a string').optional().isString(),
+  check('password', 'Password must be at least 6 characters')
+    .optional()
+    .isLength({ min: 6 }),
+  check('currentPassword')
+    .if((value, { req }) => req.body.password)
+    .notEmpty()
+    .withMessage('Current password is required to change password'),
+];
+
 module.exports = {
   registerValidation,
   loginValidation,
+  updateProfileValidation,
   validateRequest,
 };
