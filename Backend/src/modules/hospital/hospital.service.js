@@ -3,6 +3,12 @@ const Hospital = require('./hospital.model');
 const User = require('../auth/auth.model');
 const HospitalSubscription = require('../subscription/hospitalSubscription.model');
 const Plan = require('../subscription/plan.model');
+const Doctor = require('../doctor/doctor.model');
+const Department = require('../department/department.model');
+const Kiosk = require('../kiosk/kiosk.model');
+const Patient = require('../patient/patient.model');
+const WalletLedger = require('../wallet/walletLedger.model');
+const SubscriptionTransaction = require('../subscription/subscription.model');
 const { sendOnboardingEmail } = require('../../utils/email');
 const Razorpay = require('razorpay');
 
@@ -275,7 +281,15 @@ const getHospitalById = async (hospitalId) => {
   if (!hospital) {
     throw new Error('Hospital not found');
   }
+
+  // 1. Fetch Primary Admin User
+  const primaryAdmin = await User.findOne({ hospitalId, role: 'ADMIN' })
+    .select('name email phone role createdAt')
+    .sort({ createdAt: 1 })
+    .lean();
+  hospital.primaryAdmin = primaryAdmin || null;
   
+  // 2. Fetch Subscription Info
   const sub = await HospitalSubscription.findOne({ hospitalId }).lean();
   if (sub) {
     const plan = await Plan.findOne({ planId: sub.planId }).lean();
@@ -289,6 +303,36 @@ const getHospitalById = async (hospitalId) => {
     hospital.subscription = null;
   }
   
+  // 3. Usage Statistics Aggregation
+  const [doctorsCount, departmentsCount, kiosksCount, patientsCount] = await Promise.all([
+    Doctor.countDocuments({ hospitalId }),
+    Department.countDocuments({ hospitalId }),
+    Kiosk.countDocuments({ hospitalId }),
+    Patient.countDocuments({ hospitalId }),
+  ]);
+  
+  hospital.usageStats = {
+    doctors: doctorsCount,
+    departments: departmentsCount,
+    kiosks: kiosksCount,
+    patients: patientsCount,
+  };
+  
+  // 4. Financial Ledgers
+  const walletLedger = await WalletLedger.find({ hospitalId })
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .lean();
+    
+  const subscriptionHistory = await SubscriptionTransaction.find({ hospitalId })
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .lean();
+    
+  hospital.walletLedger = walletLedger || [];
+  hospital.subscriptionHistory = subscriptionHistory || [];
+  
+  // Note: Wallet balance is inherently present in hospital.wallet via schema
   return hospital;
 };
 

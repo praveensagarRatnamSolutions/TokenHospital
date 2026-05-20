@@ -172,7 +172,7 @@ export function HospitalsList({
                   </td>
 
                   <td className="px-6 py-5 rounded-r-2xl border-y border-r border-slate-200 dark:border-slate-800 group-hover:border-primary/30 transition-colors text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2 transition-opacity">
                       <Button
                         variant="ghost" size="icon"
                         onClick={(e) => handleEditClick(hospital, e)}
