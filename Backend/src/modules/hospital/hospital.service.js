@@ -20,7 +20,7 @@ const getGlobalRazorpayClient = () => {
 };
 
 const createHospital = async (hospitalData, createdById) => {
-  const { name, email, phone, address, registrationNumber, licenseNumber } =
+  const { name, email, phone, address, registrationNumber, licenseNumber, logo } =
     hospitalData;
 
   // Check if hospital with this email already exists
@@ -36,6 +36,7 @@ const createHospital = async (hospitalData, createdById) => {
     address,
     registrationNumber,
     licenseNumber,
+    logo,
     createdBy: createdById,
     isActive: true,
   });
@@ -70,6 +71,7 @@ const createHospitalBySuperAdmin = async (hospitalData, superAdminId) => {
     address,
     registrationNumber,
     licenseNumber,
+    logo,
     subscription, // new field from frontend
   } = hospitalData;
 
@@ -105,6 +107,7 @@ const createHospitalBySuperAdmin = async (hospitalData, superAdminId) => {
           address,
           registrationNumber,
           licenseNumber,
+          logo,
           createdBy: superAdminId,
           isActive: true,
         },

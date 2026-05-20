@@ -40,6 +40,7 @@ const onboardUser = async (onboardData, userId) => {
     registrationNumber,
     licenseNumber,
     gstNumber,
+    logo,
   } = onboardData;
 
   const session = await mongoose.startSession();
@@ -80,6 +81,7 @@ const onboardUser = async (onboardData, userId) => {
           registrationNumber,
           licenseNumber,
           gstNumber,
+          logo,
           createdBy: user._id,
           isActive: true,
         },

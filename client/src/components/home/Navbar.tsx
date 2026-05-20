@@ -55,14 +55,8 @@ export default function Navbar() {
             <img
               src="/logo.png"
               alt="Hospital Token"
-              className="h-11 w-auto object-contain"
+              className="h-15 w-auto object-contain"
             />
-
-            <div className="hidden sm:block">
-              <h1 className="text-base font-bold text-slate-900">Hospital Token</h1>
-
-              <p className="text-xs text-slate-500">Smart Queue Management</p>
-            </div>
           </Link>
 
           {/* DESKTOP MENU */}

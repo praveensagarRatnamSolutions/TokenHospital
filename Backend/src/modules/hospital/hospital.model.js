@@ -75,6 +75,9 @@ const hospitalSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    logo: {
+      type: String,
+    },
     // --- Compliance ---
     gstNumber: {
       type: String,

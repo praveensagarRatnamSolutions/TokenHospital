@@ -30,6 +30,7 @@ router.post('/verify-checkout', authorize('ADMIN'), verifyCheckoutValidation, va
 // SuperAdmin Only
 router.get('/plans', authorize('SUPERADMIN'), planController.getAllPlans);
 router.post('/plans', authorize('SUPERADMIN'), planCreationValidation, validateRequest, planController.createPlan);
+router.get('/plans/:id', authorize('SUPERADMIN'), planController.getPlanById);
 router.put('/plans/:id', authorize('SUPERADMIN'), planCreationValidation, validateRequest, planController.updatePlan);
 router.delete('/plans/:id', authorize('SUPERADMIN'), planController.deletePlan);
 router.post('/assign-plan/:hospitalId', authorize('SUPERADMIN'), subscriptionController.assignPlan);

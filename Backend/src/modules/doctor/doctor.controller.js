@@ -171,7 +171,8 @@ const getPresignedUrl = async (req, res, next) => {
       });
     }
 
-    const key = `profile/${req.hospitalId}/${Date.now()}-${fileName}`;
+    const folder = req.hospitalId ? req.hospitalId : `temp_${req.user._id}`;
+    const key = `profile/${folder}/${Date.now()}-${fileName}`;
     const uploadUrl = await getUploadPresignedUrl(key, fileType);
 
     res.status(200).json({

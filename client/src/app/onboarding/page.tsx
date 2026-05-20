@@ -18,7 +18,9 @@ import {
   Globe,
   Plus,
   Lock,
-  Sparkles
+  Sparkles,
+  Upload,
+  X
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -32,6 +34,7 @@ import api from '@/services/api';
 import { cn } from '@/lib/utils';
 import Script from 'next/script';
 import { subscriptionApi } from '@/services/subscriptionApi';
+import { doctorApi } from '@/modules/admin/doctors/api/doctorApi';
 
 // Interfaces matching backend Plan structure
 interface PlanPrice {
@@ -55,6 +58,8 @@ interface Plan {
     maxDoctors?: number;
     maxDepartments?: number;
     maxKiosks?: number;
+    freeSmsUnits?: number;
+    freeEmailUnits?: number;
   };
 }
 
@@ -110,6 +115,10 @@ function OnboardingContent() {
     country: '',
     nationalNumber: '',
   });
+
+  // Logo upload state
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
 
   // Optional fields
   const [address, setAddress] = useState({
@@ -308,6 +317,28 @@ function OnboardingContent() {
     try {
       setIsPending(true);
       setIsProcessing(true);
+
+      let logoKey = '';
+      if (logoFile) {
+        setProcessingStage('Uploading hospital logo to S3...');
+        try {
+          const result = await doctorApi.getUploadUrl(logoFile.name, logoFile.type);
+          const { uploadUrl, key } = result.data;
+          
+          await fetch(uploadUrl, {
+            method: 'PUT',
+            body: logoFile,
+            headers: {
+              'Content-Type': logoFile.type,
+            },
+          });
+          logoKey = key;
+        } catch (uploadErr: any) {
+          console.error('Logo upload failed:', uploadErr);
+          throw new Error('Failed to upload hospital logo. Please check internet connection.');
+        }
+      }
+
       setProcessingStage('Registering hospital node...');
 
       const payload = {
@@ -317,6 +348,7 @@ function OnboardingContent() {
         registrationNumber: showCompliance && registrationNumber.trim() ? registrationNumber.trim() : undefined,
         licenseNumber: showCompliance && licenseNumber.trim() ? licenseNumber.trim() : undefined,
         gstNumber: showCompliance && gstNumber.trim() ? gstNumber.trim() : undefined,
+        logo: logoKey || undefined,
       };
 
       // 1. Submit Onboarding data (creates Hospital & FREE subscription initially)
@@ -443,6 +475,54 @@ function OnboardingContent() {
                       onChange={(e) => setHospitalName(e.target.value)}
                       className="w-full h-12 bg-slate-50/50 border border-slate-200 rounded-xl pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-semibold"
                     />
+                  </div>
+                </div>
+
+                {/* Hospital Logo Upload */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-600 tracking-wider">Hospital Logo</label>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+                    <div className="relative size-20 rounded-2xl border-2 border-dashed border-slate-200 bg-white flex items-center justify-center overflow-hidden group hover:border-primary/50 transition-all shrink-0 shadow-sm">
+                      {logoPreviewUrl ? (
+                        <>
+                          <img src={logoPreviewUrl} alt="Logo Preview" className="w-full h-full object-contain" />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setLogoFile(null);
+                              setLogoPreviewUrl(null);
+                            }}
+                            className="absolute top-1 right-1 p-1 rounded-lg bg-rose-500 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center animate-in fade-in duration-300">
+                          <Upload className="size-5 mb-1 group-hover:text-primary transition-colors" />
+                          <span className="text-[9px] font-black uppercase">Upload</span>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setLogoFile(file);
+                            setLogoPreviewUrl(URL.createObjectURL(file));
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-extrabold text-slate-800">Add Clinic Logo</h4>
+                      <p className="text-[10px] text-slate-400 leading-normal max-w-[320px] font-medium">
+                        Select a square logo image (PNG, JPG, or SVG up to 2MB). This represents your clinic on printed tokens and system portals.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -717,7 +797,11 @@ function OnboardingContent() {
                     </p>
                   </div>
                   
-                  {isPaidPlan ? (
+                  {logoPreviewUrl ? (
+                    <div className="w-12 h-12 rounded-2xl bg-white border border-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg animate-in zoom-in-95 duration-300">
+                      <img src={logoPreviewUrl} alt="Logo" className="w-full h-full object-contain" />
+                    </div>
+                  ) : isPaidPlan ? (
                     <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
                       <Crown className="w-6 h-6" />
                     </div>

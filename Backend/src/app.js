@@ -37,11 +37,13 @@ app.use(
   })
 );
 // Middlewares
-app.use(express.json({
-  verify: (req, res, buf) => {
-    req.rawBody = buf;
-  }
-}));
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 
 app.use(helmet());
@@ -110,7 +112,10 @@ app.use('/api/reports', require('./modules/reports/reports.routes'));
 app.use('/api/settings', require('./modules/settings/settings.routes'));
 app.use('/api/payment', require('./modules/payment/payment.routes'));
 app.use('/api/kiosk', require('./modules/kiosk/kiosk.routes'));
-app.use('/api/subscription', require('./modules/subscription/subscription.routes'));
+app.use(
+  '/api/subscription',
+  require('./modules/subscription/subscription.routes')
+);
 app.use('/api/wallet', require('./modules/wallet/wallet.routes'));
 
 // Global Error Handler

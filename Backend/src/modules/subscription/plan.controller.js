@@ -8,7 +8,9 @@ const getGlobalRazorpayClient = () => {
   const keySecret = process.env.RAZORPAY_CLIENT_SECRET;
 
   if (!keyId || !keySecret) {
-    throw new Error('Global Platform Razorpay credentials are not configured in .env');
+    throw new Error(
+      'Global Platform Razorpay credentials are not configured in .env'
+    );
   }
 
   return new Razorpay({
@@ -16,8 +18,6 @@ const getGlobalRazorpayClient = () => {
     key_secret: keySecret,
   });
 };
-
-
 
 const createPlan = async (req, res, next) => {
   try {
@@ -143,8 +143,7 @@ const createPlan = async (req, res, next) => {
             amount: Math.round(priceOption.amount * 100), // paise
             currency: planData.currency || 'INR',
             description:
-              planData.description ||
-              `Subscription for ${planData.name}`,
+              planData.description || `Subscription for ${planData.name}`,
           },
         });
 
@@ -154,10 +153,7 @@ const createPlan = async (req, res, next) => {
       } catch (err) {
         console.log('RAZORPAY ERROR:', err);
 
-        logger.error(
-          `Failed to register Razorpay plan`,
-          err
-        );
+        logger.error(`Failed to register Razorpay plan`, err);
 
         return res.status(500).json({
           success: false,
@@ -190,7 +186,18 @@ const createPlan = async (req, res, next) => {
   }
 };
 
-
+const getPlanById = async (req, res, next) => {
+  try {
+    const plan = await Plan.findById(req.params.id);
+    if (!plan)
+      return res
+        .status(404)
+        .json({ success: false, message: 'Plan not found' });
+    res.status(200).json({ success: true, data: plan });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const getPlans = async (req, res, next) => {
   try {
@@ -219,7 +226,10 @@ const updatePlan = async (req, res, next) => {
       const rzp = getGlobalRazorpayClient();
 
       for (let priceOption of planData.prices) {
-        if (!priceOption.razorpayPlanId || priceOption.razorpayPlanId.startsWith('temp_')) {
+        if (
+          !priceOption.razorpayPlanId ||
+          priceOption.razorpayPlanId.startsWith('temp_')
+        ) {
           let period = 'monthly';
           let interval = priceOption.intervalMonths;
 
@@ -232,7 +242,9 @@ const updatePlan = async (req, res, next) => {
           }
 
           try {
-            console.log(`Creating Razorpay plan for new cycle ${priceOption.billingCycle} during update...`);
+            console.log(
+              `Creating Razorpay plan for new cycle ${priceOption.billingCycle} during update...`
+            );
             const rzpPlan = await rzp.plans.create({
               period: period,
               interval: interval,
@@ -245,8 +257,13 @@ const updatePlan = async (req, res, next) => {
             });
             priceOption.razorpayPlanId = rzpPlan.id;
           } catch (err) {
-            logger.error(`Failed to register new plan cycle in Razorpay during update:`, err);
-            throw new Error(`Razorpay plan registration failed: ${err.message}`);
+            logger.error(
+              `Failed to register new plan cycle in Razorpay during update:`,
+              err
+            );
+            throw new Error(
+              `Razorpay plan registration failed: ${err.message}`
+            );
           }
         }
       }
@@ -257,7 +274,10 @@ const updatePlan = async (req, res, next) => {
       runValidators: true,
     });
 
-    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
+    if (!plan)
+      return res
+        .status(404)
+        .json({ success: false, message: 'Plan not found' });
     res.status(200).json({ success: true, data: plan });
   } catch (error) {
     next(error);
@@ -267,7 +287,10 @@ const updatePlan = async (req, res, next) => {
 const deletePlan = async (req, res, next) => {
   try {
     const plan = await Plan.findByIdAndDelete(req.params.id);
-    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
+    if (!plan)
+      return res
+        .status(404)
+        .json({ success: false, message: 'Plan not found' });
     res.status(200).json({ success: true, message: 'Plan deleted' });
   } catch (error) {
     next(error);
@@ -278,6 +301,7 @@ module.exports = {
   createPlan,
   getPlans,
   getAllPlans,
+  getPlanById,
   updatePlan,
   deletePlan,
 };
