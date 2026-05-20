@@ -127,10 +127,42 @@ const refresh = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Onboard user (create hospital and link subscription)
+ * @route   POST /api/auth/onboard
+ * @access  Private
+ */
+const onboard = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const result = await authService.onboardUser(req.body, userId);
+    logger.info(`User onboarded successfully: ${result.email}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Onboarding completed successfully!',
+      data: result,
+    });
+  } catch (error) {
+    if (
+      error.message === 'User not found' ||
+      error.message === 'User is already onboarded and linked to a hospital' ||
+      error.message === 'A clinic with this email address is already registered' ||
+      error.message === 'This phone number is already registered to another clinic' ||
+      error.name === 'ValidationError' ||
+      error.code === 11000
+    ) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   updateMe,
   refresh,
+  onboard,
 };

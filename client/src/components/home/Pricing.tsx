@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Check, X, Shield, Zap, Crown } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Check, X, Shield, Zap, Crown, ArrowRight, Sparkles, MessageSquare } from 'lucide-react';
 import { subscriptionApi, Plan } from '@/services/subscriptionApi';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const PLAN_ICONS: Record<string, any> = {
   BASIC: Shield,
@@ -15,13 +16,15 @@ const PLAN_ICONS: Record<string, any> = {
 export default function Pricing() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'quarterly' | 'half_yearly' | 'yearly'>('monthly');
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         const data = await subscriptionApi.getPublicPlans();
-        setPlans(data);
+        // Sort plans by displayOrder
+        const sorted = data.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+        setPlans(sorted);
       } catch (error) {
         console.error('Failed to fetch plans:', error);
       } finally {
@@ -31,159 +34,333 @@ export default function Pricing() {
     fetchPlans();
   }, []);
 
+  // Calculate savings dynamically based on the database PRO plan prices
+  const savingsData = useMemo(() => {
+    const proPlan = plans.find((p) => p.planId === 'PRO');
+    if (!proPlan) return { savings: 20, trialDays: 30 };
+    
+    const monthlyAmt = proPlan.price || 1499;
+    const yearlyAmt = proPlan.yearlyPrice || 14399;
+    const savings = Math.round(((monthlyAmt * 12 - yearlyAmt) / (monthlyAmt * 12)) * 100);
+    const trialDays = proPlan.trialDays || 30;
+
+    return { savings: savings > 0 ? savings : 20, trialDays };
+  }, [plans]);
+
   if (loading || plans.length === 0) return null;
 
-  const proMonthly = plans.find(p => p.planId === 'PRO')?.price || 1499;
-  const proYearly = plans.find(p => p.planId === 'PRO')?.yearlyPrice || 14399;
-  const yearlySavings = Math.round(((proMonthly * 12 - proYearly) / (proMonthly * 12)) * 100);
-
   return (
-    <section id="pricing" className="py-28 bg-[#f8fafc] dark:bg-[#0f172a] overflow-hidden relative">
-      {/* Decorative blurs */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[150px] -mr-64 -mt-64" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[150px] -ml-64 -mb-64" />
+    <section id="pricing" className="py-32 bg-slate-50/50 dark:bg-[#090d16] overflow-hidden relative">
+      {/* Dynamic Background Blurs */}
+      <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-primary/5 dark:bg-primary/10 rounded-full blur-[140px] -mr-64 -mt-64 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[550px] h-[550px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-[140px] -ml-64 -mb-64 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
+        
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h2 className="text-blue-600 font-bold tracking-widest uppercase text-xs mb-4">Transparent Pricing</h2>
-          <h3 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
-            Plans that scale with{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              your hospital.
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20 dark:border-primary/30 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-widest animate-bounce-subtle">
+            <Sparkles className="w-3.5 h-3.5" />
+            Transparent Pricing
+          </div>
+          
+          <h3 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+            Flexible Plans that scale with{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500 dark:from-primary dark:to-indigo-400">
+              your clinic.
             </span>
           </h3>
-          <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">
-            Start free for 25 days. No credit card required. Upgrade when you&apos;re ready.
+          
+          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
+            Start a {savingsData.trialDays}-day free trial instantly. No credit card required. Experience premium patient queuing controls today.
           </p>
         </div>
 
         {/* Billing Cycle Toggle */}
-        <div className="flex items-center justify-center mb-14">
-          <div className="inline-flex items-center bg-white dark:bg-slate-800 rounded-2xl p-1.5 shadow-md border border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`px-7 py-3 rounded-xl text-sm font-bold transition-all ${
-                billingCycle === 'monthly'
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingCycle('yearly')}
-              className={`px-7 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                billingCycle === 'yearly'
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              Yearly
-              <span className="bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
-                -{yearlySavings}%
-              </span>
-            </button>
+        <div className="flex items-center justify-center">
+          <div className="inline-flex items-center bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-[1.5rem] p-1.5 shadow-md border border-slate-200/50 dark:border-slate-800/80 flex-wrap justify-center max-w-full gap-1">
+            {(['monthly', 'quarterly', 'half_yearly', 'yearly'] as const).map((cycle) => (
+              <button
+                key={cycle}
+                onClick={() => setBillingCycle(cycle)}
+                className={cn(
+                  'px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 flex items-center gap-2',
+                  billingCycle === cycle
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                )}
+              >
+                {cycle === 'monthly' ? 'Monthly' : cycle === 'quarterly' ? 'Quarterly' : cycle === 'half_yearly' ? 'Half-Yearly' : 'Yearly'}
+                {cycle === 'yearly' && (
+                  <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse">
+                    -{savingsData.savings}%
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Plan Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-          {plans.map((plan) => {
+        {/* Plan Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-4">
+          {plans.filter(p => p.planId !== 'ENTERPRISE').map((plan) => {
             const PlanIcon = PLAN_ICONS[plan.planId] || Shield;
-            const displayPrice = billingCycle === 'yearly' ? Math.round(plan.yearlyPrice / 12) : plan.price;
+            const priceObj = plan.prices?.find((p: any) => p.billingCycle === billingCycle.toUpperCase());
+            let price: number = priceObj?.amount ?? 0;
+            if (price === 0) {
+              if (billingCycle === 'monthly') price = plan.price || 0;
+              else if (billingCycle === 'quarterly') price = plan.quarterlyPrice || Math.round((plan.price || 0) * 3 * 0.9);
+              else if (billingCycle === 'half_yearly') price = plan.halfYearlyPrice || Math.round((plan.price || 0) * 6 * 0.85);
+              else price = plan.yearlyPrice || Math.round((plan.price || 0) * 12 * 0.8);
+            }
+
+            const intervalMonths = billingCycle === 'monthly' ? 1 : billingCycle === 'quarterly' ? 3 : billingCycle === 'half_yearly' ? 6 : 12;
+            const monthlyEquiv = Math.round(price / intervalMonths);
 
             return (
               <div
                 key={plan._id}
-                className={`relative group rounded-[2rem] transition-all duration-500 ${
-                  plan.recommended
-                    ? 'bg-slate-900 dark:bg-slate-800 text-white shadow-2xl shadow-blue-600/15 scale-[1.03] z-20'
-                    : 'bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:shadow-xl shadow-sm'
-                }`}
+                className={cn(
+                  'relative flex flex-col items-stretch',
+                  plan.recommended ? 'md:scale-[1.03] z-20' : 'z-10'
+                )}
               >
+                {/* Popular Badge Overlay */}
                 {plan.recommended && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-2 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-blue-600/30">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-primary to-indigo-500 dark:from-primary dark:to-indigo-400 text-white px-6 py-1.5 rounded-full text-[9px] font-black tracking-widest uppercase shadow-lg shadow-primary/20 border border-white/5 z-30">
                     Most Popular
                   </div>
                 )}
 
-                <div className="p-8 pt-10">
+                <div
+                  className={cn(
+                    'relative rounded-[2.5rem] transition-all duration-500 flex flex-col justify-between overflow-hidden group flex-1',
+                    plan.recommended
+                      ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 dark:from-[#0c1220] dark:via-[#090d16] dark:to-[#0f172a] text-white shadow-2xl shadow-primary/10 border border-primary/30'
+                      : 'bg-white/70 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/60 shadow-sm hover:shadow-xl'
+                  )}
+                >
+
+                {/* Top Ambient Glow */}
+                <div
+                  className={cn(
+                    'absolute inset-x-0 top-0 h-32 opacity-15 pointer-events-none transition-opacity group-hover:opacity-25',
+                    plan.recommended
+                      ? 'bg-gradient-to-br from-primary/30 to-transparent'
+                      : 'bg-gradient-to-br from-slate-400/20 to-transparent'
+                  )}
+                />
+
+                <div className="p-8 pt-10 flex flex-col flex-1 justify-between space-y-8 relative z-10">
+                  
                   {/* Icon & Name */}
-                  <div className="mb-8">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${
-                      plan.recommended ? 'bg-blue-600' : 'bg-blue-50 dark:bg-blue-500/10'
-                    }`}>
-                      <PlanIcon className={`w-7 h-7 ${plan.recommended ? 'text-white' : 'text-blue-600'}`} />
+                  <div className="space-y-5">
+                    <div className={cn(
+                      'w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner',
+                      plan.recommended 
+                        ? 'bg-primary text-white border border-white/10' 
+                        : 'bg-primary/5 dark:bg-primary/10 text-primary border border-primary/10'
+                    )}>
+                      <PlanIcon className="w-6.5 h-6.5" />
                     </div>
-                    <h4 className="text-2xl font-extrabold mb-1">{plan.name}</h4>
-                    <p className={`text-sm ${plan.recommended ? 'text-slate-400' : 'text-slate-500'}`}>
-                      {plan.description}
+                    
+                    <div className="space-y-1">
+                      <h4 className={cn(
+                        'text-2xl font-black tracking-tight',
+                        plan.recommended ? 'text-white' : 'text-slate-900 dark:text-white'
+                      )}>
+                        {plan.name}
+                      </h4>
+                      <p className={cn(
+                        'text-xs leading-relaxed font-semibold h-10 line-clamp-2',
+                        plan.recommended ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
+                      )}>
+                        {plan.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Price Block */}
+                  <div className="space-y-1">
+                    <div className="flex items-baseline gap-1 relative w-fit">
+                      <span className={cn(
+                        'text-4xl font-extrabold tracking-tight',
+                        plan.recommended ? 'text-white' : 'text-slate-900 dark:text-white'
+                      )}>
+                        ₹{monthlyEquiv.toLocaleString()}
+                      </span>
+                      <span className={cn(
+                        'text-xs font-semibold uppercase tracking-wider',
+                        plan.recommended ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
+                      )}>
+                        /month
+                      </span>
+                    </div>
+
+                    <p className={cn(
+                      'text-[10px] font-bold uppercase tracking-wider',
+                      plan.recommended ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
+                    )}>
+                      {billingCycle === 'monthly' ? 'Billed monthly' : billingCycle === 'quarterly' ? `Billed quarterly (₹${price.toLocaleString()})` : billingCycle === 'half_yearly' ? `Billed semi-annually (₹${price.toLocaleString()})` : `Billed annually (₹${price.toLocaleString()})`}
                     </p>
                   </div>
 
-                  {/* Price */}
-                  <div className="mb-8">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-extrabold tracking-tight">₹{displayPrice.toLocaleString()}</span>
-                      <span className={`text-sm ${plan.recommended ? 'text-slate-400' : 'text-slate-500'}`}>/mo</span>
-                    </div>
-                    {billingCycle === 'yearly' && (
-                      <p className={`text-xs mt-1 ${plan.recommended ? 'text-slate-500' : 'text-slate-400'}`}>
-                        Billed as ₹{plan.yearlyPrice.toLocaleString()}/year
-                      </p>
-                    )}
-                  </div>
+                  {/* Divider */}
+                  <div className={cn(
+                    'border-t',
+                    plan.recommended ? 'border-white/10' : 'border-slate-200/50 dark:border-slate-800/50'
+                  )} />
 
-                  {/* Features */}
-                  <ul className="space-y-4 mb-10">
+                  {/* Features List */}
+                  <ul className="space-y-4 flex-1">
                     {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-3 text-sm">
-                        {feature.available ? (
-                          <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
-                            plan.recommended ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600'
-                          }`}>
-                            <Check className="w-3 h-3" />
-                          </div>
-                        ) : (
-                          <div className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-700 text-slate-400">
-                            <X className="w-3 h-3" />
-                          </div>
-                        )}
-                        <span className={
+                      <li key={idx} className="flex items-start gap-3 text-xs font-semibold">
+                        
+                        <div className="shrink-0 mt-0.5">
+                          {feature.available ? (
+                            <div className={cn(
+                              'p-0.5 rounded-full',
+                              plan.recommended 
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                                : 'bg-primary/5 dark:bg-primary/10 text-primary border border-primary/10'
+                            )}>
+                              <Check className="w-3 h-3" />
+                            </div>
+                          ) : (
+                            <div className={cn(
+                              'p-0.5 rounded-full',
+                              plan.recommended 
+                                ? 'bg-white/5 text-white/30 border border-white/5' 
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                            )}>
+                              <X className="w-3 h-3" />
+                            </div>
+                          )}
+                        </div>
+
+                        <span className={cn(
+                          'leading-relaxed font-medium',
                           feature.available
-                            ? (plan.recommended ? 'text-slate-300' : 'text-slate-600 dark:text-slate-400')
-                            : 'text-slate-400 dark:text-slate-600 line-through'
-                        }>
+                            ? (plan.recommended ? 'text-slate-200' : 'text-slate-600 dark:text-slate-300')
+                            : (plan.recommended ? 'text-white/30 line-through' : 'text-slate-400 dark:text-slate-600 line-through opacity-60')
+                        )}>
                           {feature.text}
                         </span>
+
                       </li>
                     ))}
                   </ul>
 
-                  {/* CTA */}
-                  <Link href="/register" className="block">
-                    <Button
-                      className={`w-full h-14 rounded-2xl font-bold text-base transition-all active:scale-[0.98] ${
-                        plan.recommended
-                          ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30'
-                          : 'bg-slate-100 dark:bg-slate-700 hover:bg-blue-600 hover:text-white text-slate-900 dark:text-white'
-                      }`}
-                    >
-                      Start Free Trial
-                    </Button>
-                  </Link>
+                  {/* CTA Button */}
+                  <div className="pt-2">
+                    <Link href={`/register?planId=${plan.planId}&cycle=${billingCycle}`} className="block">
+                      <Button
+                        className={cn(
+                          'w-full h-13 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]',
+                          plan.recommended
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/95 shadow-lg shadow-primary/25 border border-white/5'
+                            : 'bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white text-slate-850 dark:text-slate-300 border border-transparent'
+                        )}
+                      >
+                        Start {plan.trialDays || savingsData.trialDays} Days Free Trial
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </div>
+
                 </div>
               </div>
-            );
-          })}
+            </div>
+          );
+        })}
+
+          {/* 👑 STATIC CUSTOM ENTERPRISE CARD (Method 1: Contact Sales) */}
+          <div className="relative rounded-[2.5rem] bg-white/70 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/60 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col justify-between overflow-hidden group">
+            {/* Top Ambient Glow */}
+            <div className="absolute inset-x-0 top-0 h-32 opacity-15 pointer-events-none transition-opacity group-hover:opacity-25 bg-gradient-to-br from-amber-500/20 to-transparent" />
+
+            <div className="p-8 pt-10 flex flex-col flex-1 justify-between space-y-8 relative z-10">
+              {/* Icon & Name */}
+              <div className="space-y-5">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner bg-amber-500/10 text-amber-550 border border-amber-500/20">
+                  <Crown className="w-6.5 h-6.5 text-amber-500" />
+                </div>
+                
+                <div className="space-y-1">
+                  <h4 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                    Enterprise
+                  </h4>
+                  <p className="text-xs leading-relaxed font-semibold h-10 line-clamp-2 text-slate-500 dark:text-slate-400">
+                    Bespoke limits, advanced queues, custom integrations and offline SLAs.
+                  </p>
+                </div>
+              </div>
+
+              {/* Price Block */}
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-1 relative w-fit">
+                  <span className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    Custom Quote
+                  </span>
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-450">
+                  For multi-branch or enterprise chains
+                </p>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-slate-200/50 dark:border-slate-800/50" />
+
+              {/* Features List */}
+              <ul className="space-y-4 flex-1">
+                {[
+                  'Unlimited Departments',
+                  'Unlimited Doctors & Staff',
+                  'Custom Queue Layouts',
+                  'Priority 24/7 Call Support',
+                  'Custom Branding & White-label',
+                  'Dedicated Account Manager'
+                ].map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-xs font-semibold">
+                    <div className="shrink-0 mt-0.5">
+                      <div className="p-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        <Check className="w-3 h-3" />
+                      </div>
+                    </div>
+                    <span className="leading-relaxed font-medium text-slate-600 dark:text-slate-300">
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA Button */}
+              <div className="pt-2">
+                <a 
+                  href={`https://wa.me/919999999999?text=${encodeURIComponent(`Hi TokenHospital Team! I want to discuss a Custom Enterprise Subscription Plan for our hospital.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Button
+                    className="w-full h-13 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20 border border-white/5"
+                  >
+                    Contact Sales
+                    <MessageSquare className="w-4 h-4" />
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <p className="text-center mt-14 text-slate-400 dark:text-slate-500 text-sm">
-          All plans include a{' '}
-          <span className="text-blue-600 font-bold">25-day free trial</span>
-          {' '}with full Pro features. No credit card required.
+        {/* Footer Sub-Note */}
+        <p className="text-center text-slate-400 dark:text-slate-500 text-xs font-semibold uppercase tracking-widest pt-4">
+          All subscriptions include a{' '}
+          <span className="text-primary dark:text-primary font-extrabold">{savingsData.trialDays}-day free trial</span>
+          {' '}with full limits. No credit card required. Cancel anytime.
         </p>
+
       </div>
     </section>
   );

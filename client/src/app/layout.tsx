@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, Roboto } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
+import { Toaster } from 'sonner';
 
 import StoreProvider from '@/store/StoreProvider';
 import QueryProvider from '@/store/QueryProvider';
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ThemeProvider>
               
               {children}
+              <Toaster richColors position="top-right" />
               
               </ThemeProvider>
           </QueryProvider>

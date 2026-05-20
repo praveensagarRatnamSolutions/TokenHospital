@@ -20,12 +20,15 @@ import { useSocket } from '@/hooks/useSocket';
 import { useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store/store';
 import { StatsCard } from '@/components/admin/StatsCard';
+import { useSubscription } from '@/hooks/useSubscription';
+import Link from 'next/link';
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const { socket, joinHospital } = useSocket();
   const { user } = useAppSelector((state: RootState) => state.auth);
   const hospitalId = user?.hospitalId;
+  const { status, loading: subLoading } = useSubscription();
 
   useEffect(() => {
     if (hospitalId && joinHospital) {
@@ -58,6 +61,44 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 p-8 bg-slate-50/50 dark:bg-slate-950/50 min-h-screen">
+      {/* Dynamic Pro Upgrade Billboard */}
+      {!subLoading && status && (status.planId === 'BASIC' || status.status === 'TRIAL' || !status.isValid) && (
+        <div className="relative bg-gradient-to-r from-blue-600/15 via-indigo-600/10 to-transparent border border-blue-500/20 dark:border-blue-500/10 p-6 md:p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 overflow-hidden group shadow-sm transition-all duration-300">
+          {/* Decorative Vector Grid Glow */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl opacity-50 -mr-16 -mt-16 pointer-events-none" />
+          <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl opacity-30 pointer-events-none" />
+
+          <div className="space-y-3 relative z-10 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-black uppercase tracking-wider">
+              <Zap className="w-3 h-3 fill-current animate-bounce" />
+              Unlock Premium Operations
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              {status.status === 'TRIAL' 
+                ? `Your Trial Ends in ${status.trialDaysLeft} Days`
+                : "Supercharge Your Hospital Token System"
+              }
+            </h2>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+              Upgrade to the <strong className="text-primary dark:text-blue-400">PRO Plan</strong> today to unleash digital patient kiosks, unlimited doctor rooms, real-time SMS alerts, premium custom branding, and professional operations analytics!
+            </p>
+          </div>
+
+          <div className="relative z-10 flex flex-row sm:flex-col gap-3 w-full md:w-auto shrink-0">
+            <Link href="/admin/settings/billing" className="w-full">
+              <button className="w-full h-12 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-blue-500/20 hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn">
+                Upgrade to Pro ⚡
+              </button>
+            </Link>
+            <Link href="/admin/settings/billing" className="w-full">
+              <button className="w-full h-12 px-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-2xl transition-all duration-300">
+                View Plan Pricing
+              </button>
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">

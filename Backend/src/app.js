@@ -111,6 +111,7 @@ app.use('/api/settings', require('./modules/settings/settings.routes'));
 app.use('/api/payment', require('./modules/payment/payment.routes'));
 app.use('/api/kiosk', require('./modules/kiosk/kiosk.routes'));
 app.use('/api/subscription', require('./modules/subscription/subscription.routes'));
+app.use('/api/wallet', require('./modules/wallet/wallet.routes'));
 
 // Global Error Handler
 app.use(errorHandler);

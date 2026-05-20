@@ -48,19 +48,10 @@ export default function PhoneNumberInput({ value, onChange, showLabel = true }: 
             nationalNumber,
           });
         }}
-        containerClass="w-full"
-        inputStyle={{
-          width: '100%',
-          height: '44px',
-          borderRadius: '8px',
-          border: '1px solid #d1d5db',
-          fontSize: '14px',
-          color: 'black',
-        }}
-        buttonStyle={{
-          borderTopLeftRadius: '8px',
-          borderBottomLeftRadius: '8px',
-        }}
+        containerClass="!w-full"
+        inputClass="!w-full !h-12 !pl-14 !pr-4 !bg-white !border !border-slate-200 !rounded-xl !text-slate-900 !text-sm focus:!border-primary focus:!ring-1 focus:!ring-primary !transition-all font-semibold"
+        buttonClass="!bg-slate-50 !border !border-slate-200 !rounded-l-xl hover:!bg-slate-100"
+        dropdownClass="!bg-white !text-slate-800"
       />
     </div>
   );

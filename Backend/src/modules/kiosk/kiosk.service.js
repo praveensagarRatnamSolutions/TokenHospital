@@ -140,8 +140,8 @@ const getKioskTokenStats = async (hospitalId, kioskId = null) => {
   if (!hospital) throw new Error('Hospital not found');
 
   // 2. Check if subscription is valid and Kiosk is allowed
-  const limits = getHospitalLimits(hospital);
-  if (!isSubscriptionValid(hospital) || !limits.allowKiosk) {
+  const limits = await getHospitalLimits(hospital);
+  if (!(await isSubscriptionValid(hospital)) || !limits.allowKiosk) {
     throw new Error('Access Denied: Your plan does not allow Kiosk access or has expired.');
   }
 

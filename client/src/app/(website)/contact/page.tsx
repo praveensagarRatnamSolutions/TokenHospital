@@ -152,17 +152,17 @@ ${formData.message}
                 {
                   icon: Mail,
                   title: 'Email Support',
-                  value: 'support@hospitaltoken.com',
+                  value: 'info@ratnamsolutions.com',
                 },
                 {
                   icon: Phone,
                   title: 'Phone Number',
-                  value: '+91 98765 43210',
+                  value: '+91 8790523012',
                 },
                 {
                   icon: MapPin,
                   title: 'Location',
-                  value: 'Hyderabad, India',
+                  value: 'Flat 302, Ratnam Solutions, Madhapur, Hyderabad, TS, India - 500081',
                 },
                 {
                   icon: Clock,

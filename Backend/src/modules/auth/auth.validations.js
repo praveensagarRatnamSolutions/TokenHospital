@@ -17,15 +17,15 @@ const registerValidation = [
   check('password', 'Password must be at least 6 characters').isLength({
     min: 6,
   }),
+];
 
-  // ✅ Add hospital fields instead
+const onboardValidation = [
   check('hospitalName', 'Hospital name is required').not().isEmpty(),
 
   check('phone.full', 'Valid phone number is required')
     .notEmpty()
     .isLength({ min: 10 }),
 
-  // ✅ optional but recommended
   check('phone.countryCode', 'Country code is required').notEmpty(),
 
   check('phone.country', 'Country is required').notEmpty(),
@@ -58,6 +58,7 @@ const updateProfileValidation = [
 
 module.exports = {
   registerValidation,
+  onboardValidation,
   loginValidation,
   updateProfileValidation,
   validateRequest,

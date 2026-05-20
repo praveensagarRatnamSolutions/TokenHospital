@@ -18,7 +18,7 @@ const checkLimit = (resourceType) => {
       if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
 
       // 1. Check if subscription/trial is valid
-      if (!isSubscriptionValid(hospital)) {
+      if (!(await isSubscriptionValid(hospital))) {
         return res.status(403).json({
           success: false,
           message: 'Your subscription or trial has expired. Please upgrade to continue.',

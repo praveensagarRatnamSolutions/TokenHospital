@@ -3,6 +3,7 @@ const router = express.Router();
 const authController = require('./auth.controller');
 const {
   registerValidation,
+  onboardValidation,
   loginValidation,
   updateProfileValidation,
   validateRequest,
@@ -90,18 +91,26 @@ router.post('/login', loginValidation, validateRequest, authController.login);
 
 /**
  * @swagger
- * /api/auth/me:
- *   get:
- *     summary: Get current blocked in user details
+ * /api/auth/onboard:
+ *   post:
+ *     summary: Onboard an admin user with a hospital
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Returns current user data
+ *         description: Onboarding complete
  *       401:
  *         description: Not authorized
  */
+router.post(
+  '/onboard',
+  protect,
+  onboardValidation,
+  validateRequest,
+  authController.onboard
+);
+
 router.post('/refresh', authController.refresh);
 
 router.get('/me', protect, authController.getMe);

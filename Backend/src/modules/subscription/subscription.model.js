@@ -15,7 +15,7 @@ const subscriptionTransactionSchema = new mongoose.Schema(
     },
     planId: {
       type: String,
-      enum: ['BASIC', 'PRO', 'ENTERPRISE'],
+      uppercase: true,
     },
     amount: {
       type: Number,

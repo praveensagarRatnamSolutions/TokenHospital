@@ -18,10 +18,12 @@ import {
   ChevronRight,
   Circle,
   User,
+  Zap,
 } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const adminNavItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -47,6 +49,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const user = useAppSelector((state) => state.auth.user);
   const isSuperAdmin = user?.role === 'superadmin';
+  const { status, loading } = useSubscription();
 
   // State to track expanded menus
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
@@ -183,6 +186,93 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           );
         })}
       </nav>
+
+      {/* Persistent Plan Details & Upgrade Widget */}
+      {(() => {
+        if (loading || !status) {
+          return (
+            <div className="p-4 mx-4 mb-4 rounded-3xl border border-slate-100 dark:border-slate-900 bg-slate-50/30 dark:bg-slate-900/10 animate-pulse h-28 shrink-0" />
+          );
+        }
+
+        const isTrial = status.status === 'TRIAL';
+        const isPro = status.planId === 'PRO';
+        const isEnterprise = status.planId === 'ENTERPRISE';
+        const daysLeft = status.trialDaysLeft;
+
+        return (
+          <div className="p-4 mx-4 mb-4 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 bg-gradient-to-b from-slate-50/50 to-white dark:from-slate-900/30 dark:to-slate-950/20 relative overflow-hidden group shrink-0 shadow-sm transition-all duration-300">
+            {/* Dynamic Background Glow */}
+            <div className={cn(
+              "absolute -right-6 -bottom-6 w-20 h-20 rounded-full blur-2xl opacity-20 transition-all duration-500",
+              isEnterprise ? "bg-amber-500" : isPro ? "bg-blue-500" : "bg-indigo-500"
+            )} />
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  Clinic Plan
+                </span>
+                <span className={cn(
+                  "text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md",
+                  isEnterprise
+                    ? "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                    : isPro
+                      ? "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400"
+                      : "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400"
+                )}>
+                  {status.planName}
+                </span>
+              </div>
+
+              {isTrial ? (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-xs font-black text-slate-700 dark:text-slate-200">
+                      {daysLeft} {daysLeft === 1 ? 'Day' : 'Days'} Left
+                    </span>
+                    <span className="text-[9px] font-bold text-slate-400">Trial</span>
+                  </div>
+                  {/* Minimalist Progress Bar */}
+                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-500" 
+                      style={{ width: `${Math.min(100, Math.max(5, (daysLeft / 30) * 100))}%` }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  {isEnterprise ? (
+                    <Crown className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  ) : (
+                    <Zap className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  )}
+                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                    Subscription is active
+                  </span>
+                </div>
+              )}
+
+              {/* Dynamic Action Trigger */}
+              {(isTrial || status.planId === 'BASIC' || !status.isValid) ? (
+                <Link href="/admin/settings/billing" className="block mt-3" onClick={onClose}>
+                  <button className="w-full h-8 bg-primary hover:bg-primary/95 text-white dark:text-slate-900 dark:bg-white dark:hover:bg-slate-100 text-[10px] font-black uppercase tracking-wider rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 group/btn">
+                    Upgrade to Pro
+                    <Zap className="w-3 h-3 fill-current group-hover/btn:scale-110 transition-transform" />
+                  </button>
+                </Link>
+              ) : (
+                <Link href="/admin/settings/billing" className="block mt-3" onClick={onClose}>
+                  <button className="w-full h-8 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all">
+                    Manage Billing 💳
+                  </button>
+                </Link>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="p-6 border-t border-slate-100 dark:border-slate-800 text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">
         &copy; 2026 RATNAM SOLUTIONS

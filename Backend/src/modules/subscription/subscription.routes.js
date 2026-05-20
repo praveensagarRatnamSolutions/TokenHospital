@@ -3,9 +3,16 @@ const router = express.Router();
 const subscriptionController = require('./subscription.controller');
 const planController = require('./plan.controller');
 const { protect, authorize } = require('../../middlewares/authMiddleware');
+const { validateRequest } = require('../auth/auth.validations');
+const {
+  planCreationValidation,
+  checkoutValidation,
+  verifyCheckoutValidation,
+} = require('./subscription.validations');
 
 // Public routes (no auth)
 router.get('/public-plans', planController.getPlans);
+router.post('/webhook', subscriptionController.handleSubscriptionWebhook);
 
 // All routes below require authentication
 router.use(protect);
@@ -15,10 +22,15 @@ router.get('/status', authorize('ADMIN', 'SUPERADMIN'), subscriptionController.g
 router.get('/history', authorize('ADMIN', 'SUPERADMIN'), subscriptionController.getBillingHistory);
 router.post('/change-plan', authorize('ADMIN'), subscriptionController.changePlan);
 
+// Checkout & Trial Endpoints
+router.post('/start-trial', authorize('ADMIN'), subscriptionController.startTrial);
+router.post('/create-checkout', authorize('ADMIN'), checkoutValidation, validateRequest, subscriptionController.createCheckout);
+router.post('/verify-checkout', authorize('ADMIN'), verifyCheckoutValidation, validateRequest, subscriptionController.verifyCheckout);
+
 // SuperAdmin Only
 router.get('/plans', authorize('SUPERADMIN'), planController.getAllPlans);
-router.post('/plans', authorize('SUPERADMIN'), planController.createPlan);
-router.put('/plans/:id', authorize('SUPERADMIN'), planController.updatePlan);
+router.post('/plans', authorize('SUPERADMIN'), planCreationValidation, validateRequest, planController.createPlan);
+router.put('/plans/:id', authorize('SUPERADMIN'), planCreationValidation, validateRequest, planController.updatePlan);
 router.delete('/plans/:id', authorize('SUPERADMIN'), planController.deletePlan);
 router.post('/assign-plan/:hospitalId', authorize('SUPERADMIN'), subscriptionController.assignPlan);
 

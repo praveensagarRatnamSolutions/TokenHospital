@@ -32,6 +32,24 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
       return;
     }
 
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const isOnboardingPage = currentPath.startsWith('/onboarding');
+
+    // Onboarding guard: ADMIN without hospitalId must be redirected to /onboarding
+    if (!isOnboardingPage && user && user.role?.toUpperCase() === 'ADMIN' && !user.hospitalId) {
+      router.push('/onboarding');
+      return;
+    }
+
+    // Reverse guard: Onboarded ADMIN trying to access /onboarding should go to /admin
+    if (isOnboardingPage && user && user.role?.toUpperCase() === 'ADMIN' && user.hospitalId) {
+      if (typeof window !== 'undefined' && sessionStorage.getItem('onboarding_in_progress') === 'true') {
+        return;
+      }
+      router.push('/admin');
+      return;
+    }
+
     // Check role authorization
     if (requiredRoles && user) {
       const userRole = user.role.toUpperCase();

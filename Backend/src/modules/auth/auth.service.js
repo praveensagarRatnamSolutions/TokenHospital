@@ -1,67 +1,127 @@
 const User = require('./auth.model');
 const Hospital = require('../hospital/hospital.model');
+const HospitalSubscription = require('../subscription/hospitalSubscription.model');
 const { generateToken } = require('../../utils/jwt');
 
 const mongoose = require('mongoose');
 
 const registerUser = async (userData) => {
-  const { name, email, password, hospitalName, phone } = userData;
+  const { name, email, password } = userData;
 
-  // Start a session for the transaction
+  // 1. Check if user already exists
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    throw new Error('Account already exists with this email');
+  }
+
+  // 2. Create Admin
+  const admin = await User.create({
+    name,
+    email,
+    password,
+    role: 'ADMIN',
+  });
+
+  return {
+    _id: admin._id,
+    name: admin.name,
+    email: admin.email,
+    role: admin.role,
+    hospitalId: null,
+    token: generateToken(admin._id, admin.role, null),
+  };
+};
+
+const onboardUser = async (onboardData, userId) => {
+  const {
+    hospitalName,
+    phone,
+    address,
+    registrationNumber,
+    licenseNumber,
+    gstNumber,
+  } = onboardData;
+
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // 1. Check if user already exists
-    const userExists = await User.findOne({ email }).session(session);
-    if (userExists) {
-      throw new Error('Account already exists with this email');
+    // 1. Verify user exists and doesn't already have a hospital
+    const user = await User.findById(userId).session(session);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    if (user.hospitalId) {
+      throw new Error('User is already onboarded and linked to a hospital');
     }
 
-    // 2. Create Admin (Notice the .session(session) passed to all ops)
-    const [admin] = await User.create(
+    // 2. Check if a hospital already exists by email
+    const hospitalEmailExists = await Hospital.findOne({ email: user.email }).session(session);
+    if (hospitalEmailExists) {
+      throw new Error('A clinic with this email address is already registered');
+    }
+
+    // 3. Check if hospital already exists by phone
+    if (phone && phone.full) {
+      const hospitalPhoneExists = await Hospital.findOne({ 'phone.full': phone.full }).session(session);
+      if (hospitalPhoneExists) {
+        throw new Error('This phone number is already registered to another clinic');
+      }
+    }
+
+    // 4. Create the Hospital
+    const [hospital] = await Hospital.create(
       [
         {
-          name,
-          email,
-          password,
-          role: 'ADMIN',
+          name: hospitalName,
+          email: user.email,
+          phone,
+          address,
+          registrationNumber,
+          licenseNumber,
+          gstNumber,
+          createdBy: user._id,
+          isActive: true,
         },
       ],
       { session }
     );
 
-    // 3. Create Hospital with 25-day Free Trial
-    const trialEndDate = new Date();
-    trialEndDate.setDate(trialEndDate.getDate() + 25);
+    // 5. Create matching HospitalSubscription record (initialized to FREE active by default)
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 30); // 30 days initial period
 
-    const [hospital] = await Hospital.create([{
-      name: hospitalName,
-      email,
-      phone,
-      createdBy: admin._id,
-      trialEndDate,
-      planId: 'PRO', // Give Pro features during trial
-      subscriptionStatus: 'TRIAL',
-    }], { session });
+    await HospitalSubscription.create(
+      [
+        {
+          hospitalId: hospital._id,
+          planId: 'FREE',
+          billingCycle: 'MONTHLY',
+          status: 'ACTIVE',
+          startDate,
+          currentPeriodStart: startDate,
+          currentPeriodEnd: endDate,
+        },
+      ],
+      { session }
+    );
 
-    // 4. Link hospital to admin
-    admin.hospitalId = hospital._id;
-    await admin.save({ session });
+    // 6. Link hospital to user
+    user.hospitalId = hospital._id;
+    await user.save({ session });
 
-    // Commit the changes
     await session.commitTransaction();
 
     return {
-      _id: admin._id,
-      name: admin.name,
-      email: admin.email,
-      role: admin.role,
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
       hospitalId: hospital._id,
-      token: generateToken(admin._id, admin.role, hospital._id),
+      token: generateToken(user._id, user.role, hospital._id),
     };
   } catch (error) {
-    // If anything fails, undo every change made during this process
     await session.abortTransaction();
     throw error;
   } finally {
@@ -180,6 +240,7 @@ const refreshUserToken = async (refreshToken) => {
 
 module.exports = {
   registerUser,
+  onboardUser,
   loginUser,
   createUser,
   refreshUserToken,

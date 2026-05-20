@@ -15,20 +15,31 @@ import Link from 'next/link';
 const footerLinks = [
   {
     title: 'Product',
-    links: ['Features', 'Dashboard', 'Kiosk System', 'Pricing', 'Live Demo'],
+    links: [
+      { label: 'Features', href: '/#features' },
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Kiosk System', href: '/kiosk' },
+      { label: 'Pricing', href: '/#pricing' },
+      { label: 'Live Demo', href: '/#demo' },
+    ],
   },
   {
     title: 'Company',
-    links: ['About Us', 'Case Studies', 'Hospital Partners', 'Careers', 'Contact'],
+    links: [
+      { label: 'About Us', href: '/#about' },
+      { label: 'Case Studies', href: '/#case-studies' },
+      { label: 'Hospital Partners', href: '/#partners' },
+      { label: 'Careers', href: '/#careers' },
+      { label: 'Contact', href: '/contact' },
+    ],
   },
   {
-    title: 'Support',
+    title: 'Support & Legal',
     links: [
-      'Help Center',
-      'API Docs',
-      'System Status',
-      'Privacy Policy',
-      'Terms of Service',
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Service', href: '/terms-and-conditions' },
+      { label: 'Refund Policy', href: '/refund-policy' },
+      { label: 'System Status', href: '/#status' },
     ],
   },
 ];
@@ -88,12 +99,12 @@ export default function Footer() {
               <ul className="space-y-4">
                 {group.links.map((link, idx) => (
                   <li key={idx}>
-                    <a
-                      href="#"
+                    <Link
+                      href={link.href}
                       className="text-sm text-gray-500 hover:text-[#0091DD] transition-colors"
                     >
-                      {link}
-                    </a>
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
