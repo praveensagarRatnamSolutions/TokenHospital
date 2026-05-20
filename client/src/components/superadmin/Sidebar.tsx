@@ -1,21 +1,40 @@
 'use client';
 
+import {
+  BarChart3,
+  Building2,
+  CreditCard,
+  LayoutDashboard,
+  Menu,
+  Package,
+  Receipt,
+  Settings,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { LayoutDashboard, Building2, BarChart3, Settings, Menu, CreditCard, Receipt, ShieldAlert, Package } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { name: 'Dashboard', href: '/superadmin', icon: LayoutDashboard, exact: true },
   { name: 'Hospitals', href: '/superadmin/hospitals', icon: Building2, exact: false },
-  { name: 'Subscription Plans', href: '/superadmin/plans', icon: CreditCard, exact: false },
-  { name: 'Wallet Packages', href: '/superadmin/wallet-packages', icon: Package, exact: false },
+  {
+    name: 'Subscription Plans',
+    href: '/superadmin/plans',
+    icon: CreditCard,
+    exact: false,
+  },
+  {
+    name: 'Wallet Packages',
+    href: '/superadmin/wallet-packages',
+    icon: Package,
+    exact: false,
+  },
   { name: 'Billing & Ledger', href: '/superadmin/billing', icon: Receipt, exact: false },
   { name: 'Reports', href: '/superadmin/reports', icon: BarChart3, exact: false },
-  { name: 'Audit Logs', href: '/superadmin/audit-logs', icon: ShieldAlert, exact: false },
   { name: 'Settings', href: '/superadmin/settings', icon: Settings, exact: false },
 ];
 

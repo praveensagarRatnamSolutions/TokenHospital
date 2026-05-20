@@ -64,6 +64,14 @@ export const subscriptionApi = {
     return response.data.data;
   },
 
+  exportHistory: async (params: { status?: string, service?: string, startDate?: string, endDate?: string, search?: string }) => {
+    const queryParams = new URLSearchParams(params as any).toString();
+    const response = await api.get(`/api/subscription/history/export?${queryParams}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
   getPublicPlans: async (): Promise<Plan[]> => {
     const response = await api.get('/api/subscription/public-plans');
     return response.data.data;

@@ -9,6 +9,7 @@ const logger = require('../../config/logger');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const WalletService = require('../wallet/wallet.service');
+const ExcelJS = require('exceljs');
 
 // Retrieve the global Platform Razorpay client instance
 const getGlobalRazorpayClient = () => {
@@ -196,20 +197,163 @@ const assignPlan = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get billing history
- * @route   GET /api/subscription/history
- * @access  Private
- */
 const getBillingHistory = async (req, res) => {
   try {
     const SubscriptionTransaction = require('./subscription.model');
-    const history = await SubscriptionTransaction.find({ hospitalId: req.hospitalId })
+    const query = req.user.role === 'SUPERADMIN' ? {} : { hospitalId: req.hospitalId };
+    
+    const history = await SubscriptionTransaction.find(query)
+      .populate('hospitalId', 'name email contactNumber')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(req.user.role === 'SUPERADMIN' ? 500 : 50);
 
     res.json({ success: true, data: history });
   } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Export billing history to Excel
+ * @route   GET /api/subscription/history/export
+ * @access  Private
+ */
+const exportBillingHistory = async (req, res) => {
+  try {
+    const { status, service, startDate, endDate, search } = req.query;
+    const SubscriptionTransaction = require('./subscription.model');
+    
+    let query = req.user.role === 'SUPERADMIN' ? {} : { hospitalId: req.hospitalId };
+
+    if (status && status !== 'ALL') {
+      query.status = status;
+    }
+
+    if (service && service !== 'ALL') {
+      if (service === 'SUBSCRIPTION') {
+        query.type = 'SUBSCRIPTION';
+      } else if (service === 'WALLET') {
+        query.type = 'WALLET_TOPUP';
+      }
+    }
+
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
+
+    let history = await SubscriptionTransaction.find(query)
+      .populate('hospitalId', 'name email contactNumber')
+      .sort({ createdAt: -1 });
+
+    if (search) {
+      const lowerSearch = search.toLowerCase();
+      history = history.filter(inv => {
+        const hospitalName = inv.hospitalId?.name?.toLowerCase() || '';
+        const invoiceId = inv.razorpayPaymentId?.toLowerCase() || inv._id.toString().toLowerCase();
+        return hospitalName.includes(lowerSearch) || invoiceId.includes(lowerSearch);
+      });
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Billing History', {
+      views: [{ showGridLines: false }]
+    });
+
+    // 1. Add Main Title
+    worksheet.mergeCells('A1:G2');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = 'Hospital Token Management - Billing History Report';
+    titleCell.font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } }; // slate-800
+    titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    // 2. Empty row for spacing
+    worksheet.addRow([]);
+
+    // 3. Set Columns
+    worksheet.columns = [
+      { header: 'Transaction ID', key: 'id', width: 32 },
+      { header: 'Date', key: 'date', width: 22 },
+      { header: 'Hospital Name', key: 'hospital', width: 35 },
+      { header: 'Service Type', key: 'service', width: 20 },
+      { header: 'Amount', key: 'amount', width: 18, style: { numFmt: '"₹"#,##0.00' } },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Description', key: 'description', width: 50 },
+    ];
+
+    // 4. Style the Header Row
+    const headerRow = worksheet.getRow(4);
+    headerRow.height = 25;
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }; // slate-900
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    // 5. Add Data Rows
+    history.forEach(inv => {
+      const isWallet = inv.type === 'WALLET_TOPUP';
+      const serviceType = isWallet ? 'Wallet Top-up' : 'Subscription';
+      
+      const row = worksheet.addRow({
+        id: inv.razorpayPaymentId || inv._id.toString(),
+        date: new Date(inv.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }),
+        hospital: inv.hospitalId?.name || 'Unknown',
+        service: serviceType,
+        amount: inv.amount || 0,
+        status: inv.status === 'COMPLETED' ? 'PAID' : inv.status,
+        description: inv.description || '',
+      });
+      
+      // Style row alignments
+      row.height = 20;
+      row.alignment = { vertical: 'middle' };
+      row.getCell('amount').alignment = { horizontal: 'right', vertical: 'middle' };
+      row.getCell('status').alignment = { horizontal: 'center', vertical: 'middle' };
+      row.getCell('date').alignment = { horizontal: 'center', vertical: 'middle' };
+      
+      // Color code status
+      const statusCell = row.getCell('status');
+      if (inv.status === 'COMPLETED') {
+        statusCell.font = { color: { argb: 'FF16A34A' }, bold: true }; // green-600
+      } else if (inv.status === 'PENDING') {
+        statusCell.font = { color: { argb: 'FFD97706' }, bold: true }; // amber-600
+      } else if (inv.status === 'FAILED') {
+        statusCell.font = { color: { argb: 'FFDC2626' }, bold: true }; // red-600
+      }
+    });
+
+    // 6. Add Border to all data cells
+    worksheet.eachRow({ includeEmpty: false }, function(row, rowNumber) {
+      if (rowNumber >= 4) { // Apply borders to headers and data
+        row.eachCell({ includeEmpty: true }, function(cell) {
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFCBD5E1' } }, // slate-300
+            left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+            right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+          };
+        });
+      }
+    });
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=Billing_Export_${new Date().toISOString().split('T')[0]}.xlsx`
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    logger.error('Error exporting billing history:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -531,6 +675,7 @@ module.exports = {
   changePlan,
   assignPlan,
   getBillingHistory,
+  exportBillingHistory,
   startTrial,
   createCheckout,
   verifyCheckout,

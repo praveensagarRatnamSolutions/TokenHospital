@@ -1,6 +1,9 @@
 const Token = require('../token/token.model');
 const Payment = require('../payment/payment.model');
 const Hospital = require('../hospital/hospital.model');
+const HospitalSubscription = require('../subscription/hospitalSubscription.model');
+const SubscriptionTransaction = require('../subscription/subscription.model');
+const User = require('../auth/auth.model');
 const mongoose = require('mongoose');
 
 /**
@@ -834,6 +837,251 @@ const exportDoctorPatientsData = async (hospitalId, doctorId, filters = {}) => {
   return await Token.aggregate(pipeline);
 };
 
+const SUPERADMIN_SUBSCRIPTION_STATUSES = ['TRIAL', 'ACTIVE', 'PAST_DUE', 'UNPAID', 'CANCELLED', 'PAUSED'];
+const SUPERADMIN_TRANSACTION_TYPES = ['SUBSCRIPTION', 'WALLET_TOPUP'];
+
+const getSelectedFilter = (value) => {
+  if (!value) return '';
+
+  const selected = String(value).trim();
+  return selected && selected.toUpperCase() !== 'ALL' ? selected : '';
+};
+
+const getUpperFilter = (value, allowedValues) => {
+  const selected = getSelectedFilter(value).toUpperCase();
+  return allowedValues.includes(selected) ? selected : '';
+};
+
+const parseReportDate = (value, endOfDay = false) => {
+  if (!value) return null;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  if (endOfDay) {
+    date.setHours(23, 59, 59, 999);
+  } else {
+    date.setHours(0, 0, 0, 0);
+  }
+
+  return date;
+};
+
+const getChartDateRange = (filters, today) => {
+  const customStart = parseReportDate(filters.startDate);
+  const customEnd = parseReportDate(filters.endDate, true);
+
+  if (customStart || customEnd) {
+    let endDate = customEnd || new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+    let startDate = customStart || new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    if (startDate > endDate) {
+      [startDate, endDate] = [new Date(endDate.setHours(0, 0, 0, 0)), new Date(startDate.setHours(23, 59, 59, 999))];
+    }
+
+    return { startDate, endDate, isCustom: true };
+  }
+
+  let rangeMonths = 7;
+  if (filters.timeRange === '1M') rangeMonths = 1;
+  else if (filters.timeRange === '3M') rangeMonths = 3;
+  else if (filters.timeRange === '1Y') rangeMonths = 12;
+
+  return {
+    startDate: new Date(today.getFullYear(), today.getMonth() - rangeMonths + 1, 1),
+    endDate: new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999),
+    isCustom: false,
+  };
+};
+
+const getMonthBuckets = (startDate, endDate) => {
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const startMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+  const monthCount =
+    (endMonth.getFullYear() - startMonth.getFullYear()) * 12 +
+    (endMonth.getMonth() - startMonth.getMonth()) +
+    1;
+  const includeYear = startMonth.getFullYear() !== endMonth.getFullYear() || monthCount > 12;
+  const revenueDataMap = {};
+  const walletDataMap = {};
+
+  for (let i = 0; i < monthCount; i++) {
+    const bucketDate = new Date(startMonth.getFullYear(), startMonth.getMonth() + i, 1);
+    const key = `${bucketDate.getFullYear()}-${bucketDate.getMonth() + 1}`;
+    const month = includeYear
+      ? `${monthNames[bucketDate.getMonth()]} ${String(bucketDate.getFullYear()).slice(-2)}`
+      : monthNames[bucketDate.getMonth()];
+
+    revenueDataMap[key] = { month, revenue: 0, subscriptions: 0 };
+    walletDataMap[key] = { month, sms: 0, email: 0 };
+  }
+
+  return { revenueDataMap, walletDataMap };
+};
+
+const getScopedHospitalIds = async ({ hospitalId, hospitalStatus, subscriptionStatus }) => {
+  let hospitalMatch = {};
+
+  if (hospitalId) {
+    if (!mongoose.Types.ObjectId.isValid(hospitalId)) return [];
+    hospitalMatch._id = new mongoose.Types.ObjectId(hospitalId);
+  }
+
+  if (hospitalStatus === 'ACTIVE') {
+    hospitalMatch.isActive = true;
+  } else if (hospitalStatus === 'INACTIVE') {
+    hospitalMatch.isActive = false;
+  }
+
+  const hasHospitalFilter = Object.keys(hospitalMatch).length > 0;
+
+  if (hasHospitalFilter) {
+    const hospitalIds = await Hospital.find(hospitalMatch).distinct('_id');
+
+    if (!subscriptionStatus) return hospitalIds;
+    if (!hospitalIds.length) return [];
+
+    return HospitalSubscription.find({
+      hospitalId: { $in: hospitalIds },
+      status: subscriptionStatus,
+    }).distinct('hospitalId');
+  }
+
+  if (subscriptionStatus) {
+    return HospitalSubscription.find({ status: subscriptionStatus }).distinct('hospitalId');
+  }
+
+  return null;
+};
+
+/**
+ * Global SuperAdmin Reports
+ */
+const getSuperAdminReports = async (filters = {}) => {
+  const today = new Date();
+  const hospitalStatus = getUpperFilter(filters.hospitalStatus, ['ACTIVE', 'INACTIVE']);
+  const subscriptionStatus = getUpperFilter(filters.subscriptionStatus, SUPERADMIN_SUBSCRIPTION_STATUSES);
+  const transactionType = getUpperFilter(filters.transactionType, SUPERADMIN_TRANSACTION_TYPES);
+  const hospitalId = getSelectedFilter(filters.hospitalId);
+  const scopedHospitalIds = await getScopedHospitalIds({
+    hospitalId,
+    hospitalStatus,
+    subscriptionStatus,
+  });
+  const scopedHospitalMatch = scopedHospitalIds ? { _id: { $in: scopedHospitalIds } } : {};
+  const scopedReferenceMatch = scopedHospitalIds ? { hospitalId: { $in: scopedHospitalIds } } : {};
+
+  const totalHospitals = await Hospital.countDocuments(scopedHospitalMatch);
+
+  const subscriptionMetricStatus = subscriptionStatus || 'ACTIVE';
+  const subscriptionMetricMatch = {
+    status: subscriptionMetricStatus,
+    ...scopedReferenceMatch,
+  };
+  const activeSubscriptions = await HospitalSubscription.countDocuments(subscriptionMetricMatch);
+
+  const totalUsers = scopedHospitalIds
+    ? await User.countDocuments({ hospitalId: { $in: scopedHospitalIds } })
+    : await User.countDocuments();
+
+  const chartRange = getChartDateRange(filters, today);
+  const revenuePeriod = chartRange.isCustom
+    ? chartRange
+    : {
+        startDate: new Date(today.getFullYear(), today.getMonth(), 1),
+        endDate: new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999),
+      };
+
+  const revenueMetricType = transactionType || 'SUBSCRIPTION';
+  const revenueSummary = await SubscriptionTransaction.aggregate([
+    {
+      $match: {
+        ...scopedReferenceMatch,
+        type: { $in: SUPERADMIN_TRANSACTION_TYPES },
+        status: 'COMPLETED',
+        createdAt: { $gte: revenuePeriod.startDate, $lte: revenuePeriod.endDate },
+      },
+    },
+    { $group: { _id: '$type', total: { $sum: '$amount' } } },
+  ]);
+  const subscriptionRevenue = revenueSummary.find((item) => item._id === 'SUBSCRIPTION')?.total || 0;
+  const walletRevenue = revenueSummary.find((item) => item._id === 'WALLET_TOPUP')?.total || 0;
+  const totalRevenue = subscriptionRevenue + walletRevenue;
+  const revenueThisMonth = revenueMetricType === 'WALLET_TOPUP' ? walletRevenue : subscriptionRevenue;
+
+  const transactionMatch = {
+    ...scopedReferenceMatch,
+    status: 'COMPLETED',
+    createdAt: { $gte: chartRange.startDate, $lte: chartRange.endDate },
+  };
+
+  if (transactionType) {
+    transactionMatch.type = transactionType;
+  }
+
+  const transactions = await SubscriptionTransaction.aggregate([
+    { $match: transactionMatch },
+    {
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+          type: '$type',
+        },
+        total: { $sum: '$amount' },
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const { revenueDataMap, walletDataMap } = getMonthBuckets(chartRange.startDate, chartRange.endDate);
+
+  transactions.forEach((transaction) => {
+    const key = `${transaction._id.year}-${transaction._id.month}`;
+
+    if (transaction._id.type === 'SUBSCRIPTION' && revenueDataMap[key]) {
+      revenueDataMap[key].revenue += transaction.total;
+      revenueDataMap[key].subscriptions += transaction.count;
+    } else if (transaction._id.type === 'WALLET_TOPUP' && walletDataMap[key]) {
+      walletDataMap[key].sms += Math.round(transaction.total * 0.6);
+      walletDataMap[key].email += Math.round(transaction.total * 0.4);
+
+      if (transactionType === 'WALLET_TOPUP' && revenueDataMap[key]) {
+        revenueDataMap[key].revenue += transaction.total;
+        revenueDataMap[key].subscriptions += transaction.count;
+      }
+    }
+  });
+
+  return {
+    metrics: {
+      totalHospitals,
+      activeSubscriptions,
+      revenueThisMonth,
+      subscriptionRevenue,
+      walletRevenue,
+      totalRevenue,
+      totalUsers,
+      subscriptionMetricLabel: subscriptionStatus ? `${subscriptionStatus} Subscriptions` : 'Active Subscriptions',
+      revenueMetricLabel: revenueMetricType === 'WALLET_TOPUP' ? 'Wallet Revenue' : 'Subscription Revenue',
+      revenueMetricPeriodLabel: chartRange.isCustom ? 'Selected Period' : 'Current Month',
+    },
+    filters: {
+      timeRange: filters.timeRange || '7M',
+      startDate: chartRange.startDate,
+      endDate: chartRange.endDate,
+      hospitalId: hospitalId || 'ALL',
+      hospitalStatus: hospitalStatus || 'ALL',
+      subscriptionStatus: subscriptionStatus || 'ACTIVE',
+      transactionType: transactionType || 'ALL',
+    },
+    revenueData: Object.values(revenueDataMap),
+    walletData: Object.values(walletDataMap),
+  };
+};
+
 module.exports = {
   getSummary,
   getDepartmentReport,
@@ -845,4 +1093,5 @@ module.exports = {
   getDoctorPatients,
   exportDoctorPerformanceData,
   exportDoctorPatientsData,
+  getSuperAdminReports,
 };

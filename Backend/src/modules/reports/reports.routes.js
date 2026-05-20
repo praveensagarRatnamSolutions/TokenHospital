@@ -172,4 +172,39 @@ router.get(
   reportsController.exportDoctorPatients
 );
 
+// ==========================================
+// SUPERADMIN REPORTS
+// ==========================================
+/**
+ * @swagger
+ * /api/reports/superadmin-dashboard:
+ *   get:
+ *     summary: Get Global SuperAdmin Reports
+ *     tags: [Reports]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get(
+  '/superadmin-dashboard',
+  protect,
+  authorize('SUPERADMIN'),
+  reportsController.getSuperAdminReports
+);
+
+/**
+ * @swagger
+ * /api/reports/superadmin-dashboard/export:
+ *   get:
+ *     summary: Export Global SuperAdmin Reports to Excel
+ *     tags: [Reports]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get(
+  '/superadmin-dashboard/export',
+  protect,
+  authorize('SUPERADMIN'),
+  reportsController.exportSuperAdminReports
+);
+
 module.exports = router;

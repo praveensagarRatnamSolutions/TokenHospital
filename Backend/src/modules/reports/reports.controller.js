@@ -361,6 +361,128 @@ const exportDoctorPatients = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Get Global SuperAdmin Reports
+ * @route   GET /api/reports/superadmin-dashboard
+ * @access  Private (SuperAdmin)
+ */
+const getSuperAdminReports = async (req, res, next) => {
+    try {
+        const {
+            timeRange,
+            startDate,
+            endDate,
+            hospitalId,
+            hospitalStatus,
+            subscriptionStatus,
+            transactionType,
+        } = req.query;
+        const report = await reportsService.getSuperAdminReports({
+            timeRange,
+            startDate,
+            endDate,
+            hospitalId,
+            hospitalStatus,
+            subscriptionStatus,
+            transactionType,
+        });
+        res.status(200).json({ success: true, data: report });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Export Global SuperAdmin Reports to Excel
+ * @route   GET /api/reports/superadmin-dashboard/export
+ * @access  Private (SuperAdmin)
+ */
+const exportSuperAdminReports = async (req, res, next) => {
+    try {
+        const ExcelJS = require('exceljs');
+        const {
+            timeRange,
+            startDate,
+            endDate,
+            hospitalId,
+            hospitalStatus,
+            subscriptionStatus,
+            transactionType,
+        } = req.query;
+        const data = await reportsService.getSuperAdminReports({
+            timeRange,
+            startDate,
+            endDate,
+            hospitalId,
+            hospitalStatus,
+            subscriptionStatus,
+            transactionType,
+        });
+
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Hospital System';
+
+        // 1. Metrics Worksheet
+        const wsMetrics = workbook.addWorksheet('Global Metrics');
+        wsMetrics.columns = [
+            { header: 'Metric', key: 'metric', width: 30 },
+            { header: 'Value', key: 'value', width: 20 },
+        ];
+        wsMetrics.getRow(1).font = { bold: true };
+        wsMetrics.addRow({ metric: 'Total Hospitals', value: data.metrics.totalHospitals });
+        wsMetrics.addRow({ metric: data.metrics.subscriptionMetricLabel, value: data.metrics.activeSubscriptions });
+        wsMetrics.addRow({ metric: 'Total Platform Users', value: data.metrics.totalUsers });
+        wsMetrics.addRow({
+            metric: `Subscription Revenue (${data.metrics.revenueMetricPeriodLabel})`,
+            value: data.metrics.subscriptionRevenue,
+        });
+        wsMetrics.addRow({
+            metric: `Wallet Revenue (${data.metrics.revenueMetricPeriodLabel})`,
+            value: data.metrics.walletRevenue,
+        });
+        wsMetrics.addRow({
+            metric: `Total Revenue (${data.metrics.revenueMetricPeriodLabel})`,
+            value: data.metrics.totalRevenue,
+        });
+        wsMetrics.addRow({});
+        wsMetrics.addRow({ metric: 'Applied Filters', value: '' });
+        wsMetrics.addRow({ metric: 'Hospital', value: data.filters.hospitalId });
+        wsMetrics.addRow({ metric: 'Hospital Status', value: data.filters.hospitalStatus });
+        wsMetrics.addRow({ metric: 'Subscription Status', value: data.filters.subscriptionStatus });
+        wsMetrics.addRow({ metric: 'Transaction Type', value: data.filters.transactionType });
+        wsMetrics.addRow({ metric: 'Period Start', value: new Date(data.filters.startDate).toLocaleDateString() });
+        wsMetrics.addRow({ metric: 'Period End', value: new Date(data.filters.endDate).toLocaleDateString() });
+
+        // 2. Revenue Data Worksheet
+        const wsRevenue = workbook.addWorksheet('Revenue Data');
+        wsRevenue.columns = [
+            { header: 'Month', key: 'month', width: 15 },
+            { header: 'Revenue (INR)', key: 'revenue', width: 20 },
+            { header: 'Subscriptions Count', key: 'subscriptions', width: 20 },
+        ];
+        wsRevenue.getRow(1).font = { bold: true };
+        data.revenueData.forEach(row => wsRevenue.addRow(row));
+
+        // 3. Wallet Data Worksheet
+        const wsWallet = workbook.addWorksheet('Wallet Data');
+        wsWallet.columns = [
+            { header: 'Month', key: 'month', width: 15 },
+            { header: 'SMS Value (Approx INR)', key: 'sms', width: 25 },
+            { header: 'Email Value (Approx INR)', key: 'email', width: 25 },
+        ];
+        wsWallet.getRow(1).font = { bold: true };
+        data.walletData.forEach(row => wsWallet.addRow(row));
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="Global_Reports_Export_${new Date().getTime()}.xlsx"`);
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getSummary,
     getDepartmentReport,
@@ -372,4 +494,6 @@ module.exports = {
     getDoctorPatients,
     exportDoctorPerformance,
     exportDoctorPatients,
+    getSuperAdminReports,
+    exportSuperAdminReports,
 };

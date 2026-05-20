@@ -20,6 +20,7 @@ router.use(protect);
 // Admin & SuperAdmin routes
 router.get('/status', authorize('ADMIN', 'SUPERADMIN'), subscriptionController.getSubscriptionStatus);
 router.get('/history', authorize('ADMIN', 'SUPERADMIN'), subscriptionController.getBillingHistory);
+router.get('/history/export', authorize('ADMIN', 'SUPERADMIN'), subscriptionController.exportBillingHistory);
 router.post('/change-plan', authorize('ADMIN'), subscriptionController.changePlan);
 
 // Checkout & Trial Endpoints
