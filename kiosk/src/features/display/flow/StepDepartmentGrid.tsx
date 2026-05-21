@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Stethoscope, Heart, Baby, Eye, Activity, ChevronRight, Loader2, Hospital } from 'lucide-react';
 import { kioskApi } from '../../../core/api';
 import type { Department } from '../../../core/types';
+import VirtualKeyboard from '../components/VirtualKeyboard';
 
 interface StepDepartmentGridProps {
   onSelect: (dept: Department) => void;
@@ -12,6 +13,7 @@ const StepDepartmentGrid: React.FC<StepDepartmentGridProps> = ({ onSelect }) => 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [showKeyboard, setShowKeyboard] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -30,6 +32,15 @@ const StepDepartmentGrid: React.FC<StepDepartmentGridProps> = ({ onSelect }) => 
   const filteredDepts = departments.filter(d => 
     d.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleKeyPress = (key: string) => {
+    if (key === 'backspace') {
+      setSearch((prev) => prev.slice(0, -1));
+      return;
+    }
+
+    setSearch((prev) => prev + key);
+  };
 
   const getIcon = (name: string) => {
     const n = name.toLowerCase();
@@ -64,9 +75,11 @@ const StepDepartmentGrid: React.FC<StepDepartmentGridProps> = ({ onSelect }) => 
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 dark:text-white/20 group-focus-within:text-sky-500 transition-colors" size={24} />
             <input 
               type="text" 
+              inputMode="none"
               placeholder="Search by department name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setShowKeyboard(true)}
               className="w-full bg-white dark:bg-white/5 border-2 border-slate-200 dark:border-white/10 rounded-[2rem] py-6 pl-16 pr-8 text-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-sky-500 transition-all placeholder:text-slate-300 dark:placeholder:text-white/10 shadow-sm focus:shadow-xl focus:shadow-sky-500/10"
             />
           </div>
@@ -74,7 +87,7 @@ const StepDepartmentGrid: React.FC<StepDepartmentGridProps> = ({ onSelect }) => 
       </header>
 
       {/* Grid */}
-      <main className="flex-1 overflow-y-auto p-12">
+      <main className={`flex-1 overflow-y-auto p-12 transition-all duration-500 ${showKeyboard ? 'pb-[400px]' : 'pb-12'}`}>
         <div className="max-w-6xl mx-auto grid grid-cols-2 gap-8">
           {filteredDepts.map((dept, index) => (
             <motion.button
@@ -118,6 +131,14 @@ const StepDepartmentGrid: React.FC<StepDepartmentGridProps> = ({ onSelect }) => 
           </div>
         </div>
       </footer>
+
+      <VirtualKeyboard
+        isVisible={showKeyboard}
+        layout="default"
+        onKeyPress={handleKeyPress}
+        onClose={() => setShowKeyboard(false)}
+        lockLayout={true}
+      />
     </div>
   );
 };

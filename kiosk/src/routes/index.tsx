@@ -5,6 +5,10 @@ import LoginForm from '../features/auth/components/LoginForm';
 import KioskSelector from '../features/setup/components/KioskSelector';
 import KioskDisplay from '../features/display/components/KioskDisplay';
 import type { User, Kiosk } from '../core/types';
+import KioskLoginLayout from '../components/layout/KioskLoginLayout';
+import PrivacyPolicyPage from '../features/legal/PrivacyPolicyPage';
+import RefundPolicyPage from '../features/legal/RefundPolicyPage';
+import TermsAndConditionsPage from '../features/legal/TermsAndConditionsPage';
 
 interface AppRoutesProps {
   user: User | null;
@@ -26,8 +30,18 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
   return (
     <Routes>
       <Route path="/" element={
-        user ? <Navigate to="/select" replace /> : <LoginForm onLoginSuccess={onLoginSuccess} />
+        user ? (
+          <Navigate to="/select" replace />
+        ) : (
+          <KioskLoginLayout>
+            <LoginForm onLoginSuccess={onLoginSuccess} />
+          </KioskLoginLayout>
+        )
       } />
+
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
+      <Route path="/refund-policy" element={<RefundPolicyPage />} />
 
       <Route element={<ProtectedRoute user={user} selectedKiosk={selectedKiosk} requireKiosk={false} />}>
         <Route path="/select" element={

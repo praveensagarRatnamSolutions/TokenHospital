@@ -30,7 +30,7 @@ interface PatientData {
 interface StepPaymentSelectionProps {
   department: Department;
   doctor: Doctor;
-  onProceed: (data: PatientData) => void;
+  onProceed: (data: PatientData) => Promise<void>;
   onBack: () => void;
 }
 
@@ -46,6 +46,7 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
   const [gender, setGender] = useState<"Male" | "Female" | "Other">("Male");
   const [method, setMethod] = useState<"CASH" | "UPI" | "CARD">("CASH");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [focusedField, setFocusedField] = useState<"name" | "phone" | "age" | null>(null);
   const [showKeyboard, setShowKeyboard] = useState(false);
 
@@ -71,7 +72,7 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
     if (focusedField === "age") {
       if (/^\d$/.test(key)) {
         const newVal = parseInt(age.toString() + key);
-        if (newVal <= 150) setAge(newVal);
+        if (newVal <= 120) setAge(newVal);
       }
     }
   };
@@ -92,22 +93,29 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
     };
   };
 
-  const validate = () => {
+  const validate = async () => {
     if (!name.trim()) return setError("Please enter your name");
     if (!phone.trim() || phone.length < 10)
       return setError("Please enter a valid phone number");
-    if (!age || age < 1 || age > 150)
-      return setError("Please enter a valid age (1-150)");
+    if (age === "" || age < 0 || age > 120)
+      return setError("Please enter a valid age (0-120)");
     setError("");
 
     const phoneData = parsePhoneNumber(phone);
-    onProceed({
-      name,
-      age: typeof age === "string" ? parseInt(age) : age,
-      gender,
-      phone: phoneData,
-      paymentMethod: method,
-    });
+    try {
+      setSubmitting(true);
+      await onProceed({
+        name,
+        age: typeof age === "string" ? parseInt(age) : age,
+        gender,
+        phone: phoneData,
+        paymentMethod: method,
+      });
+    } catch (err: any) {
+      setError(err?.message || "Unable to generate token. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -227,8 +235,8 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
                       setShowKeyboard(true);
                     }}
                     placeholder="e.g. 30"
-                    min="1"
-                    max="150"
+                    min="0"
+                    max="120"
                     className="w-full bg-slate-50 dark:bg-white/5 border-2 border-slate-200 dark:border-white/10 rounded-[2rem] py-6 px-8 text-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-sky-500 transition-all placeholder:text-slate-300 dark:placeholder:text-white/10"
                   />
                 </div>
@@ -379,10 +387,11 @@ const StepPaymentSelection: React.FC<StepPaymentSelectionProps> = ({
 
           <button
             onClick={validate}
-            className="w-full h-24 rounded-[3rem] bg-sky-500 hover:bg-sky-400 text-white flex items-center justify-center gap-4 transition-all shadow-2xl shadow-sky-500/20 active:scale-[0.98]"
+            disabled={submitting}
+            className="w-full h-24 rounded-[3rem] bg-sky-500 hover:bg-sky-400 disabled:bg-sky-500/60 disabled:cursor-wait text-white flex items-center justify-center gap-4 transition-all shadow-2xl shadow-sky-500/20 active:scale-[0.98]"
           >
             <span className="text-3xl font-black uppercase tracking-[0.2em] ml-8">
-              Generate Token
+              {submitting ? "Generating..." : "Generate Token"}
             </span>
             <div className="size-12 rounded-full bg-white/20 flex items-center justify-center">
               <ChevronRight size={24} />

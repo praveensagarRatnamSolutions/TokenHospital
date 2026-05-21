@@ -20,6 +20,18 @@ export type KioskStep =
   | "UPI_PAYMENT"
   | "SUCCESS";
 
+const getApiErrorMessage = (err: any) => {
+  const data = err?.response?.data;
+  const fieldError = data?.errors?.[0]?.msg;
+
+  return (
+    fieldError ||
+    data?.message ||
+    err?.message ||
+    "Unable to generate token. Please try again."
+  );
+};
+
 export const useKioskDisplay = (code: string) => {
   // Idle timeout configuration (3 minutes = 180000 milliseconds)
   const IDLE_TIMEOUT = 180000;
@@ -304,7 +316,9 @@ export const useKioskDisplay = (code: string) => {
       } catch (err) {
         console.error("Failed to fetch or send print data", err);
       }
-    } catch (err) {
+    } catch (err: any) {
+      const message = getApiErrorMessage(err);
+      throw new Error(message);
       console.error("❌ Process failed", err);
     }
   };

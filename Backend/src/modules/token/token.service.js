@@ -2,16 +2,61 @@ const Token = require('./token.model');
 const Consultation = require('../patient/consultation.model');
 const Hospital = require('../hospital/hospital.model');
 const Payment = require('../payment/payment.model');
+const Patient = require('../patient/patient.model');
 const TokenCounter = require('./tokenCounter.model');
 const Department = require('../department/department.model');
 const Doctor = require('../doctor/doctor.model');
-const Patient = require('../patient/patient.model');
+const WalletService = require('../wallet/wallet.service');
+const { sendSms, buildTokenCreatedSms, buildTokenCalledSms } = require('../../utils/sms');
+const logger = require('../../config/logger');
 const {
   broadcastToHospital,
   broadcastKioskQueue,
 } = require('../../socket/socketHandler');
 const { normalizeDate, getDayOfWeek } = require('./token.util');
 const { default: mongoose } = require('mongoose');
+
+const sendTokenSmsNotification = async ({
+  hospitalId,
+  patientPhone,
+  smsMessage,
+  referenceId,
+  actionLabel,
+}) => {
+  if (!patientPhone) return;
+
+  const hospital = await Hospital.findById(hospitalId).select('wallet');
+  if ((hospital?.wallet?.smsCredits || 0) <= 0) {
+    logger.warn(`${actionLabel} SMS skipped for ${patientPhone}: insufficient SMS credits`);
+    return;
+  }
+
+  try {
+    await WalletService.deductWallet(
+      hospitalId,
+      'SMS',
+      1,
+      `${actionLabel} SMS sent to ${patientPhone}`,
+      'TOKEN_ALERT',
+      referenceId
+    );
+    await sendSms({ to: patientPhone, message: smsMessage });
+  } catch (smsError) {
+    logger.error(`${actionLabel} SMS failed for ${patientPhone}: ${smsError.message}`);
+    try {
+      await WalletService.creditWallet(
+        hospitalId,
+        'SMS',
+        1,
+        `Refund for failed ${actionLabel.toLowerCase()} SMS to ${patientPhone}`,
+        'PROMOTIONAL_GIFT',
+        referenceId
+      );
+    } catch (refundError) {
+      logger.error(`Failed to refund SMS credit for ${patientPhone}: ${refundError.message}`);
+    }
+  }
+};
 
 /**
  * =============================================================================
@@ -265,6 +310,26 @@ const createToken = async (tokenData) => {
       createdAt: { $lt: token.createdAt },
     });
 
+    // SMS notification after token creation
+    const hospitalWithContact = await Hospital.findById(hospitalId).select('name phone wallet');
+    const doctorForSms = await Doctor.findById(assignedDoctorId).select('name roomFloor');
+    const tokenPatientPhone = patient?.phone?.full;
+    const tokenSms = buildTokenCreatedSms({
+      hospitalName: hospitalWithContact?.name || 'Hospital Token',
+      tokenNumber,
+      patientName: patient?.name || null,
+      doctorName: doctorForSms?.name || 'Doctor',
+      roomNumber: doctorForSms?.roomFloor || null,
+    });
+
+    await sendTokenSmsNotification({
+      hospitalId,
+      patientPhone: tokenPatientPhone,
+      smsMessage: tokenSms,
+      referenceId: token._id.toString(),
+      actionLabel: 'Token created',
+    });
+
     return { token: populated, payment, waitingCount };
   } catch (error) {
     await session.abortTransaction();
@@ -368,6 +433,26 @@ const callNextToken = async (doctorId, hospitalId) => {
     tokenObj.patient = tokenObj.patientId;
     broadcastToHospital(hospitalId, 'queue-updated', tokenObj);
     broadcastKioskQueue(hospitalId);
+
+    const hospital = await Hospital.findById(hospitalId).select('name phone wallet');
+    const doctor = await Doctor.findById(doctorId).select('name roomFloor');
+    const patientPhone = tokenObj.patient?.phone?.full || tokenObj.patientId?.phone?.full;
+    const message = buildTokenCalledSms({
+      hospitalName: hospital?.name || 'Hospital Token',
+      tokenNumber: tokenObj.tokenNumber,
+      patientName: tokenObj.patient?.name || tokenObj.patientId?.name || null,
+      doctorName: doctor?.name || 'Doctor',
+      roomNumber: doctor?.roomFloor || tokenObj.doctorId?.roomFloor || null,
+    });
+
+    await sendTokenSmsNotification({
+      hospitalId,
+      patientPhone,
+      smsMessage: message,
+      referenceId: tokenObj._id.toString(),
+      actionLabel: 'Token called',
+    });
+
     return tokenObj;
   } else {
     broadcastToHospital(hospitalId, 'queue-updated', {
@@ -400,6 +485,24 @@ const callTokenById = async (tokenId, doctorId, hospitalId) => {
     tokenObj.patient = tokenObj.patientId;
     broadcastToHospital(hospitalId, 'queue-updated', tokenObj);
     broadcastKioskQueue(hospitalId);
+    const hospital = await Hospital.findById(hospitalId).select('name phone wallet');
+    const doctor = await Doctor.findById(doctorId).select('name roomFloor');
+    const patientPhone = tokenObj.patient?.phone?.full || tokenObj.patientId?.phone?.full;
+    const callMessage = buildTokenCalledSms({
+      hospitalName: hospital?.name || 'Hospital Token',
+      tokenNumber: tokenObj.tokenNumber,
+      patientName: tokenObj.patient?.name || tokenObj.patientId?.name || null,
+      doctorName: doctor?.name || 'Doctor',
+      roomNumber: doctor?.roomFloor || tokenObj.doctorId?.roomFloor || null,
+    });
+
+    await sendTokenSmsNotification({
+      hospitalId,
+      patientPhone,
+      smsMessage: callMessage,
+      referenceId: tokenObj._id.toString(),
+      actionLabel: 'Token called',
+    });
     return tokenObj;
   }
   return null;

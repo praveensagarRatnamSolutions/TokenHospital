@@ -1,7 +1,10 @@
 const Kiosk = require('./kiosk.model');
 const Token = require('../token/token.model');
 const Hospital = require('../hospital/hospital.model');
-const { getHospitalLimits, isSubscriptionValid } = require('../hospital/subscription.utils');
+const {
+  getHospitalLimits,
+  isSubscriptionValid,
+} = require('../hospital/subscription.utils');
 
 /**
  * @desc Create a new kiosk
@@ -141,8 +144,11 @@ const getKioskTokenStats = async (hospitalId, kioskId = null) => {
 
   // 2. Check if subscription is valid and Kiosk is allowed
   const limits = await getHospitalLimits(hospital);
-  if (!(await isSubscriptionValid(hospital)) || !limits.allowKiosk) {
-    throw new Error('Access Denied: Your plan does not allow Kiosk access or has expired.');
+  console.log('Hospital Limits for Kiosk Access:', limits);
+  if (!(await isSubscriptionValid(hospital)) || !limits.maxKiosks) {
+    throw new Error(
+      'Access Denied: Your plan does not allow Kiosk access or has expired.'
+    );
   }
 
   const today = new Date().toISOString().split('T')[0];
@@ -181,7 +187,7 @@ const getKioskTokenStats = async (hospitalId, kioskId = null) => {
 
   const grouped = {};
 
-  // 🔥 Pre-initialize grouped data from Kiosk config to ensure assigned slots 
+  // 🔥 Pre-initialize grouped data from Kiosk config to ensure assigned slots
   // show as 'Ready' and allow 'Hi, Doctor' messages to work.
   if (kioskId) {
     const Kiosk = require('./kiosk.model');
@@ -192,9 +198,13 @@ const getKioskTokenStats = async (hospitalId, kioskId = null) => {
 
     if (kioskConfig) {
       for (const doc of kioskConfig.doctorIds) {
-        let dept = kioskConfig.departmentIds.find(d => d._id.toString() === doc.departmentId?.toString());
+        let dept = kioskConfig.departmentIds.find(
+          (d) => d._id.toString() === doc.departmentId?.toString()
+        );
         if (!dept && doc.departmentId) {
-            dept = await require('../department/department.model').findById(doc.departmentId).lean();
+          dept = await require('../department/department.model')
+            .findById(doc.departmentId)
+            .lean();
         }
 
         if (dept) {

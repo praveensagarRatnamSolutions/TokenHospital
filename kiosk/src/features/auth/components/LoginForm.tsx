@@ -10,7 +10,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   const { state, actions } = useLoginForm(onLoginSuccess);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 p-6 transition-colors duration-500">
+    <div className="flex w-full items-center justify-center bg-slate-950 p-6 transition-colors duration-500">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-white/10 shadow-2xl animate-in fade-in zoom-in duration-500">
         <div className="flex flex-col items-center mb-8">
           <div className="size-16 rounded-2xl bg-sky-500/10 dark:bg-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-500 mb-4 border border-sky-500/10">

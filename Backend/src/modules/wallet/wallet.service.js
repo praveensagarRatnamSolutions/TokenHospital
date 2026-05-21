@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Hospital = require('../hospital/hospital.model');
 const WalletLedger = require('./walletLedger.model');
+const { sendEmail } = require('../../utils/email');
+const logger = require('../../config/logger');
 
 class WalletService {
   /**
@@ -81,6 +83,26 @@ class WalletService {
   static async getBalances(hospitalId) {
     const hospital = await Hospital.findById(hospitalId).select('wallet');
     return hospital ? hospital.wallet : { smsCredits: 0, emailCredits: 0 };
+  }
+
+  static async sendEmailWithWallet({ hospitalId, to, subject, text, html, amount = 1, description, referenceType = 'TOKEN_ALERT', referenceId = null, session = null }) {
+    const balanceAfter = await WalletService.deductWallet(
+      hospitalId,
+      'EMAIL',
+      amount,
+      description || `Email sent: ${subject}`,
+      referenceType,
+      referenceId,
+      session
+    );
+
+    try {
+      await sendEmail({ to, subject, text, html });
+      return { success: true, balanceAfter };
+    } catch (error) {
+      logger.error(`Email send failed after wallet deduction for hospital ${hospitalId}: ${error.message}`);
+      throw error;
+    }
   }
 }
 

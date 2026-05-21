@@ -1,9 +1,12 @@
 const doctorService = require('./doctor.service');
 const doctorValidation = require('./doctor.validations');
 const authService = require('../auth/auth.service');
+const Hospital = require('../hospital/hospital.model');
+const WalletService = require('../wallet/wallet.service');
 const mongoose = require('mongoose');
 const logger = require('../../config/logger');
 const { getUploadPresignedUrl } = require('../../utils/s3');
+const { buildDoctorWelcomeEmail, sendEmail } = require('../../utils/email');
 
 /**
  * @desc    Add a new doctor
@@ -45,6 +48,53 @@ const createDoctor = async (req, res, next) => {
 
     await session.commitTransaction();
     logger.info(`Doctor created with account: ${doctor.name} (${email})`);
+
+    const hospital = await Hospital.findById(req.hospitalId).select('name wallet email logo');
+    const welcomeEmail = buildDoctorWelcomeEmail({
+      hospitalName: hospital?.name || 'Hospital Token',
+      doctorName: doctor.name,
+      email,
+      temporaryPassword: password,
+      loginUrl: `${process.env.FRONTEND_URL || 'https://hospitaltoken.com'}/login`,
+      hospitalLogo: hospital?.logo || null,
+    });
+
+    if ((hospital?.wallet?.emailCredits || 0) <= 0) {
+      logger.warn(`Doctor welcome email skipped for ${email}: insufficient email credits`);
+    } else {
+      try {
+        await WalletService.deductWallet(
+          req.hospitalId,
+          'EMAIL',
+          1,
+          `Doctor welcome email sent to ${email}`,
+          'TOKEN_ALERT',
+          doctor._id.toString()
+        );
+
+        await sendEmail({
+          to: email,
+          subject: welcomeEmail.subject,
+          text: welcomeEmail.text,
+          html: welcomeEmail.html,
+        });
+      } catch (emailError) {
+        logger.error(`Doctor welcome email failed for ${email}: ${emailError.message}`);
+        try {
+          await WalletService.creditWallet(
+            req.hospitalId,
+            'EMAIL',
+            1,
+            `Refund for failed doctor welcome email to ${email}`,
+            'PROMOTIONAL_GIFT',
+            doctor._id.toString()
+          );
+        } catch (refundError) {
+          logger.error(`Failed to refund email credit for ${email}: ${refundError.message}`);
+        }
+      }
+    }
+
     res.status(201).json({ success: true, data: doctor });
   } catch (error) {
     await session.abortTransaction();
