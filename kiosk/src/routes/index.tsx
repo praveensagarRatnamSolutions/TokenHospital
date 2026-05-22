@@ -27,6 +27,9 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
   onKioskSelect,
   onToggleTheme 
 }) => {
+  const canOpenKioskSelector =
+    !selectedKiosk || localStorage.getItem('kiosk_admin_unlocked') === 'true';
+
   return (
     <Routes>
       <Route path="/" element={
@@ -45,7 +48,11 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
 
       <Route element={<ProtectedRoute user={user} selectedKiosk={selectedKiosk} requireKiosk={false} />}>
         <Route path="/select" element={
-          <KioskSelector onSelect={onKioskSelect} />
+          canOpenKioskSelector ? (
+            <KioskSelector onSelect={onKioskSelect} />
+          ) : (
+            <Navigate to={`/display/${selectedKiosk.code}`} replace />
+          )
         } />
       </Route>
 

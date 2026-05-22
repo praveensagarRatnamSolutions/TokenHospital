@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Stethoscope, Heart, Baby, Eye, Activity, ChevronRight, Loader2, Hospital } from 'lucide-react';
+import { Search, Stethoscope, Heart, Baby, Eye, Activity, ChevronRight, Loader2, Hospital, ArrowLeft } from 'lucide-react';
 import { kioskApi } from '../../../core/api';
 import type { Department } from '../../../core/types';
 import VirtualKeyboard from '../components/VirtualKeyboard';
 
 interface StepDepartmentGridProps {
   onSelect: (dept: Department) => void;
+  onBack: () => void;
 }
 
-const StepDepartmentGrid: React.FC<StepDepartmentGridProps> = ({ onSelect }) => {
+const StepDepartmentGrid: React.FC<StepDepartmentGridProps> = ({ onSelect, onBack }) => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -63,7 +64,20 @@ const StepDepartmentGrid: React.FC<StepDepartmentGridProps> = ({ onSelect }) => 
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 overflow-hidden transition-colors duration-500">
       {/* Header */}
-      <header className="pt-20 pb-12 px-12 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-3xl">
+      <header className="relative pt-20 pb-12 px-12 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-3xl">
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute left-12 top-10 flex items-center gap-4 text-slate-400 dark:text-white/30 hover:text-sky-500 transition-colors group"
+        >
+          <div className="size-12 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white group-hover:border-sky-500 transition-all shadow-sm">
+            <ArrowLeft size={20} />
+          </div>
+          <span className="font-black uppercase tracking-widest text-sm">
+            Ads
+          </span>
+        </button>
+
         <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
           <div className="size-20 rounded-3xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mb-8">
             <Hospital className="text-sky-500 dark:text-sky-400" size={40} />

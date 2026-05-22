@@ -51,6 +51,7 @@ const App: React.FC = () => {
 
   const handleKioskSelect = (kiosk: Kiosk) => {
     setSelectedKiosk(kiosk);
+    localStorage.removeItem('kiosk_admin_unlocked');
     localStorage.setItem('active_kiosk_id', kiosk._id);
     localStorage.setItem('active_kiosk_data', JSON.stringify(kiosk));
   };

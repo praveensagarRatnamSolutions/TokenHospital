@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User as UserIcon, Lock, Loader2, Hospital } from 'lucide-react';
 import { useLoginForm } from '../hooks/useLoginForm';
+import VirtualKeyboard from '../../display/components/VirtualKeyboard';
 
 interface LoginFormProps {
   onLoginSuccess: (user: any) => void;
@@ -8,9 +9,25 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   const { state, actions } = useLoginForm(onLoginSuccess);
+  const [focusedField, setFocusedField] = useState<'email' | 'password' | null>(null);
+  const [showKeyboard, setShowKeyboard] = useState(false);
+
+  const handleKeyPress = (key: string) => {
+    if (!focusedField) return;
+
+    const setValue =
+      focusedField === 'email' ? actions.setEmail : actions.setPassword;
+
+    if (key === 'backspace') {
+      setValue((prev: string) => prev.slice(0, -1));
+      return;
+    }
+
+    setValue((prev: string) => prev + key);
+  };
 
   return (
-    <div className="flex w-full items-center justify-center bg-slate-950 p-6 transition-colors duration-500">
+    <div className={`flex w-full items-center justify-center bg-slate-950 p-6 transition-all duration-500 ${showKeyboard ? 'pb-[380px]' : ''}`}>
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-white/10 shadow-2xl animate-in fade-in zoom-in duration-500">
         <div className="flex flex-col items-center mb-8">
           <div className="size-16 rounded-2xl bg-sky-500/10 dark:bg-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-500 mb-4 border border-sky-500/10">
@@ -33,9 +50,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
               <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
               <input
                 type="email"
+                inputMode="none"
                 required
                 value={state.email}
                 onChange={(e) => actions.setEmail(e.target.value)}
+                onFocus={() => {
+                  setFocusedField('email');
+                  setShowKeyboard(true);
+                }}
                 className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-all font-semibold"
                 placeholder="admin@hospital.com"
               />
@@ -48,9 +70,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
               <input
                 type="password"
+                inputMode="none"
                 required
                 value={state.password}
                 onChange={(e) => actions.setPassword(e.target.value)}
+                onFocus={() => {
+                  setFocusedField('password');
+                  setShowKeyboard(true);
+                }}
                 className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-all font-semibold"
                 placeholder="••••••••"
               />
@@ -76,6 +103,18 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
           </p>
         </div>
       </div>
+
+      <VirtualKeyboard
+        isVisible={showKeyboard}
+        layout="default"
+        onKeyPress={handleKeyPress}
+        onClose={() => setShowKeyboard(false)}
+        extraKeys={
+          focusedField === 'email'
+            ? ['@', '.', '_', '-']
+            : ['@', '.', '_', '-', '#', '!']
+        }
+      />
     </div>
   );
 };

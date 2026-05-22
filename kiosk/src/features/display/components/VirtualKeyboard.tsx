@@ -8,6 +8,8 @@ interface VirtualKeyboardProps {
   onClose: () => void;
   isVisible: boolean;
   lockLayout?: boolean;
+  extraKeys?: string[];
+  onEnter?: () => void;
 }
 
 const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
@@ -16,6 +18,8 @@ const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   onClose,
   isVisible,
   lockLayout = false,
+  extraKeys = [],
+  onEnter,
 }) => {
   const [isShift, setIsShift] = useState(false);
 
@@ -47,7 +51,11 @@ const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
     } else if (key === "abc") {
       setCurrentLayoutType("default");
     } else if (key === "enter") {
+      if (onEnter) {
+        onEnter();
+      } else {
         onClose();
+      }
     } else {
       let output = key;
       if (key === "space") output = " ";
@@ -56,7 +64,12 @@ const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
     }
   };
 
-  const currentLayout = currentLayoutType === "numeric" ? numericLayout : defaultLayout;
+  const currentLayout =
+    currentLayoutType === "numeric"
+      ? numericLayout
+      : extraKeys.length
+        ? [...defaultLayout, extraKeys]
+        : defaultLayout;
 
   return (
     <AnimatePresence>

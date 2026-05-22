@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { kioskApi, authApi, printApi } from "../../../core/api";
 import { socketService } from "../../../core/api/socket";
 import { dbStore, initDB } from "../../../core/db";
@@ -33,6 +34,7 @@ const getApiErrorMessage = (err: any) => {
 };
 
 export const useKioskDisplay = (code: string) => {
+  const navigate = useNavigate();
   // Idle timeout configuration (3 minutes = 180000 milliseconds)
   const IDLE_TIMEOUT = 180000;
   const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -211,8 +213,10 @@ export const useKioskDisplay = (code: string) => {
 
   const handleExitKiosk = () => {
     if (pin === "1234") {
+      localStorage.setItem("kiosk_admin_unlocked", "true");
       localStorage.removeItem("active_kiosk_id");
-      window.location.reload();
+      localStorage.removeItem("active_kiosk_data");
+      navigate("/select", { replace: true });
     } else {
       setPinError(true);
       setTimeout(() => setPinError(false), 2000);

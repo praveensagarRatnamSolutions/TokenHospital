@@ -1,6 +1,15 @@
 const logger = require('../config/logger');
 const nodemailer = require('nodemailer');
 
+console.log('Email configuration:', {
+  emailFrom: process.env.EMAIL_FROM || 'not set',
+  host: process.env.SMTP_HOST || 'not set',
+  port: process.env.SMTP_PORT || 'not set',
+  user: process.env.SMTP_USER || 'not set',
+  pass: process.env.SMTP_PASS || 'not set',
+  secure: process.env.SMTP_SECURE || 'not set',
+});
+
 const DEFAULT_FROM =
   process.env.EMAIL_FROM || 'Hospital Token <no-reply@hospitaltoken.com>';
 

@@ -22,6 +22,7 @@ import StepDoctorGrid from "../flow/StepDoctorGrid";
 import StepPaymentSelection from "../flow/StepPaymentSelection";
 import StepUPIPayment from "../flow/StepUPIPayment";
 import StepTokenSuccess from "../flow/StepTokenSuccess";
+import VirtualKeyboard from "./VirtualKeyboard";
 
 interface KioskDisplayProps {
   code: string;
@@ -35,6 +36,17 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
   onToggleTheme,
 }) => {
   const { state, actions } = useKioskDisplay(code);
+
+  const handlePinKeyPress = (key: string) => {
+    if (key === "backspace") {
+      actions.setPin(state.pin.slice(0, -1));
+      return;
+    }
+
+    if (/^\d$/.test(key) && state.pin.length < 4) {
+      actions.setPin(state.pin + key);
+    }
+  };
   if (state.loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white overflow-hidden transition-colors duration-500">
@@ -68,7 +80,12 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
   const renderStep = () => {
     switch (state.step) {
       case "DEPARTMENT":
-        return <StepDepartmentGrid onSelect={actions.handleDeptSelect} />;
+        return (
+          <StepDepartmentGrid
+            onSelect={actions.handleDeptSelect}
+            onBack={actions.resetFlow}
+          />
+        );
       case "DOCTOR":
         return (
           <StepDoctorGrid
@@ -243,6 +260,7 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
               <div className="relative mb-8">
                 <input
                   type="password"
+                  inputMode="none"
                   value={state.pin}
                   onChange={(e) => actions.setPin(e.target.value)}
                   placeholder="----"
@@ -268,6 +286,18 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
                 </button>
               </div>
             </motion.div>
+
+            <VirtualKeyboard
+              isVisible={state.showPinModal}
+              layout="numeric"
+              onKeyPress={handlePinKeyPress}
+              onClose={() => {
+                actions.setShowPinModal(false);
+                actions.setPin("");
+              }}
+              onEnter={actions.handleExitKiosk}
+              lockLayout={true}
+            />
           </motion.div>
         )}
       </AnimatePresence>
