@@ -53,6 +53,8 @@ const getTokens = async (req, res, next) => {
       doctorId: req.query.doctorId,
       isQueue: req.query.isQueue === 'true',
       appointmentDate: req.query.appointmentDate,
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
       page: req.query.page,
       limit: req.query.limit,
       search: req.query.search,

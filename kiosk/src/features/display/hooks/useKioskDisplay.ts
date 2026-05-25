@@ -38,6 +38,7 @@ export const useKioskDisplay = (code: string) => {
   // Idle timeout configuration (3 minutes = 180000 milliseconds)
   const IDLE_TIMEOUT = 180000;
   const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAnnouncedTokenRef = useRef<string | null>(null);
 
   const [showMenu, setShowMenu] = useState(false);
   const [kiosk, setKiosk] = useState<Kiosk | null>(null);
@@ -60,6 +61,56 @@ export const useKioskDisplay = (code: string) => {
 
   const isOnline = useOnlineStatus();
   useSync(isOnline);
+
+  const getEntityId = (value: any) => {
+    if (!value) return null;
+    if (typeof value === "string") return value;
+    return value._id || value.id || null;
+  };
+
+  const isTokenVisibleForKiosk = (token: any) => {
+    const kioskDepartmentIds = kiosk?.departmentIds?.map(getEntityId).filter(Boolean) || [];
+    const kioskDoctorIds = kiosk?.doctorIds?.map(getEntityId).filter(Boolean) || [];
+    const tokenDepartmentId = getEntityId(token?.departmentId);
+    const tokenDoctorId = getEntityId(token?.doctorId);
+
+    const matchesDepartment =
+      kioskDepartmentIds.length === 0 ||
+      (tokenDepartmentId && kioskDepartmentIds.includes(tokenDepartmentId));
+    const matchesDoctor =
+      kioskDoctorIds.length === 0 ||
+      (tokenDoctorId && kioskDoctorIds.includes(tokenDoctorId));
+
+    return matchesDepartment && matchesDoctor;
+  };
+
+  const speakCalledToken = (token: any) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (!token?.tokenNumber || token.status !== "CALLED") return;
+    if (!isTokenVisibleForKiosk(token)) return;
+
+    const announcementKey = `${token._id || token.tokenNumber}-${token.calledAt || ""}`;
+    if (lastAnnouncedTokenRef.current === announcementKey) return;
+    lastAnnouncedTokenRef.current = announcementKey;
+
+    const doctorName = token.doctorId?.name;
+    const roomNumber = token.doctorId?.roomFloor;
+    const message = [
+      `Token number ${token.tokenNumber}`,
+      doctorName ? `please proceed to Doctor ${doctorName}` : "please proceed",
+      roomNumber ? `room ${roomNumber}` : null,
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = "en-IN";
+    utterance.rate = 0.85;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Idle timeout handler - resets to LANDING after inactivity
   const resetIdleTimeout = () => {
@@ -171,8 +222,15 @@ export const useKioskDisplay = (code: string) => {
     if (kiosk?.hospitalId && isOnline) {
       socketService.connect(kiosk.hospitalId);
 
+      // Join hospital room to receive direct token-called updates for voice announcements
+      socketService.emit("join-hospital", kiosk.hospitalId);
+
       // Join kiosk-specific room for targeted updates
       socketService.emit("join-kiosk", kiosk._id);
+
+      socketService.on("queue-updated", (data: any) => {
+        speakCalledToken(data);
+      });
 
       // Grouped department queue for the kiosk display
       socketService.on("kiosk-queue-updated", (data: DepartmentQueue[]) => {
@@ -190,6 +248,7 @@ export const useKioskDisplay = (code: string) => {
         .catch(() => {});
 
       return () => {
+        socketService.off("queue-updated");
         socketService.off("kiosk-queue-updated");
       };
     } else if (!isOnline) {

@@ -57,20 +57,10 @@ export default function DoctorProfilePage() {
     data: profile,
     isLoading,
     isError,
-  } = useQuery<{ name: string; email: string; profilePic?: string }, any>({
+    error: queryError,
+  } = useQuery({
     queryKey: ['authUser'],
     queryFn: authApi.getCurrentUser,
-    onSuccess: (data) => {
-      setFormData((prev) => ({
-        ...prev,
-        name: data.name || '',
-        email: data.email || '',
-        profilePic: data.profilePic || '',
-      }));
-    },
-    onError: (error: any) => {
-      setErrorMessage(error?.response?.data?.message || 'Unable to load profile');
-    },
   });
 
   useEffect(() => {
@@ -84,7 +74,13 @@ export default function DoctorProfilePage() {
     }
   }, [profile]);
 
-  const updateMutation = useMutation<unknown, any, ProfileUpdatePayload>({
+  useEffect(() => {
+    if (isError && queryError) {
+      setErrorMessage((queryError as any)?.response?.data?.message || 'Unable to load profile');
+    }
+  }, [isError, queryError]);
+
+  const updateMutation = useMutation<any, any, ProfileUpdatePayload>({
     mutationFn: (payload: ProfileUpdatePayload) => authApi.updateProfile(payload),
     onSuccess: (updatedUser) => {
       setSuccessMessage('Profile updated successfully.');
@@ -183,15 +179,15 @@ export default function DoctorProfilePage() {
   if (isLoading && !profile) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-10 shadow-xl">
+        <div className="rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-10 shadow-xl">
           <div className="animate-pulse space-y-6">
-            <div className="h-10 w-52 rounded-2xl bg-slate-200" />
-            <div className="h-96 rounded-[2rem] bg-slate-200" />
+            <div className="h-10 w-52 rounded-2xl bg-slate-200 dark:bg-slate-800" />
+            <div className="h-96 rounded-[2rem] bg-slate-200 dark:bg-slate-800" />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="h-24 rounded-3xl bg-slate-200" />
-              <div className="h-24 rounded-3xl bg-slate-200" />
+              <div className="h-24 rounded-3xl bg-slate-200 dark:bg-slate-800" />
+              <div className="h-24 rounded-3xl bg-slate-200 dark:bg-slate-800" />
             </div>
-            <div className="h-16 rounded-3xl bg-slate-200" />
+            <div className="h-16 rounded-3xl bg-slate-200 dark:bg-slate-800" />
           </div>
         </div>
       </div>
@@ -202,8 +198,8 @@ export default function DoctorProfilePage() {
     <div className="max-w-6xl mx-auto px-4 py-10">
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         <div className="xl:col-span-8 space-y-6">
-          <div className="rounded-[2rem] bg-white shadow-xl border border-slate-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-sky-600 to-indigo-600 p-8 text-white">
+          <div className="rounded-[2rem] bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-600 to-indigo-600 p-8 text-white ">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.35em] opacity-90">
@@ -218,18 +214,18 @@ export default function DoctorProfilePage() {
               </div>
             </div>
 
-            <div className="p-8">
+            <div className="p-8 ">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div className="lg:col-span-2 space-y-4">
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-                    <h2 className="text-xl font-bold">Profile Details</h2>
-                    <p className="text-sm text-slate-500 mt-1">
+                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6">
+                    <h2 className="text-xl font-bold dark:text-white">Profile Details</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                       Update your public name, email address, and avatar.
                     </p>
                   </div>
                 </div>
-                <div className="rounded-3xl border border-slate-200 p-6 flex flex-col items-center text-center bg-slate-50">
-                  <div className="relative w-28 h-28 rounded-3xl overflow-hidden bg-slate-200 shadow-inner mb-4">
+                <div className="rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center text-center bg-slate-50 dark:bg-slate-800/50">
+                  <div className="relative w-28 h-28 rounded-3xl overflow-hidden bg-slate-200 dark:bg-slate-700 shadow-inner mb-4">
                     {formData.profilePic ? (
                       <img
                         src={getProfileImageUrl(formData.profilePic)}
@@ -237,13 +233,13 @@ export default function DoctorProfilePage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-500">
+                      <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400">
                         <User className="w-12 h-12" />
                       </div>
                     )}
                   </div>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-slate-600 shadow-sm hover:bg-slate-100 transition">
-                    <ImagePlus className="w-4 h-4 text-slate-500" />
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-white dark:bg-slate-700 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 shadow-sm hover:bg-slate-100 dark:hover:bg-slate-600 transition border border-transparent dark:border-slate-600">
+                    <ImagePlus className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                     Upload avatar
                     <input
                       type="file"
@@ -256,12 +252,12 @@ export default function DoctorProfilePage() {
               </div>
 
               {errorMessage && (
-                <div className="rounded-3xl border border-red-100 bg-red-50 p-4 text-sm text-red-700 mb-6">
+                <div className="rounded-3xl border border-red-100 dark:border-red-900/30 bg-red-50 dark:bg-red-900/10 p-4 text-sm text-red-700 dark:text-red-400 mb-6">
                   {errorMessage}
                 </div>
               )}
               {successMessage && (
-                <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700 mb-6 flex items-center gap-3">
+                <div className="rounded-3xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-900/10 p-4 text-sm text-emerald-700 dark:text-emerald-400 mb-6 flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5" />
                   {successMessage}
                 </div>
@@ -270,11 +266,11 @@ export default function DoctorProfilePage() {
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <label className="text-sm font-semibold text-slate-700">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       Full Name
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400">
+                      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400 dark:text-slate-500">
                         <User className="w-4 h-4" />
                       </span>
                       <input
@@ -282,18 +278,18 @@ export default function DoctorProfilePage() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full rounded-3xl border border-slate-200 bg-white px-12 py-4 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+                        className="w-full rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-12 py-4 text-sm text-slate-900 dark:text-white outline-none transition focus:border-sky-400 dark:focus:border-sky-500 focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900/30 placeholder-slate-400 dark:placeholder-slate-500"
                         placeholder="Dr. Asha Patel"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-sm font-semibold text-slate-700">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       Email Address
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400">
+                      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400 dark:text-slate-500">
                         <Mail className="w-4 h-4" />
                       </span>
                       <input
@@ -301,22 +297,22 @@ export default function DoctorProfilePage() {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full rounded-3xl border border-slate-200 bg-white px-12 py-4 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+                        className="w-full rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-12 py-4 text-sm text-slate-900 dark:text-white outline-none transition focus:border-sky-400 dark:focus:border-sky-500 focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900/30 placeholder-slate-400 dark:placeholder-slate-500"
                         placeholder="doctor@hospital.com"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-[2rem] border border-slate-200 bg-slate-50 p-6">
+                <div className="rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-xl font-bold">Security</h2>
-                      <p className="text-sm text-slate-500 mt-1">
+                      <h2 className="text-xl font-bold dark:text-white">Security</h2>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                         Change your password securely when needed.
                       </p>
                     </div>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 shadow-sm">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white dark:bg-slate-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300 shadow-sm dark:border dark:border-slate-600">
                       <Lock className="w-3.5 h-3.5" />
                       Password
                     </div>
@@ -324,7 +320,7 @@ export default function DoctorProfilePage() {
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-sm font-semibold text-slate-700">
+                      <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                         Current Password
                       </label>
                       <div className="relative">
@@ -333,13 +329,13 @@ export default function DoctorProfilePage() {
                           name="currentPassword"
                           value={formData.currentPassword}
                           onChange={handleChange}
-                          className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+                          className="w-full rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-4 text-sm text-slate-900 dark:text-white outline-none transition focus:border-sky-400 dark:focus:border-sky-500 focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900/30 placeholder-slate-400 dark:placeholder-slate-500"
                           placeholder="••••••••"
                         />
                         <button
                           type="button"
                           onClick={() => setShowCurrentPassword((prev) => !prev)}
-                          className="absolute inset-y-0 right-4 flex items-center text-slate-500"
+                          className="absolute inset-y-0 right-4 flex items-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
                         >
                           {showCurrentPassword ? (
                             <EyeOff className="w-4 h-4" />
@@ -351,7 +347,7 @@ export default function DoctorProfilePage() {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-sm font-semibold text-slate-700">
+                      <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                         New Password
                       </label>
                       <div className="relative">
@@ -360,13 +356,13 @@ export default function DoctorProfilePage() {
                           name="password"
                           value={formData.password}
                           onChange={handleChange}
-                          className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+                          className="w-full rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-4 text-sm text-slate-900 dark:text-white outline-none transition focus:border-sky-400 dark:focus:border-sky-500 focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900/30 placeholder-slate-400 dark:placeholder-slate-500"
                           placeholder="Enter new password"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword((prev) => !prev)}
-                          className="absolute inset-y-0 right-4 flex items-center text-slate-500"
+                          className="absolute inset-y-0 right-4 flex items-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
                         >
                           {showPassword ? (
                             <EyeOff className="w-4 h-4" />
@@ -380,7 +376,7 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-sm text-slate-500">
+                  <div className="text-sm text-slate-500 dark:text-slate-400">
                     Password changes require your current password for security.
                   </div>
                   <button
@@ -401,14 +397,14 @@ export default function DoctorProfilePage() {
         </div>
 
         <aside className="xl:col-span-4 space-y-6">
-          <div className="rounded-[2rem] border border-slate-200 bg-slate-50 p-6 shadow-sm">
-            <div className="inline-flex items-center gap-3 text-slate-600 font-semibold mb-4">
-              <div className="rounded-2xl bg-sky-100 p-2 text-sky-600">
+          <div className="rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6 shadow-sm">
+            <div className="inline-flex items-center gap-3 text-slate-600 dark:text-slate-300 font-semibold mb-4">
+              <div className="rounded-2xl bg-sky-100 dark:bg-sky-900/40 p-2 text-sky-600 dark:text-sky-400">
                 <User className="w-5 h-5" />
               </div>
               Quick Profile Tips
             </div>
-            <ul className="space-y-4 text-sm text-slate-600">
+            <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
               <li className="flex gap-3">
                 <span className="mt-1 h-2.5 w-2.5 rounded-full bg-sky-500" />
                 Use a clear name and email so patients can recognize your account quickly.
@@ -424,16 +420,16 @@ export default function DoctorProfilePage() {
             </ul>
           </div>
 
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
             <div className="mb-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
                 Security Summary
               </p>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Keep your account secure
               </h2>
             </div>
-            <div className="space-y-3 text-sm text-slate-600">
+            <div className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
               <p className="flex items-start gap-3">
                 <span className="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 Your session stays active while using the dashboard.

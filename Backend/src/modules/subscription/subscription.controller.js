@@ -10,6 +10,7 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const WalletService = require('../wallet/wallet.service');
 const ExcelJS = require('exceljs');
+const { sendPriceChangeNoticeEmail } = require('../../utils/email');
 
 // Retrieve the global Platform Razorpay client instance
 const getGlobalRazorpayClient = () => {
@@ -78,6 +79,11 @@ const getSubscriptionStatus = async (req, res) => {
         isValid,
         trialDaysLeft,
         trialEndDate,
+        currentPeriodEnd: subscription?.currentPeriodEnd || null,
+        billingCycle: subscription?.billingCycle || 'MONTHLY',
+        cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd || false,
+        razorpaySubscriptionId: subscription?.razorpaySubscriptionId || null,
+        pendingPriceChange: subscription?.pendingPriceChange || null,
         limits: {
           maxDoctors: limits.maxDoctors,
           maxDepartments: limits.maxDepartments,
@@ -111,6 +117,9 @@ const changePlan = async (req, res) => {
     if (subscription) {
       subscription.planId = plan.planId;
       subscription.status = 'ACTIVE';
+      subscription.cancelAtPeriodEnd = false;
+      subscription.canceledAt = null;
+      subscription.endedAt = null;
       await subscription.save();
     } else {
       subscription = await HospitalSubscription.create({
@@ -193,6 +202,225 @@ const assignPlan = async (req, res) => {
     });
   } catch (error) {
     logger.error('Error assigning plan:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Cancel auto-renewal at the end of current billing cycle
+ * @route   POST /api/subscription/cancel-renewal
+ * @access  Private (ADMIN)
+ */
+const cancelRenewal = async (req, res) => {
+  try {
+    const subscription = await HospitalSubscription.findOne({
+      hospitalId: req.hospitalId,
+    });
+
+    if (!subscription) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Subscription not found' });
+    }
+
+    if (subscription.cancelAtPeriodEnd) {
+      return res.json({
+        success: true,
+        message: 'Auto-renewal is already scheduled for cancellation.',
+        data: subscription,
+      });
+    }
+
+    const hasRealRazorpaySubscription =
+      subscription.razorpaySubscriptionId &&
+      !subscription.razorpaySubscriptionId.startsWith('sub_mock');
+
+    if (hasRealRazorpaySubscription) {
+      const rzp = getGlobalRazorpayClient();
+      await rzp.subscriptions.cancel(subscription.razorpaySubscriptionId, {
+        cancel_at_cycle_end: true,
+      });
+    }
+
+    subscription.cancelAtPeriodEnd = true;
+    subscription.canceledAt = new Date();
+    await subscription.save();
+
+    res.json({
+      success: true,
+      message:
+        'Auto-renewal cancelled. Your plan remains active until the current period ends.',
+      data: subscription,
+    });
+  } catch (error) {
+    logger.error('Error cancelling subscription renewal:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Resume auto-renewal when possible, otherwise request a fresh checkout
+ * @route   POST /api/subscription/resume-renewal
+ * @access  Private (ADMIN)
+ */
+const resumeRenewal = async (req, res) => {
+  try {
+    const subscription = await HospitalSubscription.findOne({
+      hospitalId: req.hospitalId,
+    });
+
+    if (!subscription) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Subscription not found' });
+    }
+
+    if (!subscription.cancelAtPeriodEnd) {
+      return res.json({
+        success: true,
+        message: 'Auto-renewal is already enabled.',
+        data: subscription,
+      });
+    }
+
+    const hasRealRazorpaySubscription =
+      subscription.razorpaySubscriptionId &&
+      !subscription.razorpaySubscriptionId.startsWith('sub_mock');
+
+    if (hasRealRazorpaySubscription) {
+      return res.status(409).json({
+        success: false,
+        requiresCheckout: true,
+        message:
+          'Razorpay subscriptions cannot be reactivated after cancellation is scheduled. Please complete checkout again to resume auto-renewal.',
+        data: {
+          planId: subscription.planId,
+          billingCycle: subscription.billingCycle,
+        },
+      });
+    }
+
+    subscription.cancelAtPeriodEnd = false;
+    subscription.canceledAt = null;
+    await subscription.save();
+
+    res.json({
+      success: true,
+      message: 'Auto-renewal resumed successfully.',
+      data: subscription,
+    });
+  } catch (error) {
+    logger.error('Error resuming subscription renewal:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    SuperAdmin: Schedule a future price-change notice for existing subscribers
+ * @route   POST /api/subscription/price-migrations
+ * @access  Private (SUPERADMIN)
+ */
+const schedulePriceMigration = async (req, res) => {
+  try {
+    const { planId, billingCycle, newAmount, effectiveDate, sendEmails = true } = req.body;
+
+    if (!planId || !billingCycle || newAmount === undefined || !effectiveDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'planId, billingCycle, newAmount, and effectiveDate are required',
+      });
+    }
+
+    const parsedAmount = Number(newAmount);
+    const parsedEffectiveDate = new Date(effectiveDate);
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'newAmount must be a non-negative number',
+      });
+    }
+
+    if (Number.isNaN(parsedEffectiveDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'effectiveDate must be a valid date',
+      });
+    }
+
+    const plan = await Plan.findOne({ planId, isActive: true });
+    if (!plan) {
+      return res.status(404).json({ success: false, message: 'Plan not found' });
+    }
+
+    const currentPrice = plan.prices?.find((price) => price.billingCycle === billingCycle);
+    const currentAmount =
+      currentPrice?.amount ??
+      (billingCycle === 'YEARLY' ? plan.yearlyPrice : plan.price) ??
+      0;
+
+    const subscriptions = await HospitalSubscription.find({
+      planId: plan.planId,
+      billingCycle,
+      status: { $in: ['ACTIVE', 'TRIAL', 'GRACE_PERIOD', 'PAST_DUE'] },
+    }).populate('hospitalId', 'name email');
+
+    const noticeSentAt = new Date();
+    const pendingPriceChange = {
+      planId: plan.planId,
+      billingCycle,
+      currentAmount,
+      newAmount: parsedAmount,
+      currency: plan.currency || 'INR',
+      effectiveDate: parsedEffectiveDate,
+      noticeSentAt,
+      status: 'NOTICE_SENT',
+    };
+
+    let emailsAttempted = 0;
+    let emailsFailed = 0;
+
+    for (const subscription of subscriptions) {
+      subscription.pendingPriceChange = pendingPriceChange;
+      await subscription.save();
+
+      const hospital = subscription.hospitalId;
+      if (sendEmails && hospital?.email) {
+        emailsAttempted += 1;
+        try {
+          await sendPriceChangeNoticeEmail({
+            to: hospital.email,
+            hospitalName: hospital.name || 'Hospital',
+            planName: plan.name,
+            billingCycle,
+            currentAmount,
+            newAmount: parsedAmount,
+            currency: plan.currency || 'INR',
+            effectiveDate: parsedEffectiveDate,
+          });
+        } catch (emailError) {
+          emailsFailed += 1;
+          logger.error('Failed to send price change notice email:', emailError);
+        }
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Scheduled price-change notice for ${subscriptions.length} subscription(s).`,
+      data: {
+        planId: plan.planId,
+        billingCycle,
+        currentAmount,
+        newAmount: parsedAmount,
+        effectiveDate: parsedEffectiveDate,
+        affectedSubscriptions: subscriptions.length,
+        emailsAttempted,
+        emailsFailed,
+      },
+    });
+  } catch (error) {
+    logger.error('Error scheduling price migration:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -524,6 +752,9 @@ const verifyCheckout = async (req, res) => {
       subscription.currentPeriodStart = startDate;
       subscription.currentPeriodEnd = endDate;
       subscription.razorpaySubscriptionId = razorpay_subscription_id;
+      subscription.cancelAtPeriodEnd = false;
+      subscription.canceledAt = null;
+      subscription.endedAt = null;
       await subscription.save();
     } else {
       subscription = await HospitalSubscription.create({
@@ -535,6 +766,7 @@ const verifyCheckout = async (req, res) => {
         currentPeriodStart: startDate,
         currentPeriodEnd: endDate,
         razorpaySubscriptionId: razorpay_subscription_id,
+        cancelAtPeriodEnd: false,
       });
     }
 
@@ -620,6 +852,9 @@ const handleSubscriptionWebhook = async (req, res) => {
         subscription.status = 'ACTIVE';
         subscription.currentPeriodStart = nextPeriodStart;
         subscription.currentPeriodEnd = nextPeriodEnd;
+        subscription.cancelAtPeriodEnd = false;
+        subscription.canceledAt = null;
+        subscription.endedAt = null;
         await subscription.save();
 
         const SubscriptionTransaction = require('./subscription.model');
@@ -658,6 +893,9 @@ const handleSubscriptionWebhook = async (req, res) => {
 
       if (subscription) {
         subscription.status = 'CANCELLED';
+        subscription.cancelAtPeriodEnd = false;
+        subscription.canceledAt = new Date();
+        subscription.endedAt = new Date();
         await subscription.save();
         logger.info(`Subscription ${rzpSub.id} marked as CANCELLED through webhook.`);
       }
@@ -674,6 +912,9 @@ module.exports = {
   getSubscriptionStatus,
   changePlan,
   assignPlan,
+  cancelRenewal,
+  resumeRenewal,
+  schedulePriceMigration,
   getBillingHistory,
   exportBillingHistory,
   startTrial,

@@ -1,34 +1,38 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import api from '@/services/api';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-
 import {
-  ChevronLeft,
-  Save,
-  Sparkles,
-  ShieldCheck,
-  Zap,
-  Crown,
   Award,
   Check,
-  X,
-  User,
+  ChevronLeft,
+  Crown,
   Info,
-  Activity,
-  Plus,
-  Trash2,
   ListPlus,
+  Plus,
   RefreshCw,
-  HelpCircle,
+  Save,
+  ShieldCheck,
+  Trash2,
+  User,
+  X,
+  Zap,
 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import api from '@/services/api';
+
+const DEFAULT_PLAN_LIMITS = {
+  maxDepartments: 1,
+  maxDoctors: 2,
+  maxKiosks: 0,
+  freeSmsUnits: 0,
+  freeEmailUnits: 0,
+};
 
 export default function PlanFormPage() {
   const router = useRouter();
@@ -51,13 +55,7 @@ export default function PlanFormPage() {
     yearlyPrice: 0,
     displayOrder: 0,
     recommended: false,
-    limits: {
-      maxDepartments: 1,
-      maxDoctors: 2,
-      maxKiosks: 0,
-      freeSmsUnits: 0,
-      freeEmailUnits: 0,
-    },
+    limits: DEFAULT_PLAN_LIMITS,
     trialDays: 30,
     isActive: true,
   });
@@ -75,9 +73,9 @@ export default function PlanFormPage() {
 
           // Prepopulate individual cycle fields from prices array if loaded
           const monthlyAmt = data.prices?.find((p: any) => p.billingCycle === 'MONTHLY')?.amount || data.price || 0;
-          const quarterlyAmt = data.prices?.find((p: any) => p.billingCycle === 'QUARTERLY')?.amount || Math.round(monthlyAmt * 3 * 0.9);
-          const halfYearlyAmt = data.prices?.find((p: any) => p.billingCycle === 'HALF_YEARLY')?.amount || Math.round(monthlyAmt * 6 * 0.85);
-          const yearlyAmt = data.prices?.find((p: any) => p.billingCycle === 'YEARLY')?.amount || data.yearlyPrice || Math.round(monthlyAmt * 12 * 0.8);
+          const quarterlyAmt = data.prices?.find((p: any) => p.billingCycle === 'QUARTERLY')?.amount || Math.round(monthlyAmt * 3);
+          const halfYearlyAmt = data.prices?.find((p: any) => p.billingCycle === 'HALF_YEARLY')?.amount || Math.round(monthlyAmt * 6);
+          const yearlyAmt = data.prices?.find((p: any) => p.billingCycle === 'YEARLY')?.amount || data.yearlyPrice || Math.round(monthlyAmt * 12);
 
           setFormData({
             ...data,
@@ -113,7 +111,7 @@ export default function PlanFormPage() {
         });
     } else {
       // Prepopulate standard base features for new plans
-      generateCoreFeatures(formData.limits);
+      generateCoreFeatures(DEFAULT_PLAN_LIMITS);
     }
   }, [isEdit, editId]);
 
@@ -168,6 +166,9 @@ export default function PlanFormPage() {
 
   // Razorpay Plan ID Safeguard: Determines if we should recreate or preserve plan ID
   const getRazorpayPlanId = (cycle: string, newAmount: number) => {
+    if (newAmount <= 0) {
+      return null;
+    }
     if (!isEdit) {
       return `temp_${cycle.toLowerCase()}`;
     }
@@ -188,13 +189,18 @@ export default function PlanFormPage() {
 
     setSaving(true);
     try {
+      const monthlyAmount = formData.price;
+      const quarterlyAmount = formData.quarterlyPrice || Math.round(formData.price * 3);
+      const halfYearlyAmount = formData.halfYearlyPrice || Math.round(formData.price * 6);
+      const yearlyAmount = formData.yearlyPrice || Math.round(formData.price * 12);
+
       const payload = {
         ...formData,
         prices: [
-          { billingCycle: 'MONTHLY', intervalMonths: 1, amount: formData.price, razorpayPlanId: getRazorpayPlanId('MONTHLY', formData.price) },
-          { billingCycle: 'QUARTERLY', intervalMonths: 3, amount: formData.quarterlyPrice || Math.round(formData.price * 3 * 0.9), razorpayPlanId: getRazorpayPlanId('QUARTERLY', formData.quarterlyPrice) },
-          { billingCycle: 'HALF_YEARLY', intervalMonths: 6, amount: formData.halfYearlyPrice || Math.round(formData.price * 6 * 0.85), razorpayPlanId: getRazorpayPlanId('HALF_YEARLY', formData.halfYearlyPrice) },
-          { billingCycle: 'YEARLY', intervalMonths: 12, amount: formData.yearlyPrice || Math.round(formData.price * 12 * 0.8), razorpayPlanId: getRazorpayPlanId('YEARLY', formData.yearlyPrice) }
+          { billingCycle: 'MONTHLY', intervalMonths: 1, amount: monthlyAmount, razorpayPlanId: getRazorpayPlanId('MONTHLY', monthlyAmount) },
+          { billingCycle: 'QUARTERLY', intervalMonths: 3, amount: quarterlyAmount, razorpayPlanId: getRazorpayPlanId('QUARTERLY', quarterlyAmount) },
+          { billingCycle: 'HALF_YEARLY', intervalMonths: 6, amount: halfYearlyAmount, razorpayPlanId: getRazorpayPlanId('HALF_YEARLY', halfYearlyAmount) },
+          { billingCycle: 'YEARLY', intervalMonths: 12, amount: yearlyAmount, razorpayPlanId: getRazorpayPlanId('YEARLY', yearlyAmount) }
         ],
         features: features, // Save fully dynamic user-managed features checklist
       };
@@ -225,11 +231,11 @@ export default function PlanFormPage() {
 
   // Compute live price rates for sticky checkout preview card
   const totalAmount = previewCycle === 'yearly'
-    ? (formData.yearlyPrice || Math.round(formData.price * 12 * 0.8))
+    ? (formData.yearlyPrice || Math.round(formData.price * 12))
     : previewCycle === 'half_yearly'
-      ? (formData.halfYearlyPrice || Math.round(formData.price * 6 * 0.85))
+      ? (formData.halfYearlyPrice || Math.round(formData.price * 6))
       : previewCycle === 'quarterly'
-        ? (formData.quarterlyPrice || Math.round(formData.price * 3 * 0.9))
+        ? (formData.quarterlyPrice || Math.round(formData.price * 3))
         : formData.price;
 
   const intervalMonths = previewCycle === 'yearly' ? 12 : (previewCycle === 'half_yearly' ? 6 : (previewCycle === 'quarterly' ? 3 : 1));
@@ -382,7 +388,7 @@ export default function PlanFormPage() {
                     value={formData.quarterlyPrice}
                     onChange={(e) => setFormData({ ...formData, quarterlyPrice: Number(e.target.value) })}
                     className="w-full h-14 px-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl font-bold outline-none border border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white transition-all text-sm"
-                    placeholder={String(Math.round(formData.price * 3 * 0.9))}
+                    placeholder={String(Math.round(formData.price * 3))}
                   />
                   <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">/3m</span>
                 </div>
@@ -399,7 +405,7 @@ export default function PlanFormPage() {
                     value={formData.halfYearlyPrice}
                     onChange={(e) => setFormData({ ...formData, halfYearlyPrice: Number(e.target.value) })}
                     className="w-full h-14 px-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl font-bold outline-none border border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white transition-all text-sm"
-                    placeholder={String(Math.round(formData.price * 6 * 0.85))}
+                    placeholder={String(Math.round(formData.price * 6))}
                   />
                   <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">/6m</span>
                 </div>
@@ -416,7 +422,7 @@ export default function PlanFormPage() {
                     value={formData.yearlyPrice}
                     onChange={(e) => setFormData({ ...formData, yearlyPrice: Number(e.target.value) })}
                     className="w-full h-14 px-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl font-bold outline-none border border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white transition-all text-sm"
-                    placeholder={String(Math.round(formData.price * 12 * 0.8))}
+                    placeholder={String(Math.round(formData.price * 12))}
                   />
                   <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">/year</span>
                 </div>

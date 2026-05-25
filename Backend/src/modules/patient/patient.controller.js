@@ -105,8 +105,16 @@ const getPatientConsultations = async (req, res, next) => {
 
         const [consultations, total] = await Promise.all([
             Consultation.find({ patientId, hospitalId })
-                .populate('doctorId', 'name')
-                .populate('tokenId', 'tokenNumber')
+                .populate('patientId')
+                .populate('doctorId', 'name specialization')
+                .populate({
+                    path: 'tokenId',
+                    select: 'tokenNumber appointmentDate departmentId doctorId completedAt',
+                    populate: [
+                        { path: 'departmentId', select: 'name prefix' },
+                        { path: 'doctorId', select: 'name specialization' },
+                    ],
+                })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)

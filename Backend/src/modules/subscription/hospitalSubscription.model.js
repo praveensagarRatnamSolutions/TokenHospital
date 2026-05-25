@@ -20,7 +20,16 @@ const hospitalSubscriptionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['TRIAL', 'ACTIVE', 'PAST_DUE', 'UNPAID', 'CANCELLED', 'PAUSED'],
+      enum: [
+        'TRIAL',
+        'ACTIVE',
+        'PAST_DUE',
+        'UNPAID',
+        'CANCELLED',
+        'PAUSED',
+        'GRACE_PERIOD',
+        'EXPIRED',
+      ],
       required: true,
       default: 'TRIAL',
     },
@@ -56,6 +65,25 @@ const hospitalSubscriptionSchema = new mongoose.Schema(
     razorpayCustomerId: {
       type: String,
       sparse: true,
+    },
+    pendingPriceChange: {
+      planId: String,
+      billingCycle: {
+        type: String,
+        enum: ['MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY'],
+      },
+      currentAmount: Number,
+      newAmount: Number,
+      currency: {
+        type: String,
+        default: 'INR',
+      },
+      effectiveDate: Date,
+      noticeSentAt: Date,
+      status: {
+        type: String,
+        enum: ['NOTICE_SENT', 'ACCEPTED', 'CANCELLED'],
+      },
     },
     metadata: {
       type: Map,

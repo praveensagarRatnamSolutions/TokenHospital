@@ -12,7 +12,8 @@ import {
   History,
   User,
   Monitor,
-  HeartPulse
+  HeartPulse,
+  PlayCircle
 } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 import { cn } from '@/lib/utils';
@@ -21,9 +22,10 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const doctorNavItems = [
   { name: 'Live Console', href: '/doctor', icon: Activity },
   { name: 'My Kiosks', href: '/doctor/kiosks', icon: Monitor },
+  { name: 'My Ads', href: '/doctor/ads', icon: PlayCircle },
   { name: 'Patient History', href: '/doctor/history', icon: History },
   { name: 'Profile', href: '/doctor/profile', icon: User },
-  { name: 'Settings', href: '/doctor/settings', icon: Settings },
+  // { name: 'Settings', href: '/doctor/settings', icon: Settings },
 ];
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {

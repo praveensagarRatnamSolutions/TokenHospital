@@ -39,10 +39,32 @@ export interface SubscriptionStatus {
   planId: string;
   planName: string;
   planDescription: string;
-  status: 'TRIAL' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'GRACE_PERIOD';
+  status:
+    | 'TRIAL'
+    | 'ACTIVE'
+    | 'PAST_DUE'
+    | 'UNPAID'
+    | 'CANCELLED'
+    | 'PAUSED'
+    | 'GRACE_PERIOD'
+    | 'EXPIRED';
   isValid: boolean;
   trialDaysLeft: number;
   trialEndDate: string;
+  currentPeriodEnd: string | null;
+  billingCycle: 'MONTHLY' | 'QUARTERLY' | 'HALF_YEARLY' | 'YEARLY';
+  cancelAtPeriodEnd: boolean;
+  razorpaySubscriptionId: string | null;
+  pendingPriceChange: {
+    planId: string;
+    billingCycle: 'MONTHLY' | 'QUARTERLY' | 'HALF_YEARLY' | 'YEARLY';
+    currentAmount: number;
+    newAmount: number;
+    currency: string;
+    effectiveDate: string;
+    noticeSentAt: string;
+    status: 'NOTICE_SENT' | 'ACCEPTED' | 'CANCELLED';
+  } | null;
   limits: {
     maxDepartments: number;
     maxDoctors: number;
@@ -79,6 +101,27 @@ export const subscriptionApi = {
 
   changePlan: async (planId: string) => {
     const response = await api.post('/api/subscription/change-plan', { planId });
+    return response.data;
+  },
+
+  cancelRenewal: async () => {
+    const response = await api.post('/api/subscription/cancel-renewal');
+    return response.data;
+  },
+
+  resumeRenewal: async () => {
+    const response = await api.post('/api/subscription/resume-renewal');
+    return response.data;
+  },
+
+  schedulePriceMigration: async (payload: {
+    planId: string;
+    billingCycle: 'MONTHLY' | 'QUARTERLY' | 'HALF_YEARLY' | 'YEARLY';
+    newAmount: number;
+    effectiveDate: string;
+    sendEmails?: boolean;
+  }) => {
+    const response = await api.post('/api/subscription/price-migrations', payload);
     return response.data;
   },
 

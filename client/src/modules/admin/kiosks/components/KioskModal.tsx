@@ -19,6 +19,7 @@ import { Kiosk, KioskAd } from '../../../kiosk/types';
 import { useDepartments } from '../../departments/hooks';
 import { useDoctors } from '../../doctors/hooks';
 import { useAds } from '../../ads/hooks';
+import { useAppSelector } from '@/store/hooks';
 import { Ad } from '../../ads/types';
 import { Department } from '../../departments/types';
 import { Doctor } from '../../doctors/types';
@@ -66,6 +67,8 @@ export const KioskModal: React.FC<KioskModalProps> = ({
     limit: 100,
   });
 
+  const user = useAppSelector((state) => state.auth.user);
+
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -84,16 +87,19 @@ export const KioskModal: React.FC<KioskModalProps> = ({
         })),
       });
     } else {
+      const defaultDoctorId = user?.role === 'DOCTOR' ? (user?.doctorId?._id || user?.doctorId) : null;
+      const defaultDepartmentId = user?.role === 'DOCTOR' ? (user?.doctorId?.departmentId?._id || user?.doctorId?.departmentId) : null;
+
       setFormData({
         name: '',
         code: '',
         locationType: 'general',
-        departmentIds: [],
-        doctorIds: [],
+        departmentIds: defaultDepartmentId ? [defaultDepartmentId] : [],
+        doctorIds: defaultDoctorId ? [defaultDoctorId] : [],
         ads: [],
       });
     }
-  }, [initialData, isOpen]);
+  }, [initialData, isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -136,7 +142,7 @@ export const KioskModal: React.FC<KioskModalProps> = ({
 
   const tabs = [
     { id: 'general', label: 'Settings', icon: Settings },
-    { id: 'clinical', label: 'Clinical', icon: Users },
+    ...(user?.role !== 'DOCTOR' ? [{ id: 'clinical', label: 'Clinical', icon: Users }] : []),
     { id: 'playlist', label: 'Playlist', icon: PlayCircle },
   ];
 

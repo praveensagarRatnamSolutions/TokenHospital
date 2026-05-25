@@ -1,15 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useSubscription } from '@/hooks/useSubscription';
-import { subscriptionApi, Plan } from '@/services/subscriptionApi';
-import { walletApi } from '@/services/walletApi';
-import { Check, X, Shield, Zap, Crown, Clock, Loader, MessageSquare, Mail, Calendar, Info } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Calendar, Check, Clock, Crown, Info,Loader, Mail, MessageSquare, Shield, X, Zap } from 'lucide-react';
+import React, { useEffect,useState } from 'react';
 import { toast } from 'sonner';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Plan,subscriptionApi } from '@/services/subscriptionApi';
+import { walletApi } from '@/services/walletApi';
 
 const PLAN_ICONS: Record<string, any> = {
   BASIC: Shield,
@@ -37,6 +38,7 @@ export default function BillingPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'quarterly' | 'half_yearly' | 'yearly'>('monthly');
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
+  const [renewalUpdating, setRenewalUpdating] = useState<'cancel' | 'resume' | null>(null);
 
   // --- WALLET & HISTORY LEDGER STATES ---
   const [balances, setBalances] = useState<{ smsCredits: number; emailCredits: number } | null>(null);
@@ -89,10 +91,13 @@ export default function BillingPage() {
     fetchWalletAndHistoryData();
   }, []);
 
-  const handleChangePlan = async (planId: string) => {
+  const handleChangePlan = async (
+    planId: string,
+    selectedBillingCycle: typeof billingCycle = billingCycle
+  ) => {
     try {
       setChangingPlan(planId);
-      const cycleUpper = billingCycle.toUpperCase() as 'MONTHLY' | 'QUARTERLY' | 'HALF_YEARLY' | 'YEARLY';
+      const cycleUpper = selectedBillingCycle.toUpperCase() as 'MONTHLY' | 'QUARTERLY' | 'HALF_YEARLY' | 'YEARLY';
       
       const checkoutRes = await subscriptionApi.createCheckout(planId, cycleUpper);
       if (!checkoutRes.success) {
@@ -111,7 +116,7 @@ export default function BillingPage() {
         key: checkoutData.keyId,
         subscription_id: checkoutData.subscriptionId,
         name: "Hospital Queue Token",
-        description: `Subscription to ${planId} Plan (${billingCycle.toUpperCase()})`,
+        description: `Subscription to ${planId} Plan (${selectedBillingCycle.toUpperCase()})`,
         image: "/logo.png",
         handler: async function (response: any) {
           try {
@@ -147,6 +152,41 @@ export default function BillingPage() {
       toast.error(err.response?.data?.message || err.message || 'Failed to initiate plan upgrade');
     } finally {
       setChangingPlan(null);
+    }
+  };
+
+  const handleCancelRenewal = async () => {
+    try {
+      setRenewalUpdating('cancel');
+      const result = await subscriptionApi.cancelRenewal();
+      toast.success(result.message || 'Auto-renewal cancelled');
+      refresh();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to cancel auto-renewal');
+    } finally {
+      setRenewalUpdating(null);
+    }
+  };
+
+  const handleResumeRenewal = async () => {
+    try {
+      setRenewalUpdating('resume');
+      const result = await subscriptionApi.resumeRenewal();
+      toast.success(result.message || 'Auto-renewal resumed');
+      refresh();
+    } catch (err: any) {
+      const data = err.response?.data;
+      if (err.response?.status === 409 && data?.requiresCheckout) {
+        const checkoutPlanId = data.data?.planId || status?.planId;
+        const checkoutCycle = ((data.data?.billingCycle || status?.billingCycle || 'MONTHLY').toLowerCase()) as typeof billingCycle;
+        setBillingCycle(checkoutCycle);
+        toast.info('Please complete checkout again to resume auto-renewal.');
+        await handleChangePlan(checkoutPlanId, checkoutCycle);
+        return;
+      }
+      toast.error(data?.message || 'Failed to resume auto-renewal');
+    } finally {
+      setRenewalUpdating(null);
     }
   };
 
@@ -220,6 +260,12 @@ export default function BillingPage() {
 
   const isTrial = status.status === 'TRIAL';
   const yearlySavings = Math.round(((1499 * 12 - 14399) / (1499 * 12)) * 100);
+  const currentPeriodEndLabel = status.currentPeriodEnd
+    ? new Date(status.currentPeriodEnd).toLocaleDateString('en-IN', { dateStyle: 'medium' })
+    : null;
+  const pendingPriceChangeLabel = status.pendingPriceChange?.effectiveDate
+    ? new Date(status.pendingPriceChange.effectiveDate).toLocaleDateString('en-IN', { dateStyle: 'medium' })
+    : null;
 
   return (
     <div className="space-y-10 max-w-6xl mx-auto">
@@ -251,12 +297,16 @@ export default function BillingPage() {
             ) : (
               <div className="flex items-center gap-2 text-xs text-blue-200">
                 <Calendar className="w-4 h-4 text-blue-300" />
-                <span>Plan active. Billed cycle keeps digital queues and smart broadcast alerts fully functional.</span>
+                <span>
+                  {status.cancelAtPeriodEnd && currentPeriodEndLabel
+                    ? `Auto-renewal is off. Access continues until ${currentPeriodEndLabel}.`
+                    : `Auto-renewal is enabled for ${status.billingCycle.replace('_', ' ').toLowerCase()} billing.`}
+                </span>
               </div>
             )}
           </div>
           
-          <div className="flex flex-col justify-end items-start md:items-end gap-3 text-right">
+          <div className="flex flex-col justify-end items-start md:items-end gap-3 text-left md:text-right">
             {isTrial ? (
               <Button
                 onClick={() => {
@@ -268,13 +318,79 @@ export default function BillingPage() {
                 Upgrade to PRO Tiers ⚡
               </Button>
             ) : (
-              <Badge className="bg-green-500/20 text-green-300 border border-green-400/30 px-4 py-1.5 text-sm font-bold shrink-0">
-                ✓ Premium Active
-              </Badge>
+              <div className="w-full md:w-[320px] rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-sm backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          status.cancelAtPeriodEnd ? 'bg-amber-300' : 'bg-emerald-300'
+                        }`}
+                      />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-blue-100">
+                        Auto-renewal
+                      </p>
+                    </div>
+                    <p className="mt-1 truncate text-xs font-semibold text-white">
+                      {status.cancelAtPeriodEnd
+                        ? `Off${currentPeriodEndLabel ? `, ends ${currentPeriodEndLabel}` : ''}`
+                        : 'On, recurring billing active'}
+                    </p>
+                  </div>
+                  <Badge className="shrink-0 border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-black text-emerald-200 hover:bg-emerald-400/10">
+                    Active
+                  </Badge>
+                </div>
+                <div className="mt-3 flex justify-start md:justify-end">
+                  <Button
+                    onClick={status.cancelAtPeriodEnd ? handleResumeRenewal : handleCancelRenewal}
+                    disabled={renewalUpdating !== null || changingPlan !== null}
+                    size="sm"
+                    variant="outline"
+                    className="h-8 rounded-lg border-white/15 bg-white/10 px-3 text-[11px] font-black text-white hover:bg-white hover:text-indigo-950"
+                  >
+                    {renewalUpdating ? (
+                      <Loader className="w-3.5 h-3.5 animate-spin" />
+                    ) : status.cancelAtPeriodEnd ? (
+                      'Resume Auto-renewal'
+                    ) : (
+                      'Cancel Auto-renewal'
+                    )}
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         </div>
       </Card>
+
+      {status.pendingPriceChange?.status === 'NOTICE_SENT' && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-amber-950 shadow-sm dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-amber-100">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-300">
+                Upcoming subscription price change
+              </p>
+              <p className="mt-1 text-sm font-semibold">
+                Your {status.planName} {status.pendingPriceChange.billingCycle.replace('_', ' ').toLowerCase()} price changes from ₹
+                {status.pendingPriceChange.currentAmount.toLocaleString()} to ₹
+                {status.pendingPriceChange.newAmount.toLocaleString()}
+                {pendingPriceChangeLabel ? ` on ${pendingPriceChangeLabel}` : ''}.
+              </p>
+            </div>
+            <Button
+              onClick={() => {
+                setActiveShopTab('plans');
+                window.scrollTo({ top: 320, behavior: 'smooth' });
+              }}
+              variant="outline"
+              className="h-9 rounded-xl border-amber-300 bg-white text-xs font-black text-amber-800 hover:bg-amber-100 dark:bg-amber-950 dark:text-amber-100"
+            >
+              Review Billing
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* 2. Unified Resource & Wallet Status Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">

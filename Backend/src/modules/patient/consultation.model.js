@@ -9,7 +9,7 @@ const consultationSchema = new mongoose.Schema({
     },
     doctorId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Your Doctor/Staff user
+        ref: 'Doctor',
         required: true
     },
     hospitalId: {

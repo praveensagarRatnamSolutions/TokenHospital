@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, AlertCircle, Loader, LayoutGrid, LayoutList, Filter, CheckCircle2, Clock, Layers, X } from 'lucide-react';
+import { Plus, AlertCircle, Loader, LayoutGrid, LayoutList, Filter, CheckCircle2, Clock, Layers, X, Monitor } from 'lucide-react';
 import { Pagination } from '@/components/common/Pagination';
 
 
@@ -13,9 +13,19 @@ import { useAds, useCreateAd, useUpdateAd, useDeleteAd } from '../hooks';
 
 interface AdListProps {
   isDarkMode?: boolean;
+  title?: React.ReactNode;
+  superTitle?: string;
+  description?: string;
+  icon?: any;
 }
 
-export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
+export const AdList: React.FC<AdListProps> = ({ 
+  isDarkMode = false,
+  title = <React.Fragment>Kiosk <span className="text-primary italic font-serif">Ads</span></React.Fragment>,
+  superTitle = 'DISPLAY TERMINALS',
+  description = 'Manage and deploy content to your kiosk screens',
+  icon: Icon = Monitor
+}) => {
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
@@ -110,16 +120,27 @@ export const AdList: React.FC<AdListProps> = ({ isDarkMode = false }) => {
   return (
     <div className={`space-y-6 ${containerBg} rounded-xl p-6 min-h-screen transition-colors duration-300`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className={`text-3xl font-extrabold tracking-tight ${textColor}`}>Kiosk Ads</h1>
-          <p className={`text-sm ${mutedText} mt-1`}>Manage and deploy content to your kiosk screens</p>
+          <div className="flex items-center gap-2 mb-2">
+            {Icon && <Icon className="w-5 h-5 text-primary" />}
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+              {superTitle}
+            </span>
+          </div>
+          <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">
+            {title}
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">
+            {description}
+          </p>
         </div>
         <button 
           onClick={handleCreateClick} 
-          className={`${buttonPrimary} flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all active:scale-95`}
+          className="h-14 px-8 bg-primary text-white font-black rounded-2xl hover:scale-[1.02] transition-all shadow-xl shadow-primary/20 flex items-center gap-2 group"
         >
-          <Plus size={20} strokeWidth={3} /> Upload New Content
+          <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+          Upload New Content
         </button>
       </div>
 

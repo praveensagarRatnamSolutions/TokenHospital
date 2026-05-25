@@ -1,45 +1,43 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/services/api';
-import { useSocket } from '@/hooks/useSocket';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import {
   Activity,
-  History,
-  User,
-  Users,
-  ChevronRight,
-  CheckCircle2,
-  PhoneCall,
-  ClipboardList,
-  Zap,
   AlertTriangle,
-  TrendingUp,
+  ArrowRight,
+  CheckCircle2,
+  ChevronRight,
+  ClipboardList,
   Clock,
+  Droplets,
+  Heart,
+  History,
+  Phone,
+  Save,
+  ShieldAlert,
+  Stethoscope,
+  Thermometer,
+  User,
   UserCheck,
   UserMinus,
-  ShieldAlert,
-  ArrowRight,
-  Save,
-  Thermometer,
-  Heart,
-  Droplets,
-  Stethoscope,
-  Info,
-  Phone,
+  Users,
+  Zap,
 } from 'lucide-react';
-import { useAppSelector } from '@/store/hooks';
-import { RootState } from '@/store/store';
-import { cn } from '@/lib/utils';
+import React, { useEffect,useState } from 'react';
+
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet';
-import { format } from 'date-fns';
+import { useSocket } from '@/hooks/useSocket';
+import { cn } from '@/lib/utils';
+import api from '@/services/api';
+import { useAppSelector } from '@/store/hooks';
+import { RootState } from '@/store/store';
+
 import DoctorEmergencyModal from './components/DoctorEmergencyModal';
 
 // Helper for phone formatting
@@ -93,6 +91,10 @@ export default function DoctorDashboard() {
   const [patientDetails, setPatientDetails] = useState({ age: '', gender: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [historyPatient, setHistoryPatient] = useState<{
+    id: string;
+    name?: string;
+  } | null>(null);
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
 
   const [diagnosis, setDiagnosis] = useState('');
@@ -147,11 +149,11 @@ export default function DoctorDashboard() {
   const remainingTokens = orderedUpcomingTokens.slice(1);
 
   const { data: patientHistory, isLoading: loadingHistory } = useQuery({
-    queryKey: ['patientHistory', currentToken?.patientId?._id],
-    enabled: !!currentToken?.patientId?._id && isHistoryOpen,
+    queryKey: ['patientHistory', historyPatient?.id],
+    enabled: !!historyPatient?.id && isHistoryOpen,
     queryFn: async () => {
       const response = await api.get(
-        `/api/patient/${currentToken.patientId._id}/consultations`,
+        `/api/patient/${historyPatient!.id}/consultations`,
       );
       return response.data.data;
     },
@@ -178,6 +180,7 @@ export default function DoctorDashboard() {
   // Sync patient details when token changes
   useEffect(() => {
     if (currentToken?.patientId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPatientDetails({
         age: currentToken.patientId.age?.toString() || '',
         gender: currentToken.patientId.gender || 'Male',
@@ -188,6 +191,7 @@ export default function DoctorDashboard() {
   // Timer Logic
   useEffect(() => {
     if (!currentToken || currentToken.status !== 'CALLED' || !currentToken.calledAt) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSessionTime('00:00');
       return;
     }
@@ -292,6 +296,9 @@ export default function DoctorDashboard() {
         vitals,
       });
       setIsConsultationSaved(true);
+      queryClient.invalidateQueries({
+        queryKey: ['patientHistory', currentToken.patientId._id],
+      });
     } catch (error) {
       console.error('Save error', error);
     }
@@ -315,12 +322,25 @@ export default function DoctorDashboard() {
     completeMutation.mutate({
       id: currentToken._id,
       consultation:
-        diagnosis || symptoms || Object.values(vitals).some((v) => v) ? consultation : {},
+        !isConsultationSaved &&
+        (diagnosis || symptoms || Object.values(vitals).some((v) => v))
+          ? consultation
+          : {},
     });
   };
 
   const handleCallSpecificToken = (tokenId: string) => {
     callSpecificTokenMutation.mutate({ id: tokenId ,doctorId});
+  };
+
+  const openPatientHistory = (patient: any) => {
+    const patientId = patient?._id || patient?.id;
+    if (!patientId) return;
+    setHistoryPatient({
+      id: patientId,
+      name: patient?.name || 'Patient',
+    });
+    setIsHistoryOpen(true);
   };
 
   return (
@@ -443,7 +463,7 @@ export default function DoctorDashboard() {
                         </span>
                       )}
                       <button
-                        onClick={() => setIsHistoryOpen(true)}
+                        onClick={() => openPatientHistory(currentToken.patientId)}
                         className={cn(
                           'px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all hover:scale-105 active:scale-95 border',
                           currentToken.isEmergency
@@ -791,6 +811,12 @@ export default function DoctorDashboard() {
                           {formatPhone(nextToken.patient?.phone) ||
                             'No contact info'}
                         </p>
+                        <button
+                          onClick={() => openPatientHistory(nextToken.patient)}
+                          className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
+                        >
+                          View History
+                        </button>
                       </div>
                     </div>
                     {!currentToken && (
@@ -866,6 +892,12 @@ export default function DoctorDashboard() {
                                 Call
                               </button>
                             )}
+                            <button
+                              onClick={() => openPatientHistory(token.patient)}
+                              className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-[9px] font-black uppercase tracking-widest hover:bg-primary/10 hover:text-primary dark:bg-slate-900 dark:text-slate-300"
+                            >
+                              History
+                            </button>
                           </div>
                           {token.isPostponed && (
                             <div className="bg-amber-500/10 p-1.5 rounded-lg">
@@ -914,7 +946,7 @@ export default function DoctorDashboard() {
                   Medical Record
                 </SheetTitle>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  History for {currentToken?.patientId?.name}
+                  History for {historyPatient?.name || 'Patient'}
                 </p>
               </div>
             </div>
@@ -928,80 +960,141 @@ export default function DoctorDashboard() {
                 ))}
               </div>
             ) : patientHistory?.length > 0 ? (
-              <div className="space-y-8 relative before:absolute before:left-[21px] before:top-4 before:bottom-4 before:w-[2px] before:bg-slate-100 dark:before:bg-slate-800">
-                {patientHistory.map((visit: any, index: number) => (
-                  <div key={visit._id} className="relative pl-12 group">
-                    {/* Timeline Dot */}
-                    <div className="absolute left-0 top-1 size-11 bg-white dark:bg-slate-950 rounded-2xl border-2 border-slate-100 dark:border-slate-800 flex items-center justify-center z-10 group-hover:border-primary group-hover:scale-110 transition-all">
-                      <span className="text-[10px] font-black text-slate-400 group-hover:text-primary">
-                        {index + 1}
-                      </span>
-                    </div>
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-2xl bg-primary/5 p-4 border border-primary/10">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-primary">Visits</p>
+                    <p className="text-2xl font-black text-slate-950 dark:text-white">{patientHistory.length}</p>
+                  </div>
+                  <div className="rounded-2xl bg-emerald-500/5 p-4 border border-emerald-500/10">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Last Visit</p>
+                    <p className="text-xs font-black text-slate-950 dark:text-white">
+                      {format(new Date(patientHistory[0].createdAt), 'dd MMM yyyy')}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-amber-500/5 p-4 border border-amber-500/10">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-amber-500">Rx Records</p>
+                    <p className="text-2xl font-black text-slate-950 dark:text-white">
+                      {patientHistory.filter((visit: any) => visit.prescription?.length).length}
+                    </p>
+                  </div>
+                </div>
 
-                    <div className="glass p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 group-hover:shadow-xl transition-all">
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-xs font-black text-primary uppercase tracking-widest">
-                          {format(new Date(visit.createdAt), 'MMMM dd, yyyy')}
-                        </p>
-                        <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg font-bold text-slate-500">
-                          Dr. {visit.doctorId?.name || 'Medical Staff'}
+                <div className="space-y-8 relative before:absolute before:left-[21px] before:top-4 before:bottom-4 before:w-[2px] before:bg-slate-100 dark:before:bg-slate-800">
+                  {patientHistory.map((visit: any, index: number) => (
+                    <div key={visit._id} className="relative pl-12 group">
+                      {/* Timeline Dot */}
+                      <div className="absolute left-0 top-1 size-11 bg-white dark:bg-slate-950 rounded-2xl border-2 border-slate-100 dark:border-slate-800 flex items-center justify-center z-10 group-hover:border-primary group-hover:scale-110 transition-all">
+                        <span className="text-[10px] font-black text-slate-400 group-hover:text-primary">
+                          {index + 1}
                         </span>
                       </div>
 
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                            <Stethoscope className="size-3" /> Diagnosis
-                          </p>
-                          <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed">
-                            {visit.diagnosis || 'No record.'}
-                          </p>
+                      <div className="glass p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 group-hover:shadow-xl transition-all">
+                        <div className="flex items-center justify-between gap-4 mb-4">
+                          <div>
+                            <p className="text-xs font-black text-primary uppercase tracking-widest">
+                              {format(new Date(visit.createdAt), 'MMMM dd, yyyy')}
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-bold mt-1">
+                              Token {visit.tokenId?.tokenNumber || 'N/A'}
+                              {visit.tokenId?.departmentId?.name ? ` · ${visit.tokenId.departmentId.name}` : ''}
+                            </p>
+                          </div>
+                          <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg font-bold text-slate-500 shrink-0">
+                            Dr. {visit.doctorId?.name || visit.tokenId?.doctorId?.name || 'Medical Staff'}
+                          </span>
                         </div>
 
-                        {visit.symptoms?.length > 0 && (
+                        <div className="space-y-4">
                           <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                              <ClipboardList className="size-3" /> Symptoms
+                              <Stethoscope className="size-3" /> Diagnosis
                             </p>
-                            <div className="flex flex-wrap gap-2">
-                              {visit.symptoms.map((s: string, ci: number) => (
-                                <span
-                                  key={ci}
-                                  className="text-[10px] font-bold bg-primary/5 text-primary px-2 py-1 rounded-lg border border-primary/10"
-                                >
-                                  {s}
-                                </span>
-                              ))}
-                            </div>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed">
+                              {visit.diagnosis || 'No diagnosis recorded.'}
+                            </p>
                           </div>
-                        )}
 
-                        {visit.prescription?.length > 0 && (
-                          <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                              Prescription
-                            </p>
-                            <div className="space-y-2">
-                              {visit.prescription.map((m: any, mi: number) => (
-                                <div
-                                  key={mi}
-                                  className="flex items-center justify-between gap-4"
-                                >
-                                  <p className="text-xs font-black text-slate-900 dark:text-white">
-                                    {m.medicineName}
-                                  </p>
-                                  <p className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                                    {m.dosage}
-                                  </p>
+                          {visit.symptoms?.length > 0 && (
+                            <div>
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                <ClipboardList className="size-3" /> Symptoms
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {visit.symptoms.map((s: string, ci: number) => (
+                                  <span
+                                    key={ci}
+                                    className="text-[10px] font-bold bg-primary/5 text-primary px-2 py-1 rounded-lg border border-primary/10"
+                                  >
+                                    {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {Object.values(visit.vitals || {}).some(Boolean) && (
+                            <div className="grid grid-cols-4 gap-2">
+                              {[
+                                ['BP', visit.vitals?.bp],
+                                ['HR', visit.vitals?.hr],
+                                ['SpO2', visit.vitals?.spo2],
+                                ['Temp', visit.vitals?.temp],
+                              ].map(([label, value]) => (
+                                <div key={label} className="rounded-xl bg-slate-50 dark:bg-slate-900 p-2 text-center border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[8px] font-black uppercase text-slate-400">{label}</p>
+                                  <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">{value || '--'}</p>
                                 </div>
                               ))}
                             </div>
-                          </div>
-                        )}
+                          )}
+
+                          {visit.prescription?.length > 0 && (
+                            <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                Prescription
+                              </p>
+                              <div className="space-y-2">
+                                {visit.prescription.map((m: any, mi: number) => (
+                                  <div
+                                    key={mi}
+                                    className="rounded-xl bg-white dark:bg-slate-950 px-3 py-2 border border-slate-100 dark:border-slate-800"
+                                  >
+                                    <div className="flex items-center justify-between gap-4">
+                                      <p className="text-xs font-black text-slate-900 dark:text-white">
+                                        {m.medicineName}
+                                      </p>
+                                      <p className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                                        {m.dosage || 'Dose N/A'}
+                                      </p>
+                                    </div>
+                                    {(m.duration || m.instructions) && (
+                                      <p className="text-[10px] text-slate-500 font-semibold mt-1">
+                                        {[m.duration, m.instructions].filter(Boolean).join(' · ')}
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {visit.notes && (
+                            <div>
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                                Notes
+                              </p>
+                              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
+                                {visit.notes}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="text-center py-20 px-10">
@@ -1012,7 +1105,7 @@ export default function DoctorDashboard() {
                   No History Found
                 </h4>
                 <p className="text-sm text-slate-500 font-medium">
-                  This patient doesn't have any previous consultation records on file.
+                  This patient doesn&apos;t have any previous consultation records on file.
                 </p>
               </div>
             )}

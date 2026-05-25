@@ -1,9 +1,26 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Activity,
+  ArrowUpRight,
+  Check,
+  Crown,
+  Edit2,
+  Infinity as InfinityIcon,
+  Layers3,
+  Plus,
+  Sparkles,
+  Star,
+  Trash2,
+  X,
+  Zap,
+} from 'lucide-react';
 import Link from 'next/link';
-import api from '@/services/api';
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -11,32 +28,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  Check,
-  X,
-  Star,
-  Layers3,
-  Users,
-  Building2,
-  Sparkles,
-  Crown,
-  Activity,
-  Infinity as InfinityIcon,
-  ShieldCheck,
-  ArrowUpRight,
-  Zap,
-} from 'lucide-react';
-
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import api from '@/services/api';
 
 type BillingMode = 'MONTHLY' | 'QUARTERLY' | 'HALF_YEARLY' | 'YEARLY';
 
@@ -44,6 +38,10 @@ export default function PlanManagementPage() {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [billingMode, setBillingMode] = useState<BillingMode>('MONTHLY');
+  const [migrationPlan, setMigrationPlan] = useState<any | null>(null);
+  const [migrationAmount, setMigrationAmount] = useState('');
+  const [migrationDate, setMigrationDate] = useState('');
+  const [schedulingMigration, setSchedulingMigration] = useState(false);
 
   const fetchPlans = async () => {
     try {
@@ -79,6 +77,46 @@ export default function PlanManagementPage() {
       fetchPlans();
     } catch (error) {
       toast.error('Failed to delete plan');
+    }
+  };
+
+  const openMigrationDialog = (plan: any, currentPrice: number) => {
+    const defaultDate = new Date();
+    defaultDate.setDate(defaultDate.getDate() + 30);
+
+    setMigrationPlan({ ...plan, currentPrice });
+    setMigrationAmount(String(currentPrice));
+    setMigrationDate(defaultDate.toISOString().split('T')[0]);
+  };
+
+  const handleScheduleMigration = async () => {
+    if (!migrationPlan) return;
+
+    const parsedAmount = Number(migrationAmount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
+      toast.error('Enter a valid new price');
+      return;
+    }
+    if (!migrationDate) {
+      toast.error('Choose an effective date');
+      return;
+    }
+
+    try {
+      setSchedulingMigration(true);
+      const res = await api.post('/api/subscription/price-migrations', {
+        planId: migrationPlan.planId,
+        billingCycle: billingMode,
+        newAmount: parsedAmount,
+        effectiveDate: migrationDate,
+        sendEmails: true,
+      });
+      toast.success(res.data?.message || 'Price-change notice scheduled');
+      setMigrationPlan(null);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to schedule price change');
+    } finally {
+      setSchedulingMigration(false);
     }
   };
 
@@ -243,9 +281,9 @@ export default function PlanManagementPage() {
           let price = priceObj?.amount;
           if (!price) {
             if (billingMode === 'MONTHLY') price = plan.price;
-            else if (billingMode === 'QUARTERLY') price = plan.quarterlyPrice || Math.round(plan.price * 3 * 0.9);
-            else if (billingMode === 'HALF_YEARLY') price = plan.halfYearlyPrice || Math.round(plan.price * 6 * 0.85);
-            else price = plan.yearlyPrice || Math.round(plan.price * 12 * 0.8);
+            else if (billingMode === 'QUARTERLY') price = plan.quarterlyPrice || Math.round(plan.price * 3);
+            else if (billingMode === 'HALF_YEARLY') price = plan.halfYearlyPrice || Math.round(plan.price * 6);
+            else price = plan.yearlyPrice || Math.round(plan.price * 12);
           }
 
           const intervalMonths = billingMode === 'MONTHLY' ? 1 : billingMode === 'QUARTERLY' ? 3 : billingMode === 'HALF_YEARLY' ? 6 : 12;
@@ -451,7 +489,7 @@ export default function PlanManagementPage() {
                 </div>
 
                 {/* FOOTER ACTION BUTTON */}
-                <div className="pt-2">
+                <div className="space-y-2 pt-2">
                   <Link href={`/superadmin/plans/create?id=${plan._id}`}>
                     <Button
                       className={cn(
@@ -467,6 +505,13 @@ export default function PlanManagementPage() {
                       <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Button>
                   </Link>
+                  <Button
+                    onClick={() => openMigrationDialog(plan, price)}
+                    variant="outline"
+                    className="w-full h-10 rounded-2xl text-xs font-bold border-amber-300/40 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/20 dark:text-amber-300 dark:hover:bg-amber-950/40"
+                  >
+                    Schedule Price Change
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -498,6 +543,75 @@ export default function PlanManagementPage() {
                 Publish First Plan
               </Button>
             </Link>
+          </div>
+        </div>
+      )}
+
+      {migrationPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-950">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600">
+                Price migration notice
+              </p>
+              <h2 className="text-xl font-black text-slate-950 dark:text-white">
+                {migrationPlan.name} - {billingMode.replace('_', ' ')}
+              </h2>
+              <p className="text-xs font-semibold text-slate-500">
+                Existing subscribers will receive a notice and see the upcoming change in Billing.
+              </p>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Current price
+                </label>
+                <div className="mt-1 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  ₹{Number(migrationPlan.currentPrice || 0).toLocaleString()}
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  New price
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={migrationAmount}
+                  onChange={(event) => setMigrationAmount(event.target.value)}
+                  className="mt-1 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black outline-none focus:border-primary dark:border-slate-800 dark:bg-slate-900"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Effective date
+                </label>
+                <input
+                  type="date"
+                  value={migrationDate}
+                  onChange={(event) => setMigrationDate(event.target.value)}
+                  className="mt-1 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold outline-none focus:border-primary dark:border-slate-800 dark:bg-slate-900"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setMigrationPlan(null)}
+                className="h-11 flex-1 rounded-2xl font-bold"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleScheduleMigration}
+                disabled={schedulingMigration}
+                className="h-11 flex-1 rounded-2xl font-black"
+              >
+                {schedulingMigration ? 'Scheduling...' : 'Send Notice'}
+              </Button>
+            </div>
           </div>
         </div>
       )}

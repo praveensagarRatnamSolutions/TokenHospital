@@ -164,8 +164,50 @@ const sendOnboardingEmail = async ({
   }
 };
 
+const sendPriceChangeNoticeEmail = async ({
+  to,
+  hospitalName,
+  planName,
+  billingCycle,
+  currentAmount,
+  newAmount,
+  currency = 'INR',
+  effectiveDate,
+}) => {
+  const formattedDate = new Date(effectiveDate).toLocaleDateString('en-IN', {
+    dateStyle: 'long',
+  });
+  const money = (amount) =>
+    new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
+
+  const subject = `Upcoming ${planName} price change`;
+  const text = [
+    `Hello ${hospitalName},`,
+    '',
+    `We are writing to let you know that the ${planName} (${billingCycle}) subscription price will change from ${money(currentAmount)} to ${money(newAmount)} starting ${formattedDate}.`,
+    '',
+    'Your current access continues normally until then. You can review your billing page for renewal options before the change takes effect.',
+    '',
+    'Thank you for using Hospital Token Platform.',
+  ].join('\n');
+
+  const html = `
+    <p>Hello <strong>${hospitalName}</strong>,</p>
+    <p>We are writing to let you know that the <strong>${planName}</strong> (${billingCycle}) subscription price will change from <strong>${money(currentAmount)}</strong> to <strong>${money(newAmount)}</strong> starting <strong>${formattedDate}</strong>.</p>
+    <p>Your current access continues normally until then. You can review your billing page for renewal options before the change takes effect.</p>
+    <p>Thank you for using Hospital Token Platform.</p>
+  `;
+
+  return sendEmail({ to, subject, text, html });
+};
+
 module.exports = {
   sendEmail,
   buildDoctorWelcomeEmail,
   sendOnboardingEmail,
+  sendPriceChangeNoticeEmail,
 };

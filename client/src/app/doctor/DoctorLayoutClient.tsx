@@ -110,13 +110,13 @@ export default function DoctorLayoutClient({ children }: { children: React.React
                     <span className="font-medium">Profile Settings</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                     onClick={() => router.push('/doctor/settings')}
                     className="rounded-xl px-3 py-2 cursor-pointer gap-3"
                   >
                     <Settings className="w-4 h-4 text-slate-400" />
                     <span className="font-medium">System Settings</span>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
 
                   <DropdownMenuSeparator />
 

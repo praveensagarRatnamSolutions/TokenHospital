@@ -15,7 +15,8 @@ import {
   ArrowRight,
   Sparkles,
   Info,
-  Clock
+  Clock,
+  Globe
 } from 'lucide-react';
 
 export default function RefundPolicyPage() {

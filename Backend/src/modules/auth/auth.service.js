@@ -89,7 +89,7 @@ const onboardUser = async (onboardData, userId) => {
       { session }
     );
 
-    // 5. Create matching HospitalSubscription record (initialized to FREE active by default)
+    // 5. Create matching HospitalSubscription record with the standard trial period
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 30); // 30 days initial period
@@ -100,10 +100,12 @@ const onboardUser = async (onboardData, userId) => {
           hospitalId: hospital._id,
           planId: 'FREE',
           billingCycle: 'MONTHLY',
-          status: 'ACTIVE',
+          status: 'TRIAL',
           startDate,
           currentPeriodStart: startDate,
           currentPeriodEnd: endDate,
+          trialStart: startDate,
+          trialEnd: endDate,
         },
       ],
       { session }

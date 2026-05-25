@@ -81,11 +81,14 @@ const createPlan = async (req, res, next) => {
      * =========================================
      */
 
-    const rzp = getGlobalRazorpayClient();
+    // Only create Razorpay plans for paid plans
+    const paidPrices = planData.prices.filter(
+      (priceOption) => priceOption.amount > 0
+    );
+    const rzp = paidPrices.length > 0 ? getGlobalRazorpayClient() : null;
 
     console.log('Razorpay Client:', !!rzp);
 
-    // Only create Razorpay plans for paid plans
     for (const priceOption of planData.prices) {
       /**
        * FREE PLAN
@@ -221,50 +224,57 @@ const updatePlan = async (req, res, next) => {
   try {
     const planData = req.body;
 
-    // If the update modifies pricing, register any brand-new prices in Razorpay dynamically
+    // If the update modifies pricing, register any brand-new paid prices in Razorpay dynamically
     if (planData.prices && planData.prices.length > 0) {
-      const rzp = getGlobalRazorpayClient();
-
       for (let priceOption of planData.prices) {
-        if (
-          !priceOption.razorpayPlanId ||
-          priceOption.razorpayPlanId.startsWith('temp_')
-        ) {
-          let period = 'monthly';
-          let interval = priceOption.intervalMonths;
+        if (priceOption.amount <= 0) {
+          priceOption.razorpayPlanId = null;
+        }
+      }
 
-          if (priceOption.billingCycle === 'YEARLY') {
-            period = 'yearly';
-            interval = 1;
-          } else {
-            period = 'monthly';
-            interval = priceOption.intervalMonths;
-          }
+      const pricesNeedingRegistration = planData.prices.filter(
+        (priceOption) =>
+          priceOption.amount > 0 &&
+          (!priceOption.razorpayPlanId ||
+            priceOption.razorpayPlanId.startsWith('temp_'))
+      );
 
-          try {
-            console.log(
-              `Creating Razorpay plan for new cycle ${priceOption.billingCycle} during update...`
-            );
-            const rzpPlan = await rzp.plans.create({
-              period: period,
-              interval: interval,
-              item: {
-                name: `${planData.name || 'Plan'} - ${priceOption.billingCycle}`,
-                amount: Math.round(priceOption.amount * 100),
-                currency: planData.currency || 'INR',
-                description: planData.description || `Subscription Plan`,
-              },
-            });
-            priceOption.razorpayPlanId = rzpPlan.id;
-          } catch (err) {
-            logger.error(
-              `Failed to register new plan cycle in Razorpay during update:`,
-              err
-            );
-            throw new Error(
-              `Razorpay plan registration failed: ${err.message}`
-            );
-          }
+      const rzp =
+        pricesNeedingRegistration.length > 0 ? getGlobalRazorpayClient() : null;
+
+      for (let priceOption of pricesNeedingRegistration) {
+        let period = 'monthly';
+        let interval = priceOption.intervalMonths;
+
+        if (priceOption.billingCycle === 'YEARLY') {
+          period = 'yearly';
+          interval = 1;
+        } else {
+          period = 'monthly';
+          interval = priceOption.intervalMonths;
+        }
+
+        try {
+          console.log(
+            `Creating Razorpay plan for new cycle ${priceOption.billingCycle} during update...`
+          );
+          const rzpPlan = await rzp.plans.create({
+            period: period,
+            interval: interval,
+            item: {
+              name: `${planData.name || 'Plan'} - ${priceOption.billingCycle}`,
+              amount: Math.round(priceOption.amount * 100),
+              currency: planData.currency || 'INR',
+              description: planData.description || `Subscription Plan`,
+            },
+          });
+          priceOption.razorpayPlanId = rzpPlan.id;
+        } catch (err) {
+          logger.error(
+            `Failed to register new plan cycle in Razorpay during update:`,
+            err
+          );
+          throw new Error(`Razorpay plan registration failed: ${err.message}`);
         }
       }
     }

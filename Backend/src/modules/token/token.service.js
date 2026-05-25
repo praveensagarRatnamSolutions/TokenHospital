@@ -570,11 +570,18 @@ const getTokens = async (hospitalId, filters = {}) => {
   if (filters.doctorId)
     match.doctorId = new mongoose.Types.ObjectId(filters.doctorId);
 
-  const date = filters.appointmentDate || new Date();
-  match.appointmentDate = {
-    $gte: new Date(new Date(date).setUTCHours(0, 0, 0, 0)),
-    $lte: new Date(new Date(date).setUTCHours(23, 59, 59, 999)),
-  };
+  if (filters.startDate && filters.endDate) {
+    match.appointmentDate = {
+      $gte: new Date(new Date(filters.startDate).setUTCHours(0, 0, 0, 0)),
+      $lte: new Date(new Date(filters.endDate).setUTCHours(23, 59, 59, 999)),
+    };
+  } else if (filters.appointmentDate) {
+    const date = filters.appointmentDate;
+    match.appointmentDate = {
+      $gte: new Date(new Date(date).setUTCHours(0, 0, 0, 0)),
+      $lte: new Date(new Date(date).setUTCHours(23, 59, 59, 999)),
+    };
+  }
 
   const page = parseInt(filters.page) || 1;
   const limit = parseInt(filters.limit) || 50;

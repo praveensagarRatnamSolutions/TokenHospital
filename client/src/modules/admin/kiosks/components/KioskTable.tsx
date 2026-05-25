@@ -3,6 +3,7 @@
 import React from 'react';
 import { Edit2, Trash2, Monitor, MapPin, Power, ExternalLink, User, Users } from 'lucide-react';
 import { Kiosk } from '../../../kiosk/types';
+import { useAppSelector } from '@/store/hooks';
 
 interface KioskTableProps {
   kiosks: Kiosk[];
@@ -17,6 +18,8 @@ export const KioskTable: React.FC<KioskTableProps> = ({
   onDelete,
   onToggleActive,
 }) => {
+  const user = useAppSelector((state) => state.auth.user);
+
   if (kiosks.length === 0) {
     return (
       <div className="py-32 text-center rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -43,7 +46,10 @@ export const KioskTable: React.FC<KioskTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {kiosks.map((kiosk) => (
+            {kiosks.map((kiosk) => {
+              const canEditOrDelete = user?.role === 'ADMIN' || kiosk.createdBy === user?._id;
+
+              return (
               <tr
                 key={kiosk._id}
                 className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group"
@@ -99,11 +105,12 @@ export const KioskTable: React.FC<KioskTableProps> = ({
                 <td className="px-8 py-5">
                   <button
                     onClick={() => onToggleActive(kiosk)}
+                    disabled={!canEditOrDelete}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
                       kiosk.isActive
                         ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/50'
                         : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100 dark:bg-slate-800/50 dark:text-slate-500 dark:border-slate-800'
-                    }`}
+                    } ${!canEditOrDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <Power className="w-3 h-3" />
                     {kiosk.isActive ? 'Active' : 'Offline'}
@@ -113,13 +120,15 @@ export const KioskTable: React.FC<KioskTableProps> = ({
                 {/* Actions */}
                 <td className="px-8 py-5">
                   <div className="flex items-center justify-end gap-1">
-                    <button
-                      onClick={() => onEdit(kiosk)}
-                      className="p-2.5 text-slate-400 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-xl transition-all"
-                      title="Edit Kiosk"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
+                    {canEditOrDelete && (
+                      <button
+                        onClick={() => onEdit(kiosk)}
+                        className="p-2.5 text-slate-400 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-xl transition-all"
+                        title="Edit Kiosk"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => window.open(`/kiosk/${kiosk.code}`, '_blank')}
                       className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-all"
@@ -127,17 +136,20 @@ export const KioskTable: React.FC<KioskTableProps> = ({
                     >
                       <ExternalLink className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => onDelete(kiosk)}
-                      className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
-                      title="Delete Kiosk"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {canEditOrDelete && (
+                      <button
+                        onClick={() => onDelete(kiosk)}
+                        className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
+                        title="Delete Kiosk"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

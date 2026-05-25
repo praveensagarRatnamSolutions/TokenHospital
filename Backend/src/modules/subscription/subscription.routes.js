@@ -22,6 +22,8 @@ router.get('/status', authorize('ADMIN', 'SUPERADMIN'), subscriptionController.g
 router.get('/history', authorize('ADMIN', 'SUPERADMIN'), subscriptionController.getBillingHistory);
 router.get('/history/export', authorize('ADMIN', 'SUPERADMIN'), subscriptionController.exportBillingHistory);
 router.post('/change-plan', authorize('ADMIN'), subscriptionController.changePlan);
+router.post('/cancel-renewal', authorize('ADMIN'), subscriptionController.cancelRenewal);
+router.post('/resume-renewal', authorize('ADMIN'), subscriptionController.resumeRenewal);
 
 // Checkout & Trial Endpoints
 router.post('/start-trial', authorize('ADMIN'), subscriptionController.startTrial);
@@ -35,5 +37,6 @@ router.get('/plans/:id', authorize('SUPERADMIN'), planController.getPlanById);
 router.put('/plans/:id', authorize('SUPERADMIN'), planCreationValidation, validateRequest, planController.updatePlan);
 router.delete('/plans/:id', authorize('SUPERADMIN'), planController.deletePlan);
 router.post('/assign-plan/:hospitalId', authorize('SUPERADMIN'), subscriptionController.assignPlan);
+router.post('/price-migrations', authorize('SUPERADMIN'), subscriptionController.schedulePriceMigration);
 
 module.exports = router;
