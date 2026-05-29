@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Sidebar } from '@/components/superadmin/Sidebar';
 import { Topbar } from '@/components/superadmin/Topbar';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return (

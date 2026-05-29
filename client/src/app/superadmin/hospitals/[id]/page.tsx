@@ -1,35 +1,34 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import { 
-  ArrowLeft, 
-  Building2, 
-  MapPin, 
-  Mail, 
-  Phone, 
-  ShieldCheck,
-  CreditCard,
-  Zap,
   Activity,
-  Calendar,
   AlertCircle,
-  Loader,
-  Users,
-  Stethoscope,
-  BriefcaseMedical,
-  MonitorSmartphone,
-  Wallet,
-  ArrowUpRight,
   ArrowDownRight,
+  ArrowLeft, 
+  ArrowUpRight,
+  BriefcaseMedical,
+  Building2, 
+  Calendar,
   CheckCircle2,
   Clock,
-  UserCircle
-} from 'lucide-react';
-import { hospitalApi } from '@/services/hospitalApi';
-import { Button } from '@/components/ui/button';
+  CreditCard,
+  Loader,
+  Mail, 
+  MapPin, 
+  MonitorSmartphone,
+  Phone, 
+  ShieldCheck,
+  Stethoscope,
+  UserCircle,
+  Users,
+  Wallet,
+  Zap} from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { Badge } from '@/components/ui/badge';
-import { HospitalForm } from '@/components/superadmin/HospitalForm';
+import { Button } from '@/components/ui/button';
+import { hospitalApi } from '@/services/hospitalApi';
 
 function formatPhone(phone: any) {
   if (!phone) return 'N/A';
@@ -51,7 +50,6 @@ export default function HospitalDetailsPage() {
   const [hospital, setHospital] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showEditForm, setShowEditForm] = useState(false);
 
   const fetchHospitalDetails = async () => {
     try {
@@ -108,7 +106,7 @@ export default function HospitalDetailsPage() {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 font-mono">NODE ID: {hospital._id}</p>
         </div>
         <div className="ml-auto">
-          <Button onClick={() => setShowEditForm(true)} className="rounded-xl font-bold bg-primary hover:bg-primary/90">
+          <Button onClick={() => router.push(`/superadmin/hospitals/create?id=${id}`)} className="rounded-xl font-bold bg-primary hover:bg-primary/90">
             Edit Node
           </Button>
         </div>
@@ -427,15 +425,6 @@ export default function HospitalDetailsPage() {
           </div>
         </div>
       </div>
-
-      {showEditForm && (
-        <HospitalForm 
-          hospital={hospital} 
-          onClose={() => setShowEditForm(false)} 
-          onSuccess={fetchHospitalDetails} 
-        />
-      )}
-
     </div>
   );
 }

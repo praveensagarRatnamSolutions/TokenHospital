@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Search, Building2, Activity, Zap } from 'lucide-react';
+import { Activity, Building2, Plus, Search, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 import { HospitalsList } from '@/components/superadmin/HospitalsList';
-import { HospitalForm } from '@/components/superadmin/HospitalForm';
-import { Hospital, hospitalApi } from '@/services/hospitalApi';
 import { Button } from '@/components/ui/button';
+import { Hospital, hospitalApi } from '@/services/hospitalApi';
 
 export default function HospitalsPage() {
+  const router = useRouter();
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
-  const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchHospitals = async () => {
@@ -41,22 +41,11 @@ export default function HospitalsPage() {
   const customPlanCount = hospitals.filter(h => h.subscription?.plan?.isCustom).length;
 
   const handleCreate = () => {
-    setSelectedHospital(null);
-    setShowForm(true);
+    router.push('/superadmin/hospitals/create');
   };
 
   const handleEdit = (hospital: Hospital) => {
-    setSelectedHospital(hospital);
-    setShowForm(true);
-  };
-
-  const handleFormClose = () => {
-    setShowForm(false);
-    setSelectedHospital(null);
-  };
-
-  const handleFormSuccess = () => {
-    fetchHospitals();
+    router.push(`/superadmin/hospitals/create?id=${hospital._id}`);
   };
 
   return (
@@ -146,14 +135,6 @@ export default function HospitalsPage() {
           />
         </div>
       </div>
-
-      {showForm && (
-        <HospitalForm
-          hospital={selectedHospital}
-          onClose={handleFormClose}
-          onSuccess={handleFormSuccess}
-        />
-      )}
     </div>
   );
 }

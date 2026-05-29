@@ -1,20 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { walletApi } from '@/services/walletApi';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  Plus,
-  MessageSquare,
-  Mail,
-  MoreVertical,
-  Activity,
-  Zap,
   Edit,
+  Mail,
+  MessageSquare,
+  Plus,
+  Zap,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect,useState } from 'react';
 import { toast } from 'sonner';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { walletApi } from '@/services/walletApi';
 
 export default function WalletPackagesPage() {
   const router = useRouter();

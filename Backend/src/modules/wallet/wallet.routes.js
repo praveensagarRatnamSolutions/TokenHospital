@@ -12,6 +12,9 @@ const {
 router.get('/packages', protect, walletController.getTopupPackages);
 router.get('/packages/:id', protect, walletController.getTopupPackageById);
 
+// Public Webhook from Razorpay
+router.post('/webhook', walletController.handleWalletWebhook);
+
 // Private hospital admin wallet & checkout routes
 router.get('/balances', protect, walletController.getBalances);
 router.get('/ledger', protect, walletController.getLedger);

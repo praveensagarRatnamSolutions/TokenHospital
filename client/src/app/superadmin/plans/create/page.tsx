@@ -7,6 +7,7 @@ import {
   Crown,
   Info,
   ListPlus,
+  Lock,
   Plus,
   RefreshCw,
   Save,
@@ -58,6 +59,7 @@ export default function PlanFormPage() {
     limits: DEFAULT_PLAN_LIMITS,
     trialDays: 30,
     isActive: true,
+    isCustom: false,
   });
 
   // Dynamic custom features array state
@@ -90,6 +92,7 @@ export default function PlanFormPage() {
               freeSmsUnits: data.limits?.freeSmsUnits ?? 0,
               freeEmailUnits: data.limits?.freeEmailUnits ?? 0,
             },
+            isCustom: data.isCustom ?? false,
           });
 
           // Save original prices for Razorpay check
@@ -360,6 +363,22 @@ export default function PlanFormPage() {
               </div>
             </div>
 
+            {/* Premium pricing-locked notice */}
+            {isEdit && (
+              <div className="bg-amber-500/5 dark:bg-amber-950/10 border border-amber-500/20 rounded-[2rem] p-5 flex gap-4 items-start shadow-sm relative overflow-hidden animate-pulse-slow">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 p-2.5 rounded-xl shrink-0">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div className="space-y-1 relative z-10">
+                  <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest">Pricing is Safely Locked</h4>
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Price values are immutable for active tiers to safeguard ongoing subscriptions and historical hospital invoices. To change plan prices, please use the <strong className="text-amber-700 dark:text-amber-400">Schedule Price Change</strong> tool on the main Plans dashboard.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Monthly price */}
               <div className="space-y-2">
@@ -368,11 +387,18 @@ export default function PlanFormPage() {
                 </label>
                 <div className="relative">
                   <input
+                    disabled={isEdit}
                     type="number"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                    className="w-full h-14 px-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl font-bold outline-none border border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white transition-all text-sm"
+                    className={cn(
+                      "w-full h-14 px-5 rounded-2xl font-bold outline-none border transition-all text-sm",
+                      isEdit
+                        ? "bg-slate-100/70 dark:bg-slate-800/20 border-slate-200/50 dark:border-slate-800/50 text-slate-400 cursor-not-allowed select-none"
+                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white"
+                    )}
                   />
+                  {isEdit && <Lock className="w-4 h-4 text-slate-400 absolute right-16 top-1/2 -translate-y-1/2" />}
                   <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">/mo</span>
                 </div>
               </div>
@@ -384,12 +410,19 @@ export default function PlanFormPage() {
                 </label>
                 <div className="relative">
                   <input
+                    disabled={isEdit}
                     type="number"
                     value={formData.quarterlyPrice}
                     onChange={(e) => setFormData({ ...formData, quarterlyPrice: Number(e.target.value) })}
-                    className="w-full h-14 px-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl font-bold outline-none border border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white transition-all text-sm"
+                    className={cn(
+                      "w-full h-14 px-5 rounded-2xl font-bold outline-none border transition-all text-sm",
+                      isEdit
+                        ? "bg-slate-100/70 dark:bg-slate-800/20 border-slate-200/50 dark:border-slate-800/50 text-slate-400 cursor-not-allowed select-none"
+                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white"
+                    )}
                     placeholder={String(Math.round(formData.price * 3))}
                   />
+                  {isEdit && <Lock className="w-4 h-4 text-slate-400 absolute right-16 top-1/2 -translate-y-1/2" />}
                   <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">/3m</span>
                 </div>
               </div>
@@ -401,12 +434,19 @@ export default function PlanFormPage() {
                 </label>
                 <div className="relative">
                   <input
+                    disabled={isEdit}
                     type="number"
                     value={formData.halfYearlyPrice}
                     onChange={(e) => setFormData({ ...formData, halfYearlyPrice: Number(e.target.value) })}
-                    className="w-full h-14 px-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl font-bold outline-none border border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white transition-all text-sm"
+                    className={cn(
+                      "w-full h-14 px-5 rounded-2xl font-bold outline-none border transition-all text-sm",
+                      isEdit
+                        ? "bg-slate-100/70 dark:bg-slate-800/20 border-slate-200/50 dark:border-slate-800/50 text-slate-400 cursor-not-allowed select-none"
+                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white"
+                    )}
                     placeholder={String(Math.round(formData.price * 6))}
                   />
+                  {isEdit && <Lock className="w-4 h-4 text-slate-400 absolute right-16 top-1/2 -translate-y-1/2" />}
                   <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">/6m</span>
                 </div>
               </div>
@@ -418,12 +458,19 @@ export default function PlanFormPage() {
                 </label>
                 <div className="relative">
                   <input
+                    disabled={isEdit}
                     type="number"
                     value={formData.yearlyPrice}
                     onChange={(e) => setFormData({ ...formData, yearlyPrice: Number(e.target.value) })}
-                    className="w-full h-14 px-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl font-bold outline-none border border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white transition-all text-sm"
+                    className={cn(
+                      "w-full h-14 px-5 rounded-2xl font-bold outline-none border transition-all text-sm",
+                      isEdit
+                        ? "bg-slate-100/70 dark:bg-slate-800/20 border-slate-200/50 dark:border-slate-800/50 text-slate-400 cursor-not-allowed select-none"
+                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/20 text-slate-800 dark:text-white"
+                    )}
                     placeholder={String(Math.round(formData.price * 12))}
                   />
+                  {isEdit && <Lock className="w-4 h-4 text-slate-400 absolute right-16 top-1/2 -translate-y-1/2" />}
                   <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">/year</span>
                 </div>
               </div>
@@ -567,7 +614,7 @@ export default function PlanFormPage() {
             <Separator className="bg-slate-100 dark:bg-slate-800" />
 
             {/* Plan Settings Toggles */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Recommended Badge Switch */}
               <div className="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-slate-200/50 dark:border-slate-850">
                 <div className="space-y-0.5">
@@ -589,6 +636,18 @@ export default function PlanFormPage() {
                 <Switch
                   checked={formData.isActive}
                   onCheckedChange={(v) => setFormData({ ...formData, isActive: v })}
+                />
+              </div>
+
+              {/* Is Custom Plan Switch */}
+              <div className="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-slate-200/50 dark:border-slate-850 animate-pulse-slow">
+                <div className="space-y-0.5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Is Custom Plan</p>
+                  <p className="text-[9px] font-medium text-slate-400">Directly assign to custom clinics</p>
+                </div>
+                <Switch
+                  checked={formData.isCustom}
+                  onCheckedChange={(v) => setFormData({ ...formData, isCustom: v })}
                 />
               </div>
             </div>
@@ -729,8 +788,14 @@ export default function PlanFormPage() {
                     </div>
 
                     {formData.recommended && (
-                      <div className="bg-amber-400 text-slate-900 px-3 py-1.5 rounded-xl flex items-center justify-center font-black text-[9px] tracking-wider uppercase shadow-md shadow-black/10">
+                      <div className="bg-amber-450 text-slate-900 px-3 py-1.5 rounded-xl flex items-center justify-center font-black text-[9px] tracking-wider uppercase shadow-md shadow-black/10">
                         Popular
+                      </div>
+                    )}
+
+                    {formData.isCustom && (
+                      <div className="bg-orange-500 text-white px-3 py-1.5 rounded-xl flex items-center justify-center font-black text-[9px] tracking-wider uppercase shadow-md shadow-black/10">
+                        Custom
                       </div>
                     )}
 

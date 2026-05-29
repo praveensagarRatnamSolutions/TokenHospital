@@ -66,7 +66,7 @@ const planSchema = new mongoose.Schema(
     },
     billingCycle: {
       type: String,
-      enum: ['MONTHLY', 'YEARLY'],
+      enum: ['MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY'],
       default: 'MONTHLY',
     },
     prices: [planPriceSchema], // 👈 Dynamic, extensible prices array

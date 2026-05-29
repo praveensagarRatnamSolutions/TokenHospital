@@ -49,7 +49,7 @@ const hospitalSchema = new mongoose.Schema(
         type: Number,
         default: 0,
         min: 0,
-      }
+      },
     },
     // ✅ ADD THIS
     timezone: {
@@ -58,11 +58,13 @@ const hospitalSchema = new mongoose.Schema(
     },
     registrationNumber: {
       type: String,
+      trim: true,
       unique: true,
       sparse: true,
     },
     licenseNumber: {
       type: String,
+      trim: true,
       unique: true,
       sparse: true,
     },

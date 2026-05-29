@@ -38,5 +38,6 @@ router.put('/plans/:id', authorize('SUPERADMIN'), planCreationValidation, valida
 router.delete('/plans/:id', authorize('SUPERADMIN'), planController.deletePlan);
 router.post('/assign-plan/:hospitalId', authorize('SUPERADMIN'), subscriptionController.assignPlan);
 router.post('/price-migrations', authorize('SUPERADMIN'), subscriptionController.schedulePriceMigration);
+router.post('/price-migrations/run', authorize('SUPERADMIN'), subscriptionController.runPriceMigrationsManual);
 
 module.exports = router;

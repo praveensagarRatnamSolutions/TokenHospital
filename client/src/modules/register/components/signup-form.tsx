@@ -49,11 +49,11 @@ export default function SignupForm() {
 
       // Save token in Redux & Cookies
       dispatch(
-          setCredentials({
-            user,
-            accessToken: token,
-            refreshToken: token,
-          })
+        setCredentials({
+          user,
+          accessToken: token,
+          refreshToken: token,
+        }),
       );
 
       // Get plan details from URL params if any
@@ -79,9 +79,10 @@ export default function SignupForm() {
 
   return (
     <div className="space-y-6">
+      
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Field>
-          <FieldLabel>Full Name</FieldLabel>
+          <FieldLabel className="text-slate-700">Full Name</FieldLabel>
           <div className="relative">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -94,7 +95,7 @@ export default function SignupForm() {
         </Field>
 
         <Field>
-          <FieldLabel>Email Address</FieldLabel>
+          <FieldLabel className="text-slate-700">Email Address</FieldLabel>
           <div className="relative">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -107,7 +108,7 @@ export default function SignupForm() {
         </Field>
 
         <Field>
-          <FieldLabel>Password</FieldLabel>
+          <FieldLabel className="text-slate-700">Password</FieldLabel>
           <div className="relative">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -121,7 +122,11 @@ export default function SignupForm() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
             </button>
           </div>
           {errors.password && <FieldError>{errors.password.message}</FieldError>}

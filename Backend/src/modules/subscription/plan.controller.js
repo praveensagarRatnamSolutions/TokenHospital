@@ -86,56 +86,52 @@ const createPlan = async (req, res, next) => {
       (priceOption) => priceOption.amount > 0
     );
     const rzp = paidPrices.length > 0 ? getGlobalRazorpayClient() : null;
-
-    console.log('Razorpay Client:', !!rzp);
-
+    
     for (const priceOption of planData.prices) {
-      /**
-       * FREE PLAN
-       * Skip Razorpay creation
-       */
+      // Skip FREE plans (amount <= 0)
       if (priceOption.amount <= 0) {
         priceOption.razorpayPlanId = null;
         continue;
       }
 
+      // Map billing cycle to Razorpay period & interval
       let period = 'monthly';
-      let interval = priceOption.intervalMonths;
-
-      /**
-       * Razorpay supports:
-       * daily, weekly, monthly, yearly
-       */
+      let interval = 1;
 
       switch (priceOption.billingCycle) {
         case 'MONTHLY':
           period = 'monthly';
           interval = 1;
           break;
-
         case 'QUARTERLY':
           period = 'monthly';
           interval = 3;
           break;
-
         case 'HALF_YEARLY':
           period = 'monthly';
           interval = 6;
           break;
-
         case 'YEARLY':
           period = 'yearly';
           interval = 1;
           break;
-
         default:
           period = 'monthly';
           interval = 1;
       }
 
       try {
-        console.log(
-          `Creating Razorpay plan for ${planData.name} (${priceOption.billingCycle}) at ₹${priceOption.amount}`
+        // Validate Razorpay client exists before calling
+        if (!rzp) {
+          logger.warn(
+            `Razorpay not configured. Skipping plan creation for ${priceOption.billingCycle}`
+          );
+          priceOption.razorpayPlanId = null;
+          continue;
+        }
+
+        logger.info(
+          `Creating Razorpay plan: ${planData.name} (${priceOption.billingCycle}) - ₹${priceOption.amount}`
         );
 
         const razorpayPlan = await rzp.plans.create({
@@ -150,22 +146,14 @@ const createPlan = async (req, res, next) => {
           },
         });
 
-        console.log('Razorpay Plan Created:', razorpayPlan.id);
-
         priceOption.razorpayPlanId = razorpayPlan.id;
+        logger.info(`✅ Razorpay plan created: ${razorpayPlan.id}`);
       } catch (err) {
-        console.log('RAZORPAY ERROR:', err);
-
-        logger.error(`Failed to register Razorpay plan`, err);
-
-        return res.status(500).json({
-          success: false,
-          message:
-            err?.error?.description ||
-            err?.message ||
-            'Failed to create Razorpay plan',
-          error: err,
-        });
+        // Warn but continue - plan can be created without Razorpay integration
+        logger.error(
+          `⚠️ Failed to create Razorpay plan for ${priceOption.billingCycle}: ${err.message}`
+        );
+        priceOption.razorpayPlanId = null;
       }
     }
 
@@ -204,7 +192,9 @@ const getPlanById = async (req, res, next) => {
 
 const getPlans = async (req, res, next) => {
   try {
-    const plans = await Plan.find({ isActive: true }).sort({ displayOrder: 1 });
+    const plans = await Plan.find({ isActive: true, isCustom: false }).sort({
+      displayOrder: 1,
+    });
     res.status(200).json({ success: true, data: plans });
   } catch (error) {
     next(error);

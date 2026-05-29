@@ -11,27 +11,8 @@ export default function Page() {
           <div className="absolute top-0 right-0 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute bottom-0 left-0 h-80 w-80 rounded-full bg-cyan-400/10 blur-3xl" />
 
-          <div className="relative z-10">
+          <div className="relative z-10 my-auto space-y-6">
             {/* Logo */}
-            <div className="mb-16 flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/20 bg-white p-2 ">
-                <Link href="/" className="text-lg sm:text-xl font-bold">
-                  <img
-                    src="/logo.png" // 👉 replace with your real logo
-                    className="h-10 w-25"
-                    alt="Ratnam Solutions"
-                  />
-                </Link>
-              </div>
-
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-white">
-                  Hospital Token
-                </h1>
-
-                <p className="mt-1 text-sm text-blue-100">Smart Queue Management</p>
-              </div>
-            </div>
 
             {/* Heading */}
             <div className="max-w-xl space-y-6">
@@ -70,15 +51,14 @@ export default function Page() {
         {/* Right Section */}
         <div className="flex min-h-screen items-center justify-center bg-white px-6 py-25 sm:px-10 lg:px-16">
           <div className="w-full max-w-md">
-            {/* Mobile Logo */}
-            <div className="mb-10 text-center lg:hidden">
-              <div className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-2xl text-white shadow-xl">
-                🏥
-              </div>
-
-              <h1 className="text-3xl font-bold text-slate-900">Hospital Token</h1>
-
-              <p className="mt-2 text-slate-500">Smart Queue Management System</p>
+            <div className="mx-auto mb-8 flex items-center justify-center rounded-2xl border border-white/20 bg-white p-2 ">
+              <Link href="/" className="text-lg sm:text-xl font-bold ">
+                <img
+                  src="/logo.png" // 👉 replace with your real logo
+                  className="h-20 w-25"
+                  alt="Ratnam Solutions"
+                />
+              </Link>
             </div>
 
             {/* Header */}

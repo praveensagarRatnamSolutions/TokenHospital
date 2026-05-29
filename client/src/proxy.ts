@@ -8,10 +8,13 @@ export function proxy(request: NextRequest) {
 
   // 1. If hitting login or register and already logged in, redirect to dashboard
   if (token && (pathname === '/login' || pathname === '/register')) {
-    if (userRole === 'SUPERADMIN') return NextResponse.redirect(new URL('/superadmin', request.url));
-    if (userRole === 'ADMIN') return NextResponse.redirect(new URL('/admin', request.url));
-    if (userRole === 'DOCTOR') return NextResponse.redirect(new URL('/doctor', request.url));
-    return NextResponse.redirect(new URL('/kiosk', request.url));
+    if (userRole === 'SUPERADMIN')
+      return NextResponse.redirect(new URL('/superadmin', request.url));
+    if (userRole === 'ADMIN')
+      return NextResponse.redirect(new URL('/admin', request.url));
+    if (userRole === 'DOCTOR')
+      return NextResponse.redirect(new URL('/doctor', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   // 2. Protect Portals
@@ -27,13 +30,13 @@ export function proxy(request: NextRequest) {
   // Role-based protection
   if (token) {
     if (isSuperAdminPath && userRole !== 'SUPERADMIN') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
     if (isAdminPath && userRole !== 'ADMIN') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
     if (isDoctorPath && userRole !== 'DOCTOR') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
   }
 

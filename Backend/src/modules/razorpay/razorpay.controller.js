@@ -44,36 +44,56 @@ exports.handleWebhook = async (req, res) => {
       const razorpayPayment = payload.payment.entity;
       const razorpayOrderId = razorpayPayment.order_id;
 
-      // 1. Find the pending payment record
-      const paymentRecord = await Payment.findOne({ razorpayOrderId });
+      // 1. Atomically find and lock the payment record to prevent duplicate webhooks
+      const paymentRecord = await Payment.findOneAndUpdate(
+        { 
+          razorpayOrderId: razorpayOrderId,
+          status: { $ne: 'captured' }
+        },
+        { 
+          $set: { 
+            status: 'processing_capture',
+            razorpayPaymentId: razorpayPayment.id
+          } 
+        },
+        { new: true }
+      );
 
-      if (paymentRecord && paymentRecord.status !== 'captured') {
+      if (paymentRecord) {
         logger.info(
           `Processing captured payment for Order: ${razorpayOrderId}`
         );
 
-        console.log('Payment Record Found:', paymentRecord);
-        // 2. Create the Token using stored patient details
-        const tokenResult = await tokenService.createToken({
-          hospitalId: paymentRecord.hospitalId,
-          departmentId: paymentRecord.departmentId,
-          doctorId: paymentRecord.doctorId,
-          patientDetails: paymentRecord.patientDetails,
-          appointmentDate:
-            paymentRecord.patientDetails?.appointmentDate || new Date(),
-          isEmergency: paymentRecord.patientDetails?.isEmergency || false,
-          status: 'WAITING', // 👈 Activate immediately for UPI
-          existingPaymentId: paymentRecord._id, // 👈 Link to this payment record
-        });
+        console.log('Payment Record Locked:', paymentRecord);
+        try {
+          // 2. Create the Token using stored patient details
+          const tokenResult = await tokenService.createToken({
+            hospitalId: paymentRecord.hospitalId,
+            departmentId: paymentRecord.departmentId,
+            doctorId: paymentRecord.doctorId,
+            patientDetails: paymentRecord.patientDetails,
+            appointmentDate:
+              paymentRecord.patientDetails?.appointmentDate || new Date(),
+            isEmergency: paymentRecord.patientDetails?.isEmergency || false,
+            status: 'WAITING', // 👈 Activate immediately for UPI
+            existingPaymentId: paymentRecord._id, // 👈 Link to this payment record
+          });
 
-        // 3. Update the payment record status (token linking is now handled in createToken)
-        paymentRecord.status = 'captured';
-        paymentRecord.razorpayPaymentId = razorpayPayment.id;
-        await paymentRecord.save();
+          // 3. Update the payment record status to fully captured
+          paymentRecord.status = 'captured';
+          await paymentRecord.save();
 
-        logger.info(
-          `Token created successfully for Order: ${razorpayOrderId}, Token: ${tokenResult.token.tokenNumber}`
-        );
+          logger.info(
+            `Token created successfully for Order: ${razorpayOrderId}, Token: ${tokenResult.token.tokenNumber}`
+          );
+        } catch (error) {
+          // Revert the lock if token creation fails so it can be retried
+          paymentRecord.status = 'pending';
+          await paymentRecord.save();
+          throw error;
+        }
+      } else {
+        logger.info(`Payment for Order: ${razorpayOrderId} already processed or not found.`);
       }
     }
 

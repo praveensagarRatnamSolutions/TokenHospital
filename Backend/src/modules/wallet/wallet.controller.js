@@ -219,6 +219,15 @@ exports.verifyPayment = async (req, res, next) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, packageId } = req.body;
 
+    // 0. Idempotency check
+    const existingTransaction = await SubscriptionTransaction.findOne({ razorpayOrderId: razorpay_order_id });
+    if (existingTransaction) {
+      return res.status(200).json({
+        success: true,
+        message: 'Payment already verified and credits added successfully'
+      });
+    }
+
     const pkg = await TopupPackage.findById(packageId);
     if (!pkg) {
       return res.status(404).json({ success: false, message: 'Package not found' });
@@ -268,5 +277,90 @@ exports.verifyPayment = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+};
+
+/**
+ * @desc    Global Platform Webhook for Razorpay Wallet Orders
+ * @route   POST /api/wallet/webhook
+ * @access  Public
+ */
+exports.handleWalletWebhook = async (req, res) => {
+  try {
+    const signature = req.headers['x-razorpay-signature'];
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    if (!signature || !webhookSecret) {
+      return res.status(400).json({ success: false, message: 'Invalid request' });
+    }
+
+    const rawBody = req.rawBody ? req.rawBody.toString() : JSON.stringify(req.body);
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(rawBody)
+      .digest('hex');
+
+    if (expectedSignature !== signature) {
+      return res.status(400).json({ success: false, message: 'Invalid signature' });
+    }
+
+    const { event, payload } = req.body;
+    
+    if (event === 'order.paid') {
+      const rzpOrder = payload.order.entity;
+      const rzpPayment = payload.payment.entity;
+
+      // Extract metadata from order notes
+      const notes = rzpOrder.notes || {};
+      const { hospitalId, packageId, credits, service } = notes;
+
+      if (!hospitalId || !packageId || !credits || !service) {
+        // Not a wallet order
+        return res.json({ success: true, message: 'Not a wallet order' });
+      }
+
+      // Idempotency check
+      const existingTransaction = await SubscriptionTransaction.findOne({ razorpayOrderId: rzpOrder.id });
+      if (existingTransaction) {
+        return res.json({ success: true, message: 'Already processed' });
+      }
+
+      const pkg = await TopupPackage.findById(packageId);
+      if (!pkg) {
+        return res.json({ success: true, message: 'Package not found' });
+      }
+
+      // Atomically credit clinic wallet balances
+      await WalletService.creditWallet(
+        hospitalId,
+        service, // 'SMS' or 'EMAIL'
+        Number(credits),
+        `Purchased credit bundle: ${pkg.name}`,
+        'MANUAL_TOPUP',
+        rzpPayment.id
+      );
+
+      // Write payment transaction to SubscriptionTransaction collection
+      await SubscriptionTransaction.create({
+        hospitalId,
+        type: 'WALLET_TOPUP',
+        amount: pkg.price,
+        currency: 'INR',
+        status: 'COMPLETED',
+        razorpayOrderId: rzpOrder.id,
+        razorpayPaymentId: rzpPayment.id,
+        description: `Bought messaging bundle: ${pkg.name} (${Number(credits).toLocaleString()} ${service} Credits) [Webhook]`,
+        metadata: {
+          packageId,
+          service,
+          credits: Number(credits)
+        }
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error processing wallet webhook:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };

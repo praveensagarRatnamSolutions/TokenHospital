@@ -2,9 +2,29 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const compression = require('compression');
+const mongoSanitize = require('express-mongo-sanitize');
+const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const errorHandler = require('./middlewares/errorHandler');
+
+// Rate limiters
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests. Please try again later.' },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts. Please try again in 15 minutes.' },
+});
 
 const app = express();
 app.use(
@@ -48,6 +68,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(helmet());
 app.use(morgan('dev'));
+app.use(compression());
+app.use(mongoSanitize());
 
 // Swagger Setup
 const swaggerOptions = {
@@ -100,7 +122,8 @@ app.get('/', (req, res) => {
 });
 
 // Import and use routes
-app.use('/api/auth', require('./modules/auth/auth.routes'));
+app.use('/api', globalLimiter);
+app.use('/api/auth', authLimiter, require('./modules/auth/auth.routes'));
 app.use('/api/hospital', require('./modules/hospital/hospital.routes'));
 app.use('/api/doctor', require('./modules/doctor/doctor.routes'));
 app.use('/api/department', require('./modules/department/department.routes'));

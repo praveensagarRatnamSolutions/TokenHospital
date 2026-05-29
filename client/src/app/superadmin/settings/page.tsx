@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Shield, Database, Bell } from 'lucide-react';
+import { Bell,Database, Settings, Shield } from 'lucide-react';
 
 export default function SuperAdminSettings() {
   return (

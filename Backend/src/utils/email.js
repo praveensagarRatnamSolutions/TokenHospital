@@ -153,10 +153,16 @@ const sendOnboardingEmail = async ({
       Email: ${to}<br />
       Temporary Password: ${tempPassword}</p>
       <p>Please change your password upon your first login.</p>
-      ${invoiceLink ? `<p>Subscription payment link: <a href="${invoiceLink}">${invoiceLink}</a></p>` : ''}
+      ${invoiceLink ? `<p><strong>Subscription Payment Link:</strong><br /><a href="${invoiceLink}" style="color:#2563eb;text-decoration:none;font-weight:600;">${invoiceLink}</a></p>` : ''}
     `;
 
     await sendEmail({ to, subject, text, html });
+    console.log('✅ Onboarding email sent:', {
+      to,
+      hospitalName,
+      hasPaymentLink: !!invoiceLink,
+      paymentLink: invoiceLink || 'N/A',
+    });
     return true;
   } catch (error) {
     logger.error('Failed to send onboarding email:', error);

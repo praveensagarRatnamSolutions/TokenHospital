@@ -1,9 +1,11 @@
 const User = require('./auth.model');
 const Hospital = require('../hospital/hospital.model');
 const HospitalSubscription = require('../subscription/hospitalSubscription.model');
+const Plan = require('../subscription/plan.model');
 const { generateToken } = require('../../utils/jwt');
 
 const mongoose = require('mongoose');
+const WalletService = require('../wallet/wallet.service');
 
 const registerUser = async (userData) => {
   const { name, email, password } = userData;
@@ -57,16 +59,22 @@ const onboardUser = async (onboardData, userId) => {
     }
 
     // 2. Check if a hospital already exists by email
-    const hospitalEmailExists = await Hospital.findOne({ email: user.email }).session(session);
+    const hospitalEmailExists = await Hospital.findOne({
+      email: user.email,
+    }).session(session);
     if (hospitalEmailExists) {
       throw new Error('A clinic with this email address is already registered');
     }
 
     // 3. Check if hospital already exists by phone
     if (phone && phone.full) {
-      const hospitalPhoneExists = await Hospital.findOne({ 'phone.full': phone.full }).session(session);
+      const hospitalPhoneExists = await Hospital.findOne({
+        'phone.full': phone.full,
+      }).session(session);
       if (hospitalPhoneExists) {
-        throw new Error('This phone number is already registered to another clinic');
+        throw new Error(
+          'This phone number is already registered to another clinic'
+        );
       }
     }
 
@@ -94,7 +102,7 @@ const onboardUser = async (onboardData, userId) => {
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 30); // 30 days initial period
 
-    await HospitalSubscription.create(
+    const subscription = await HospitalSubscription.create(
       [
         {
           hospitalId: hospital._id,
@@ -110,6 +118,34 @@ const onboardUser = async (onboardData, userId) => {
       ],
       { session }
     );
+
+    const plan = await Plan.findOne({ planId: 'FREE', isActive: true }).session(
+      session
+    );
+    if (plan?.limits) {
+      if (plan.limits.freeSmsUnits > 0) {
+        await WalletService.creditWallet(
+          hospital._id,
+          'SMS',
+          plan.limits.freeSmsUnits,
+          `Free credits from ${plan.name} onboarding trial`,
+          'SUBSCRIPTION_RENEWAL',
+          subscription._id,
+          session
+        );
+      }
+      if (plan.limits.freeEmailUnits > 0) {
+        await WalletService.creditWallet(
+          hospital._id,
+          'EMAIL',
+          plan.limits.freeEmailUnits,
+          `Free credits from ${plan.name} onboarding trial`,
+          'SUBSCRIPTION_RENEWAL',
+          subscription._id,
+          session
+        );
+      }
+    }
 
     // 6. Link hospital to user
     user.hospitalId = hospital._id;

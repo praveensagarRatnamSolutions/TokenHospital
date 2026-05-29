@@ -73,7 +73,7 @@ export function HospitalsList({
 
   const handleEditClick = (hospital: Hospital, e: React.MouseEvent) => {
     e.stopPropagation();
-    onEdit(hospital);
+    router.push(`/superadmin/hospitals/create?id=${hospital._id}`);
   };
 
   const navigateToDetails = (id: string) => {

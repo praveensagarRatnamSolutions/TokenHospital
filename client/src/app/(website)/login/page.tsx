@@ -90,7 +90,7 @@ export default function LoginPage() {
       } else if (role === 'DOCTOR') {
         router.push('/doctor');
       } else {
-        router.push('/kiosk');
+        router.push('/');
       }
     } catch (err: any) {
       console.error('Login error:', err);

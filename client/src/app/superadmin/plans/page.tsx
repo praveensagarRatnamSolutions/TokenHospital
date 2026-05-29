@@ -48,7 +48,7 @@ export default function PlanManagementPage() {
       const response = await api.get('/api/subscription/plans');
 
       const sortedPlans = response.data.data.sort(
-        (a: any, b: any) => a.displayOrder - b.displayOrder
+        (a: any, b: any) => a.displayOrder - b.displayOrder,
       );
 
       setPlans(sortedPlans);
@@ -65,9 +65,7 @@ export default function PlanManagementPage() {
 
   const handleDelete = async (id: string) => {
     if (
-      !confirm(
-        'Are you sure you want to delete this plan? This action cannot be undone.'
-      )
+      !confirm('Are you sure you want to delete this plan? This action cannot be undone.')
     )
       return;
 
@@ -186,7 +184,8 @@ export default function PlanManagementPage() {
           </h1>
 
           <p className="text-sm text-slate-500 dark:text-slate-400 max-w-2xl font-medium">
-            Configure pricing commercials, subscription tiers, resource limits, and premium SaaS platform features for onboarded hospitals.
+            Configure pricing commercials, subscription tiers, resource limits, and
+            premium SaaS platform features for onboarded hospitals.
           </p>
         </div>
 
@@ -210,7 +209,9 @@ export default function PlanManagementPage() {
             <h2 className="text-3xl font-black text-slate-800 dark:text-slate-100">
               {stats.total}
             </h2>
-            <p className="text-[10px] text-slate-400 font-medium">Configured in platform database</p>
+            <p className="text-[10px] text-slate-400 font-medium">
+              Configured in platform database
+            </p>
           </div>
           <div className="bg-primary/10 text-primary p-4 rounded-2xl relative z-10 group-hover:rotate-6 transition-transform">
             <Layers3 className="w-6 h-6" />
@@ -228,7 +229,9 @@ export default function PlanManagementPage() {
               {stats.active}
               <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
             </h2>
-            <p className="text-[10px] text-slate-400 font-medium">Currently visible for hospital checkout</p>
+            <p className="text-[10px] text-slate-400 font-medium">
+              Currently visible for hospital checkout
+            </p>
           </div>
           <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-4 rounded-2xl relative z-10 group-hover:rotate-6 transition-transform">
             <Activity className="w-6 h-6" />
@@ -245,7 +248,9 @@ export default function PlanManagementPage() {
             <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 truncate max-w-[180px]">
               {stats.recommended}
             </h2>
-            <p className="text-[10px] text-slate-400 font-medium">Highlighted as &apos;Most Popular&apos;</p>
+            <p className="text-[10px] text-slate-400 font-medium">
+              Highlighted as &apos;Most Popular&apos;
+            </p>
           </div>
           <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 p-4 rounded-2xl relative z-10 group-hover:rotate-6 transition-transform">
             <Crown className="w-6 h-6" />
@@ -264,10 +269,16 @@ export default function PlanManagementPage() {
                 'px-5 py-2.5 rounded-xl text-xs font-bold transition-all relative z-10 duration-300',
                 billingMode === mode
                   ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white',
               )}
             >
-              {mode === 'MONTHLY' ? 'Monthly' : mode === 'QUARTERLY' ? 'Quarterly' : mode === 'HALF_YEARLY' ? 'Half-Yearly' : 'Yearly'}
+              {mode === 'MONTHLY'
+                ? 'Monthly'
+                : mode === 'QUARTERLY'
+                  ? 'Quarterly'
+                  : mode === 'HALF_YEARLY'
+                    ? 'Half-Yearly'
+                    : 'Yearly'}
             </button>
           ))}
         </div>
@@ -281,12 +292,21 @@ export default function PlanManagementPage() {
           let price = priceObj?.amount;
           if (!price) {
             if (billingMode === 'MONTHLY') price = plan.price;
-            else if (billingMode === 'QUARTERLY') price = plan.quarterlyPrice || Math.round(plan.price * 3);
-            else if (billingMode === 'HALF_YEARLY') price = plan.halfYearlyPrice || Math.round(plan.price * 6);
+            else if (billingMode === 'QUARTERLY')
+              price = plan.quarterlyPrice || Math.round(plan.price * 3);
+            else if (billingMode === 'HALF_YEARLY')
+              price = plan.halfYearlyPrice || Math.round(plan.price * 6);
             else price = plan.yearlyPrice || Math.round(plan.price * 12);
           }
 
-          const intervalMonths = billingMode === 'MONTHLY' ? 1 : billingMode === 'QUARTERLY' ? 3 : billingMode === 'HALF_YEARLY' ? 6 : 12;
+          const intervalMonths =
+            billingMode === 'MONTHLY'
+              ? 1
+              : billingMode === 'QUARTERLY'
+                ? 3
+                : billingMode === 'HALF_YEARLY'
+                  ? 6
+                  : 12;
           const monthlyEquiv = Math.round(price / intervalMonths);
 
           return (
@@ -296,7 +316,7 @@ export default function PlanManagementPage() {
                 'relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 flex flex-col justify-between group h-full',
                 plan.recommended
                   ? 'glass-primary border-primary/40 shadow-xl shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2'
-                  : 'glass border-slate-200/60 dark:border-slate-800/60 hover:shadow-xl hover:shadow-slate-200/10 hover:-translate-y-2'
+                  : 'glass border-slate-200/60 dark:border-slate-800/60 hover:shadow-xl hover:shadow-slate-200/10 hover:-translate-y-2',
               )}
             >
               {/* RECOMMENDED BADGE */}
@@ -315,23 +335,32 @@ export default function PlanManagementPage() {
                   'absolute inset-x-0 top-0 h-32 opacity-25 pointer-events-none transition-opacity group-hover:opacity-35',
                   plan.recommended
                     ? 'bg-gradient-to-br from-primary/30 via-secondary/15 to-transparent'
-                    : 'bg-gradient-to-br from-slate-400/20 to-transparent'
+                    : 'bg-gradient-to-br from-slate-400/20 to-transparent',
                 )}
               />
 
               {/* CARD CONTENT HEADER */}
               <CardHeader className="relative pb-0 pt-7 px-7 space-y-4">
                 <div className="flex items-center justify-between">
-                  <Badge
-                    className={cn(
-                      'rounded-full px-3 py-0.5 text-[10px] font-bold tracking-wider uppercase border',
-                      plan.isActive
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                        : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                  <div className="flex items-center gap-1.5">
+                    <Badge
+                      className={cn(
+                        'rounded-full px-3 py-0.5 text-[10px] font-bold tracking-wider uppercase border',
+                        plan.isActive
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                          : 'bg-slate-500/10 text-slate-500 border-slate-500/20',
+                      )}
+                    >
+                      {plan.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+
+                    {plan.isCustom && (
+                      <Badge className="rounded-full px-3 py-0.5 text-[10px] font-bold tracking-wider uppercase border bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 flex items-center gap-1">
+                        <Zap className="w-3 h-3 text-orange-500 fill-orange-500" />
+                        Custom
+                      </Badge>
                     )}
-                  >
-                    {plan.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
+                  </div>
 
                   {/* Actions Bar */}
                   <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
@@ -382,13 +411,24 @@ export default function PlanManagementPage() {
                   </div>
 
                   <div className="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    {billingMode === 'MONTHLY' ? 'Billed monthly' : billingMode === 'QUARTERLY' ? `Billed quarterly (₹${price.toLocaleString()})` : billingMode === 'HALF_YEARLY' ? `Billed semi-annually (₹${price.toLocaleString()})` : `Billed annually (₹${price.toLocaleString()})`}
+                    {billingMode === 'MONTHLY'
+                      ? 'Billed monthly'
+                      : billingMode === 'QUARTERLY'
+                        ? `Billed quarterly (₹${price.toLocaleString()})`
+                        : billingMode === 'HALF_YEARLY'
+                          ? `Billed semi-annually (₹${price.toLocaleString()})`
+                          : `Billed annually (₹${price.toLocaleString()})`}
                   </div>
 
                   {billingMode !== 'MONTHLY' && plan.price > 0 && (
                     <div className="mt-2 inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border border-emerald-500/10 animate-pulse">
                       <Zap className="w-3 h-3 fill-emerald-500" />
-                      Save up to {billingMode === 'QUARTERLY' ? '10%' : billingMode === 'HALF_YEARLY' ? '15%' : '20%'}
+                      Save up to{' '}
+                      {billingMode === 'QUARTERLY'
+                        ? '10%'
+                        : billingMode === 'HALF_YEARLY'
+                          ? '15%'
+                          : '20%'}
                     </div>
                   )}
                 </div>
@@ -411,7 +451,7 @@ export default function PlanManagementPage() {
                         {plan.limits?.maxDepartments >= 99999 ? (
                           <InfinityIcon className="w-4 h-4 text-primary" />
                         ) : (
-                          plan.limits?.maxDepartments ?? 1
+                          (plan.limits?.maxDepartments ?? 1)
                         )}
                       </span>
                       <span className="text-[9px] uppercase tracking-wide text-slate-400 font-bold mt-0.5">
@@ -425,7 +465,7 @@ export default function PlanManagementPage() {
                         {plan.limits?.maxDoctors >= 99999 ? (
                           <InfinityIcon className="w-4 h-4 text-primary" />
                         ) : (
-                          plan.limits?.maxDoctors ?? 2
+                          (plan.limits?.maxDoctors ?? 2)
                         )}
                       </span>
                       <span className="text-[9px] uppercase tracking-wide text-slate-400 font-bold mt-0.5">
@@ -439,7 +479,7 @@ export default function PlanManagementPage() {
                         {plan.limits?.maxKiosks === -1 ? (
                           <InfinityIcon className="w-4 h-4 text-primary" />
                         ) : (
-                          plan.limits?.maxKiosks ?? 0
+                          (plan.limits?.maxKiosks ?? 0)
                         )}
                       </span>
                       <span className="text-[9px] uppercase tracking-wide text-slate-400 font-bold mt-0.5">
@@ -478,7 +518,8 @@ export default function PlanManagementPage() {
                         <span
                           className={cn(
                             'leading-relaxed text-slate-600 dark:text-slate-300 font-medium',
-                            !feature.available && 'text-slate-400 line-through opacity-60'
+                            !feature.available &&
+                              'text-slate-400 line-through opacity-60',
                           )}
                         >
                           {feature.text}
@@ -489,14 +530,14 @@ export default function PlanManagementPage() {
                 </div>
 
                 {/* FOOTER ACTION BUTTON */}
-                <div className="space-y-2 pt-2">
+                <div className="space-y-2 pt-2 gap-3 flex flex-col">
                   <Link href={`/superadmin/plans/create?id=${plan._id}`}>
                     <Button
                       className={cn(
                         'w-full h-12 rounded-2xl text-xs font-bold shadow-sm transition-all group-hover:shadow-md flex items-center justify-center gap-1.5',
                         plan.recommended
                           ? 'bg-primary text-primary-foreground hover:bg-primary/95'
-                          : 'bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white text-slate-700 dark:text-slate-300'
+                          : 'bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white text-slate-700 dark:text-slate-300',
                       )}
                       variant={plan.recommended ? 'default' : 'outline'}
                     >
@@ -534,7 +575,8 @@ export default function PlanManagementPage() {
             </h2>
 
             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed">
-              Create premium subscription plans to begin onboarding hospitals, setting custom rate limits, and defining credit commercials.
+              Create premium subscription plans to begin onboarding hospitals, setting
+              custom rate limits, and defining credit commercials.
             </p>
 
             <Link href="/superadmin/plans/create" className="inline-block">
@@ -548,68 +590,119 @@ export default function PlanManagementPage() {
       )}
 
       {migrationPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-950">
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600">
-                Price migration notice
-              </p>
-              <h2 className="text-xl font-black text-slate-950 dark:text-white">
-                {migrationPlan.name} - {billingMode.replace('_', ' ')}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm transition-all duration-300">
+          <div className="w-full max-w-md rounded-[2.5rem] border border-slate-200/50 bg-white p-7 shadow-2xl dark:border-slate-800/50 dark:bg-slate-950 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="space-y-1.5 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-500/10 px-2.5 py-0.5 rounded-md">
+                Price Migration notice
+              </span>
+              <h2 className="text-2xl font-black tracking-tight text-slate-950 dark:text-white mt-2">
+                {migrationPlan.name} <span className="text-slate-400 font-medium">·</span>{' '}
+                <span className="text-xs font-extrabold uppercase text-slate-500">
+                  {billingMode.replace('_', ' ')}
+                </span>
               </h2>
-              <p className="text-xs font-semibold text-slate-500">
-                Existing subscribers will receive a notice and see the upcoming change in Billing.
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 leading-relaxed">
+                Seamlessly schedule a pricing adjustment for new signups and existing
+                subscribers.
               </p>
             </div>
 
-            <div className="mt-6 space-y-4">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Current price
-                </label>
-                <div className="mt-1 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                  ₹{Number(migrationPlan.currentPrice || 0).toLocaleString()}
+            {/* Visual SaaS workflow timeline explanations */}
+            <div className="my-5 p-4.5 bg-primary/[0.03] border border-primary/10 rounded-2xl space-y-3.5">
+              <p className="text-[9px] font-black uppercase tracking-wider text-primary">
+                Price Migration Timeline Details
+              </p>
+              <div className="space-y-2.5 text-[10.5px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
+                <div className="flex gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[9px] font-black shrink-0">
+                    1
+                  </span>
+                  <span>
+                    <strong>Immediate Checkout Price</strong>: MongoDB is updated so any
+                    new clinics pay the new price starting today.
+                  </span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[9px] font-black shrink-0">
+                    2
+                  </span>
+                  <span>
+                    <strong>Automatic Notices</strong>: Active clinics receive customized
+                    email notices explaining the update.
+                  </span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[9px] font-black shrink-0">
+                    3
+                  </span>
+                  <span>
+                    <strong>Seamless Transition</strong>: Clinics continue on the old rate
+                    until the effective date, then transition automatically at their cycle
+                    end.
+                  </span>
                 </div>
               </div>
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  New price
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={migrationAmount}
-                  onChange={(event) => setMigrationAmount(event.target.value)}
-                  className="mt-1 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black outline-none focus:border-primary dark:border-slate-800 dark:bg-slate-900"
-                />
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                    Current price
+                  </label>
+                  <div className="mt-1 h-12 flex items-center rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/20 px-4 text-sm font-black text-slate-700 dark:text-slate-200">
+                    ₹{Number(migrationPlan.currentPrice || 0).toLocaleString()}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                    New price
+                  </label>
+                  <div className="relative mt-1">
+                    <input
+                      type="number"
+                      min={0}
+                      value={migrationAmount}
+                      onChange={(event) => setMigrationAmount(event.target.value)}
+                      className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 dark:border-slate-800 dark:bg-slate-900 text-slate-800 dark:text-white"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                      ₹
+                    </span>
+                  </div>
+                </div>
               </div>
+
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
                   Effective date
                 </label>
                 <input
                   type="date"
                   value={migrationDate}
                   onChange={(event) => setMigrationDate(event.target.value)}
-                  className="mt-1 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold outline-none focus:border-primary dark:border-slate-800 dark:bg-slate-900"
+                  className="mt-1 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 dark:border-slate-800 dark:bg-slate-900 text-slate-800 dark:text-white"
                 />
               </div>
             </div>
 
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex gap-3 pt-2">
               <Button
                 variant="outline"
                 onClick={() => setMigrationPlan(null)}
-                className="h-11 flex-1 rounded-2xl font-bold"
+                className="h-12 flex-1 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 dark:border-slate-800"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleScheduleMigration}
                 disabled={schedulingMigration}
-                className="h-11 flex-1 rounded-2xl font-black"
+                className="h-12 flex-1 rounded-2xl font-black bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/10 hover:shadow-lg"
               >
-                {schedulingMigration ? 'Scheduling...' : 'Send Notice'}
+                {schedulingMigration ? 'Scheduling...' : 'Deploy Migration'}
               </Button>
             </div>
           </div>

@@ -74,6 +74,7 @@ const hospitalSubscriptionSchema = new mongoose.Schema(
       },
       currentAmount: Number,
       newAmount: Number,
+      newRazorpayPlanId: String,
       currency: {
         type: String,
         default: 'INR',

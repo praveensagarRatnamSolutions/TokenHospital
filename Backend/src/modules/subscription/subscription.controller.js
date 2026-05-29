@@ -353,12 +353,79 @@ const schedulePriceMigration = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Plan not found' });
     }
 
-    const currentPrice = plan.prices?.find((price) => price.billingCycle === billingCycle);
-    const currentAmount =
-      currentPrice?.amount ??
-      (billingCycle === 'YEARLY' ? plan.yearlyPrice : plan.price) ??
-      0;
+    const currentPriceIndex = plan.prices?.findIndex((price) => price.billingCycle === billingCycle);
+    if (currentPriceIndex === -1 || currentPriceIndex === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: `No active price structure found for cycle: ${billingCycle}`,
+      });
+    }
 
+    const currentPriceObj = plan.prices[currentPriceIndex];
+    const currentAmount = currentPriceObj.amount;
+
+    if (currentAmount === parsedAmount) {
+      return res.status(400).json({
+        success: false,
+        message: 'New price must be different from current price',
+      });
+    }
+
+    // 1. Create a brand new plan in Razorpay for the new price
+    let newRazorpayPlanId = `plan_mock_${crypto.randomBytes(8).toString('hex')}`;
+    let isMock = true;
+
+    try {
+      const rzp = getGlobalRazorpayClient();
+      
+      let period = 'monthly';
+      let interval = currentPriceObj.intervalMonths || 1;
+
+      if (billingCycle === 'YEARLY') {
+        period = 'yearly';
+        interval = 1;
+      } else {
+        period = 'monthly';
+        interval = currentPriceObj.intervalMonths || 1;
+      }
+
+      logger.info(`Creating brand new Razorpay plan for price migration: ${plan.name} (${billingCycle}) - ₹${parsedAmount}`);
+      
+      const razorpayPlan = await rzp.plans.create({
+        period,
+        interval,
+        item: {
+          name: `${plan.name} - ${billingCycle}`,
+          amount: Math.round(parsedAmount * 100), // paise
+          currency: plan.currency || 'INR',
+          description: plan.description || `Subscription Plan for ${plan.name}`,
+        },
+      });
+
+      newRazorpayPlanId = razorpayPlan.id;
+      isMock = false;
+      logger.info(`✅ Razorpay plan created during migration: ${newRazorpayPlanId}`);
+    } catch (err) {
+      logger.error(`⚠️ Razorpay plan creation failed during migration. Sandbox mode fallback activated: ${err.message}`);
+    }
+
+    // 2. Update Plan document immediately so new checkouts/signups pay the new price
+    plan.prices[currentPriceIndex].amount = parsedAmount;
+    plan.prices[currentPriceIndex].razorpayPlanId = newRazorpayPlanId;
+
+    // Sync legacy properties on the plan document
+    if (billingCycle === 'MONTHLY') {
+      plan.price = parsedAmount;
+      plan.razorpayPlanIdMonthly = newRazorpayPlanId;
+    } else if (billingCycle === 'YEARLY') {
+      plan.yearlyPrice = parsedAmount;
+      plan.razorpayPlanIdYearly = newRazorpayPlanId;
+    }
+    
+    await plan.save();
+    logger.info(`✅ Updated MongoDB Plan ${plan.planId} price cycle to ₹${parsedAmount} (Razorpay ID: ${newRazorpayPlanId})`);
+
+    // 3. Find and schedule active subscriptions for migration
     const subscriptions = await HospitalSubscription.find({
       planId: plan.planId,
       billingCycle,
@@ -371,6 +438,7 @@ const schedulePriceMigration = async (req, res) => {
       billingCycle,
       currentAmount,
       newAmount: parsedAmount,
+      newRazorpayPlanId,
       currency: plan.currency || 'INR',
       effectiveDate: parsedEffectiveDate,
       noticeSentAt,
@@ -407,12 +475,14 @@ const schedulePriceMigration = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `Scheduled price-change notice for ${subscriptions.length} subscription(s).`,
+      message: `Scheduled price-change notice for ${subscriptions.length} active subscription(s). Updated plan checkout price to ₹${parsedAmount}.`,
       data: {
         planId: plan.planId,
         billingCycle,
         currentAmount,
         newAmount: parsedAmount,
+        newRazorpayPlanId,
+        isMock,
         effectiveDate: parsedEffectiveDate,
         affectedSubscriptions: subscriptions.length,
         emailsAttempted,
@@ -717,6 +787,21 @@ const createCheckout = async (req, res) => {
 const verifyCheckout = async (req, res) => {
   try {
     const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature, planId, billingCycle } = req.body;
+    const SubscriptionTransaction = require('./subscription.model');
+
+    // 0. Idempotency Check
+    if (razorpay_payment_id) {
+      const existingTransaction = await SubscriptionTransaction.findOne({ razorpayPaymentId: razorpay_payment_id });
+      if (existingTransaction) {
+        logger.info(`Subscription payment already verified for payment ID: ${razorpay_payment_id}`);
+        const subscription = await HospitalSubscription.findOne({ razorpaySubscriptionId: razorpay_subscription_id });
+        return res.status(200).json({
+          success: true,
+          message: 'Subscription payment already verified successfully!',
+          data: subscription,
+        });
+      }
+    }
 
     // 1. Perform HMAC SHA256 Signature Verification (Bypassed for mock subscriptions in sandbox mode)
     if (razorpay_subscription_id && razorpay_subscription_id.startsWith('sub_mock')) {
@@ -771,7 +856,6 @@ const verifyCheckout = async (req, res) => {
     }
 
     // 4. Write transaction ledger history receipt
-    const SubscriptionTransaction = require('./subscription.model');
     await SubscriptionTransaction.create({
       hospitalId: req.hospitalId,
       type: 'SUBSCRIPTION',
@@ -841,6 +925,15 @@ const handleSubscriptionWebhook = async (req, res) => {
       const rzpSub = payload.subscription.entity;
       const rzpPayment = payload.payment.entity;
 
+      const SubscriptionTransaction = require('./subscription.model');
+      
+      // Idempotency check
+      const existingTransaction = await SubscriptionTransaction.findOne({ razorpayPaymentId: rzpPayment.id });
+      if (existingTransaction) {
+        logger.info(`Webhook idempotency: Subscription payment already processed for payment ID: ${rzpPayment.id}`);
+        return res.json({ success: true, message: 'Already processed' });
+      }
+
       const subscription = await HospitalSubscription.findOne({
         razorpaySubscriptionId: rzpSub.id,
       });
@@ -857,7 +950,6 @@ const handleSubscriptionWebhook = async (req, res) => {
         subscription.endedAt = null;
         await subscription.save();
 
-        const SubscriptionTransaction = require('./subscription.model');
         const plan = await Plan.findOne({ planId: subscription.planId });
         const chosenPrice = plan?.prices.find(p => p.billingCycle === subscription.billingCycle);
 
@@ -884,6 +976,22 @@ const handleSubscriptionWebhook = async (req, res) => {
 
         logger.info(`Subscription ${rzpSub.id} successfully auto-renewed through webhook!`);
       }
+    } else if (event === 'payment.failed') {
+      // Handle payment failure for subscriptions
+      const rzpPayment = payload.payment.entity;
+      logger.warn(`Payment failed: ${rzpPayment.id}`);
+    } else if (event === 'subscription.paused') {
+      const rzpSub = payload.subscription.entity;
+
+      const subscription = await HospitalSubscription.findOne({
+        razorpaySubscriptionId: rzpSub.id,
+      });
+
+      if (subscription) {
+        subscription.status = 'PAST_DUE';
+        await subscription.save();
+        logger.info(`Subscription ${rzpSub.id} marked as PAST_DUE through webhook.`);
+      }
     } else if (event === 'subscription.cancelled' || event === 'subscription.halted') {
       const rzpSub = payload.subscription.entity;
 
@@ -908,6 +1016,22 @@ const handleSubscriptionWebhook = async (req, res) => {
   }
 };
 
+const runPriceMigrationsManual = async (req, res) => {
+  try {
+    const { executePriceMigrations } = require('../../utils/cronJob');
+    const result = await executePriceMigrations();
+    
+    res.json({
+      success: true,
+      message: `Manual price migration sweep completed. Succeeded: ${result.succeeded}, Failed: ${result.failed}`,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Error running manual price migrations:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getSubscriptionStatus,
   changePlan,
@@ -915,6 +1039,7 @@ module.exports = {
   cancelRenewal,
   resumeRenewal,
   schedulePriceMigration,
+  runPriceMigrationsManual,
   getBillingHistory,
   exportBillingHistory,
   startTrial,

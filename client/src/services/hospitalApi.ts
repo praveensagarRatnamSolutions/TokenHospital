@@ -1,15 +1,18 @@
 import api from './api';
+import type { PhoneData } from '@/components/common/phone-input';
 
 export interface Hospital {
   _id: string;
   name: string;
   email: string;
-  phone: string | {
-    full: string;
-    countryCode: string;
-    country: string;
-    nationalNumber: string;
-  };
+  phone:
+    | string
+    | {
+        full: string;
+        countryCode: string;
+        country: string;
+        nationalNumber: string;
+      };
   address: {
     street: string;
     city: string;
@@ -34,7 +37,7 @@ export interface CreateHospitalDto {
   adminName: string;
   email: string;
   password?: string;
-  phone: string;
+  phone: PhoneData;
   address: {
     street: string;
     city: string;
@@ -55,7 +58,9 @@ export const hospitalApi = {
     if (filters?.isActive !== undefined) {
       params.append('isActive', String(filters.isActive));
     }
-    const response = await api.get(`/api/hospital${params.toString() ? `?${params}` : ''}`);
+    const response = await api.get(
+      `/api/hospital${params.toString() ? `?${params}` : ''}`,
+    );
     return response.data;
   },
 
