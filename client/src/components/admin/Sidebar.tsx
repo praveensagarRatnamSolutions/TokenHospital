@@ -274,9 +274,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         );
       })()}
 
-      <div className="p-6 border-t border-slate-100 dark:border-slate-800 text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">
+      {/* <div className="p-6 border-t border-slate-100 dark:border-slate-800 text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">
         &copy; 2026 RATNAM SOLUTIONS
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -38,7 +38,8 @@ export const useDepartments = (): UseDeparmentsReturn => {
         setError(response.message || 'Failed to fetch departments');
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to fetch departments';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to fetch departments';
       setError(errorMessage);
       setDepartments([]);
     } finally {
@@ -84,7 +85,8 @@ export const useCreateDepartment = (): UseCreateDepartmentReturn => {
           return null;
         }
       } catch (err: any) {
-        const errorMessage = err.message || 'Failed to create department';
+        const errorMessage =
+          err?.response?.data?.message || err?.message || 'Failed to create department';
         setError(errorMessage);
         return null;
       } finally {
@@ -130,7 +132,8 @@ export const useUpdateDepartment = (): UseUpdateDepartmentReturn => {
           return null;
         }
       } catch (err: any) {
-        const errorMessage = err.message || 'Failed to update department';
+        const errorMessage =
+          err?.response?.data?.message || err?.message || 'Failed to update department';
         setError(errorMessage);
         return null;
       } finally {
@@ -172,7 +175,8 @@ export const useDeleteDepartment = (): UseDeleteDepartmentReturn => {
         return false;
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to delete department';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to delete department';
       setError(errorMessage);
       return false;
     } finally {

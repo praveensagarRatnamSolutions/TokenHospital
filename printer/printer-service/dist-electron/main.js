@@ -79252,8 +79252,10 @@ function startServer() {
         department = {},
         payment = {}
       } = req2.body;
+      const CLOUDFRONT_BASE_URL = process.env.PRINTER_CLOUDFRONT_URL || "https://d2rxrksscpnnty.cloudfront.net";
       const hospitalName = typeof hospital === "string" ? hospital : hospital.name || "Hospital Service";
       const logo = typeof hospital === "string" ? "" : hospital.logo || hospital.logoUrl || "";
+      const logoUrl = logo ? /^https?:\/\//i.test(logo) ? logo : `${CLOUDFRONT_BASE_URL.replace(/\/$/, "")}/${logo.replace(/^\/+/, "")}` : "";
       const patientName = typeof patient === "string" ? patient : patient.name || "---";
       const patientPhone = typeof patient === "string" ? patient : ((_a = patient.phone) == null ? void 0 : _a.full) || patient.phone || "N/A";
       const patientAge = patient.age ?? "--";
@@ -79329,6 +79331,14 @@ function startServer() {
               line-height: 1.3;
             }
 
+            .ticket-container {
+              width: 280px;
+              margin: 0 auto;
+              padding: 6px;
+              box-sizing: border-box;
+              display: block;
+            }
+
             .logo {
               width: 55px;
               height: auto;
@@ -79393,7 +79403,8 @@ function startServer() {
         </head>
 
         <body>
-          ${logo ? `<img src="${logo}" class="logo" onerror="this.style.display='none'" />` : ""}
+        <div class="ticket-container">
+          ${logoUrl ? `<img src="${logoUrl}" class="logo" onerror="this.style.display='none'" />` : ""}
 
           <div class="hospital-name">
             ${hospitalName}
@@ -79477,6 +79488,7 @@ function startServer() {
             <div class="footer-line">
               Thank you for your patience
             </div>
+          </div>
           </div>
         </body>
       </html>

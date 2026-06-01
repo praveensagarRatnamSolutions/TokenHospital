@@ -7,6 +7,7 @@ import api from '@/services/api';
 import { doctorApi } from '../api/doctorApi';
 import { Doctor } from '../types';
 import { Laugh, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
   const router = useRouter();
@@ -90,13 +91,15 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
       return doctorApi.create(data);
     },
     onSuccess: () => {
-      alert(doctorId ? 'Profile updated successfully' : 'Doctor created successfully');
+      toast.success(
+        doctorId ? 'Profile updated successfully' : 'Doctor created successfully',
+      );
       queryClient.invalidateQueries({ queryKey: ['doctors'] });
       if (doctorId) queryClient.invalidateQueries({ queryKey: ['doctor', doctorId] });
       router.push('/admin/doctors');
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.message || 'Something went wrong');
+      toast.error(error?.response?.data?.message || 'Something went wrong');
     },
   });
 
@@ -324,7 +327,7 @@ export const DoctorProfileEdit = ({ doctorId }: { doctorId?: string }) => {
         finalProfilePic = key;
       } catch (error) {
         console.error('Upload failed:', error);
-        alert('Failed to upload image before saving profile');
+        toast.error('Failed to upload image before saving profile');
         setUploading(false);
         return;
       } finally {

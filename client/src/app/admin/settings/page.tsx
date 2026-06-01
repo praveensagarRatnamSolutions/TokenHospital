@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Settings, BarChart3, Bell, Shield, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
+import {
+  Settings,
+  BarChart3,
+  Bell,
+  Shield,
+  Loader2,
+  AlertCircle,
+  ArrowLeft,
+} from 'lucide-react';
 import { settingsApi, HospitalSettings, RazorpayConfig } from '@/services/settingsApi';
 import RazorpayCard from '@/modules/admin/settings/components/razorpay-card';
 
@@ -33,7 +41,9 @@ export default function AdminSettingsPage() {
           <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
           <div className="absolute inset-0 blur-xl bg-blue-400/20 animate-pulse" />
         </div>
-        <p className="text-sm font-bold text-slate-400 tracking-widest uppercase">Initializing Settings...</p>
+        <p className="text-sm font-bold text-slate-400 tracking-widest uppercase">
+          Initializing Settings...
+        </p>
       </div>
     );
   }
@@ -45,7 +55,9 @@ export default function AdminSettingsPage() {
           <AlertCircle className="w-12 h-12" />
         </div>
         <div className="text-center">
-          <p className="text-xl font-black tracking-tight text-slate-900 dark:text-white">Something went wrong</p>
+          <p className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
+            Something went wrong
+          </p>
           <p className="text-sm font-medium text-slate-500 mt-1">{error}</p>
         </div>
         <button
@@ -59,7 +71,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-12">
+    <div className="mx-auto px-6 py-8 space-y-12">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-100 dark:border-slate-800">
         <div>
@@ -67,8 +79,12 @@ export default function AdminSettingsPage() {
             <Settings className="w-4 h-4" />
             Control Center
           </div>
-          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">Settings</h1>
-          <p className="text-slate-500 font-medium mt-2">Manage your hospital's digital infrastructure and payment gateways.</p>
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
+            Settings
+          </h1>
+          <p className="text-slate-500 font-medium mt-2">
+            Manage your hospital's digital infrastructure and payment gateways.
+          </p>
         </div>
 
         <div className="flex gap-2">
@@ -85,7 +101,9 @@ export default function AdminSettingsPage() {
           {/* Razorpay Section */}
           <section className="space-y-6 bg-transparent">
             <div className="flex items-center gap-3">
-              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Payment Gateway</h2>
+              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+                Payment Gateway
+              </h2>
               <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
             </div>
             <RazorpayCard />
@@ -94,7 +112,9 @@ export default function AdminSettingsPage() {
           {/* Placeholder sections with premium skeleton look */}
           <section className="space-y-6 bg-transparent">
             <div className="flex items-center gap-3">
-              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Analytics & Logs</h2>
+              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+                Analytics & Logs
+              </h2>
               <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
             </div>
 
@@ -106,8 +126,12 @@ export default function AdminSettingsPage() {
                 <div className="size-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mb-6">
                   <BarChart3 className="w-6 h-6" />
                 </div>
-                <h3 className="font-black text-lg tracking-tight">Reports Configuration</h3>
-                <p className="text-sm font-medium text-slate-400 mt-2">Advanced data visualization settings coming soon.</p>
+                <h3 className="font-black text-lg tracking-tight">
+                  Reports Configuration
+                </h3>
+                <p className="text-sm font-medium text-slate-400 mt-2">
+                  Advanced data visualization settings coming soon.
+                </p>
               </div>
 
               <div className="p-8 bg-slate-50/50 dark:bg-slate-900/30 border border-dark-100 dark:border-slate-800 rounded-[2rem] relative overflow-hidden group">
@@ -118,7 +142,9 @@ export default function AdminSettingsPage() {
                   <Bell className="w-6 h-6" />
                 </div>
                 <h3 className="font-black text-lg tracking-tight">Notification System</h3>
-                <p className="text-sm font-medium text-slate-400 mt-2">Real-time alerts and template engine setup.</p>
+                <p className="text-sm font-medium text-slate-400 mt-2">
+                  Real-time alerts and template engine setup.
+                </p>
               </div>
             </div>
           </section>
@@ -140,29 +166,39 @@ export default function AdminSettingsPage() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-sm py-2 border-b border-white/10">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Hospital Engine</span>
+                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                    Hospital Engine
+                  </span>
                   <span className="text-emerald-400 font-black">OPERATIONAL</span>
                 </div>
                 <div className="flex items-center justify-between text-sm py-2 border-b border-white/10">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Payment Sync</span>
+                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                    Payment Sync
+                  </span>
                   <span className="text-emerald-400 font-black">LIVE</span>
                 </div>
                 <div className="flex items-center justify-between text-sm py-2 border-b border-white/10">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Data Protection</span>
+                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                    Data Protection
+                  </span>
                   <span className="text-blue-400 font-black">ENCRYPTED</span>
                 </div>
               </div>
 
               <p className="text-xs text-slate-400 leading-relaxed pt-4">
-                All changes made to the settings undergo immediate synchronization across your hospital's digital kiosks and appointment portals.
+                All changes made to the settings undergo immediate synchronization across
+                your hospital's digital kiosks and appointment portals.
               </p>
             </div>
           </div>
 
           <div className="p-8 rounded-[2rem] bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
-            <h4 className="font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest text-xs mb-4">Security Note</h4>
+            <h4 className="font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest text-xs mb-4">
+              Security Note
+            </h4>
             <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
-              Never share your Webhook Secret or Razorpay Keys with anyone. The platform uses AES-256 encryption to store your sensitive configuration once saved.
+              Never share your Webhook Secret or Razorpay Keys with anyone. The platform
+              uses AES-256 encryption to store your sensitive configuration once saved.
             </p>
           </div>
         </div>

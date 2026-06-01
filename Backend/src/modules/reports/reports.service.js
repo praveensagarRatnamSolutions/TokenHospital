@@ -309,7 +309,11 @@ const getFinancialSummary = async (hospitalId, filters = {}) => {
 
   return {
     period: { startDate, endDate },
-    summary: stats[0] || { totalRevenue: 0, transactionCount: 0, avgTransactionValue: 0 },
+    summary: stats[0] || {
+      totalRevenue: 0,
+      transactionCount: 0,
+      avgTransactionValue: 0,
+    },
     methodSplit,
     doctorRevenue,
     departmentRevenue,
@@ -323,7 +327,7 @@ const getFinancialSummary = async (hospitalId, filters = {}) => {
  */
 const getDetailedFinancialReport = async (hospitalId, filters = {}) => {
   const hospitalObjId = new mongoose.Types.ObjectId(hospitalId);
-
+  console.log('Filters received for detailed report:', filters, hospitalObjId);
   const page = parseInt(filters.page, 10) || 1;
   const limit = parseInt(filters.limit, 10) || 20;
   const skip = (page - 1) * limit;
@@ -575,7 +579,7 @@ const getDoctorPerformanceReport = async (hospitalId, filters = {}) => {
 
   const match = {
     hospitalId: hospitalObjId,
-    createdAt: { $gte: startDate, $lte: endDate }
+    createdAt: { $gte: startDate, $lte: endDate },
   };
 
   if (filters.departmentId && filters.departmentId !== '') {
@@ -589,18 +593,22 @@ const getDoctorPerformanceReport = async (hospitalId, filters = {}) => {
       $group: {
         _id: '$doctorId',
         totalPatients: { $sum: 1 },
-        completedPatients: { $sum: { $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0] } },
-        cancelledPatients: { $sum: { $cond: [{ $eq: ['$status', 'CANCELED'] }, 1, 0] } },
+        completedPatients: {
+          $sum: { $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0] },
+        },
+        cancelledPatients: {
+          $sum: { $cond: [{ $eq: ['$status', 'CANCELED'] }, 1, 0] },
+        },
         emergencyPatients: { $sum: { $cond: ['$isEmergency', 1, 0] } },
-      }
+      },
     },
     {
       $lookup: {
         from: 'doctors',
         localField: '_id',
         foreignField: '_id',
-        as: 'doctor'
-      }
+        as: 'doctor',
+      },
     },
     { $unwind: { path: '$doctor', preserveNullAndEmptyArrays: true } },
     // Join with departments
@@ -609,8 +617,8 @@ const getDoctorPerformanceReport = async (hospitalId, filters = {}) => {
         from: 'departments',
         localField: 'doctor.departmentId',
         foreignField: '_id',
-        as: 'department'
-      }
+        as: 'department',
+      },
     },
     { $unwind: { path: '$department', preserveNullAndEmptyArrays: true } },
     // Join with payments for revenue
@@ -626,20 +634,20 @@ const getDoctorPerformanceReport = async (hospitalId, filters = {}) => {
                   { $eq: ['$doctorId', '$$docId'] },
                   { $eq: ['$status', 'captured'] },
                   { $gte: ['$createdAt', startDate] },
-                  { $lte: ['$createdAt', endDate] }
-                ]
-              }
-            }
+                  { $lte: ['$createdAt', endDate] },
+                ],
+              },
+            },
           },
           {
             $group: {
               _id: null,
-              revenue: { $sum: '$amount' }
-            }
-          }
+              revenue: { $sum: '$amount' },
+            },
+          },
         ],
-        as: 'revenueData'
-      }
+        as: 'revenueData',
+      },
     },
     { $unwind: { path: '$revenueData', preserveNullAndEmptyArrays: true } },
     {
@@ -651,25 +659,29 @@ const getDoctorPerformanceReport = async (hospitalId, filters = {}) => {
         completedPatients: 1,
         cancelledPatients: 1,
         emergencyPatients: 1,
-        revenue: { $ifNull: ['$revenueData.revenue', 0] }
-      }
+        revenue: { $ifNull: ['$revenueData.revenue', 0] },
+      },
     },
     // Final search filter if provided
-    ...(filters.search ? [{
-      $match: {
-        $or: [
-          { doctorName: new RegExp(filters.search, 'i') },
-          { specialization: new RegExp(filters.search, 'i') },
-          { departmentName: new RegExp(filters.search, 'i') }
+    ...(filters.search
+      ? [
+          {
+            $match: {
+              $or: [
+                { doctorName: new RegExp(filters.search, 'i') },
+                { specialization: new RegExp(filters.search, 'i') },
+                { departmentName: new RegExp(filters.search, 'i') },
+              ],
+            },
+          },
         ]
-      }
-    }] : []),
-    { $sort: { revenue: -1, totalPatients: -1 } }
+      : []),
+    { $sort: { revenue: -1, totalPatients: -1 } },
   ]);
 
   return {
     period: { startDate, endDate },
-    report
+    report,
   };
 };
 
@@ -837,7 +849,14 @@ const exportDoctorPatientsData = async (hospitalId, doctorId, filters = {}) => {
   return await Token.aggregate(pipeline);
 };
 
-const SUPERADMIN_SUBSCRIPTION_STATUSES = ['TRIAL', 'ACTIVE', 'PAST_DUE', 'UNPAID', 'CANCELLED', 'PAUSED'];
+const SUPERADMIN_SUBSCRIPTION_STATUSES = [
+  'TRIAL',
+  'ACTIVE',
+  'PAST_DUE',
+  'UNPAID',
+  'CANCELLED',
+  'PAUSED',
+];
 const SUPERADMIN_TRANSACTION_TYPES = ['SUBSCRIPTION', 'WALLET_TOPUP'];
 
 const getSelectedFilter = (value) => {
@@ -872,12 +891,26 @@ const getChartDateRange = (filters, today) => {
   const customEnd = parseReportDate(filters.endDate, true);
 
   if (customStart || customEnd) {
-    let endDate = customEnd || new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
-    let startDate = customStart || new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+    let endDate =
+      customEnd ||
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        23,
+        59,
+        59,
+        999
+      );
+    let startDate =
+      customStart || new Date(endDate.getFullYear(), endDate.getMonth(), 1);
     startDate.setHours(0, 0, 0, 0);
 
     if (startDate > endDate) {
-      [startDate, endDate] = [new Date(endDate.setHours(0, 0, 0, 0)), new Date(startDate.setHours(23, 59, 59, 999))];
+      [startDate, endDate] = [
+        new Date(endDate.setHours(0, 0, 0, 0)),
+        new Date(startDate.setHours(23, 59, 59, 999)),
+      ];
     }
 
     return { startDate, endDate, isCustom: true };
@@ -889,26 +922,56 @@ const getChartDateRange = (filters, today) => {
   else if (filters.timeRange === '1Y') rangeMonths = 12;
 
   return {
-    startDate: new Date(today.getFullYear(), today.getMonth() - rangeMonths + 1, 1),
-    endDate: new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999),
+    startDate: new Date(
+      today.getFullYear(),
+      today.getMonth() - rangeMonths + 1,
+      1
+    ),
+    endDate: new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999
+    ),
     isCustom: false,
   };
 };
 
 const getMonthBuckets = (startDate, endDate) => {
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
   const startMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
   const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
   const monthCount =
     (endMonth.getFullYear() - startMonth.getFullYear()) * 12 +
     (endMonth.getMonth() - startMonth.getMonth()) +
     1;
-  const includeYear = startMonth.getFullYear() !== endMonth.getFullYear() || monthCount > 12;
+  const includeYear =
+    startMonth.getFullYear() !== endMonth.getFullYear() || monthCount > 12;
   const revenueDataMap = {};
   const walletDataMap = {};
 
   for (let i = 0; i < monthCount; i++) {
-    const bucketDate = new Date(startMonth.getFullYear(), startMonth.getMonth() + i, 1);
+    const bucketDate = new Date(
+      startMonth.getFullYear(),
+      startMonth.getMonth() + i,
+      1
+    );
     const key = `${bucketDate.getFullYear()}-${bucketDate.getMonth() + 1}`;
     const month = includeYear
       ? `${monthNames[bucketDate.getMonth()]} ${String(bucketDate.getFullYear()).slice(-2)}`
@@ -921,7 +984,11 @@ const getMonthBuckets = (startDate, endDate) => {
   return { revenueDataMap, walletDataMap };
 };
 
-const getScopedHospitalIds = async ({ hospitalId, hospitalStatus, subscriptionStatus }) => {
+const getScopedHospitalIds = async ({
+  hospitalId,
+  hospitalStatus,
+  subscriptionStatus,
+}) => {
   let hospitalMatch = {};
 
   if (hospitalId) {
@@ -950,7 +1017,9 @@ const getScopedHospitalIds = async ({ hospitalId, hospitalStatus, subscriptionSt
   }
 
   if (subscriptionStatus) {
-    return HospitalSubscription.find({ status: subscriptionStatus }).distinct('hospitalId');
+    return HospitalSubscription.find({ status: subscriptionStatus }).distinct(
+      'hospitalId'
+    );
   }
 
   return null;
@@ -961,17 +1030,30 @@ const getScopedHospitalIds = async ({ hospitalId, hospitalStatus, subscriptionSt
  */
 const getSuperAdminReports = async (filters = {}) => {
   const today = new Date();
-  const hospitalStatus = getUpperFilter(filters.hospitalStatus, ['ACTIVE', 'INACTIVE']);
-  const subscriptionStatus = getUpperFilter(filters.subscriptionStatus, SUPERADMIN_SUBSCRIPTION_STATUSES);
-  const transactionType = getUpperFilter(filters.transactionType, SUPERADMIN_TRANSACTION_TYPES);
+  const hospitalStatus = getUpperFilter(filters.hospitalStatus, [
+    'ACTIVE',
+    'INACTIVE',
+  ]);
+  const subscriptionStatus = getUpperFilter(
+    filters.subscriptionStatus,
+    SUPERADMIN_SUBSCRIPTION_STATUSES
+  );
+  const transactionType = getUpperFilter(
+    filters.transactionType,
+    SUPERADMIN_TRANSACTION_TYPES
+  );
   const hospitalId = getSelectedFilter(filters.hospitalId);
   const scopedHospitalIds = await getScopedHospitalIds({
     hospitalId,
     hospitalStatus,
     subscriptionStatus,
   });
-  const scopedHospitalMatch = scopedHospitalIds ? { _id: { $in: scopedHospitalIds } } : {};
-  const scopedReferenceMatch = scopedHospitalIds ? { hospitalId: { $in: scopedHospitalIds } } : {};
+  const scopedHospitalMatch = scopedHospitalIds
+    ? { _id: { $in: scopedHospitalIds } }
+    : {};
+  const scopedReferenceMatch = scopedHospitalIds
+    ? { hospitalId: { $in: scopedHospitalIds } }
+    : {};
 
   const totalHospitals = await Hospital.countDocuments(scopedHospitalMatch);
 
@@ -980,7 +1062,9 @@ const getSuperAdminReports = async (filters = {}) => {
     status: subscriptionMetricStatus,
     ...scopedReferenceMatch,
   };
-  const activeSubscriptions = await HospitalSubscription.countDocuments(subscriptionMetricMatch);
+  const activeSubscriptions = await HospitalSubscription.countDocuments(
+    subscriptionMetricMatch
+  );
 
   const totalUsers = scopedHospitalIds
     ? await User.countDocuments({ hospitalId: { $in: scopedHospitalIds } })
@@ -991,7 +1075,15 @@ const getSuperAdminReports = async (filters = {}) => {
     ? chartRange
     : {
         startDate: new Date(today.getFullYear(), today.getMonth(), 1),
-        endDate: new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999),
+        endDate: new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          0,
+          23,
+          59,
+          59,
+          999
+        ),
       };
 
   const revenueMetricType = transactionType || 'SUBSCRIPTION';
@@ -1001,15 +1093,21 @@ const getSuperAdminReports = async (filters = {}) => {
         ...scopedReferenceMatch,
         type: { $in: SUPERADMIN_TRANSACTION_TYPES },
         status: 'COMPLETED',
-        createdAt: { $gte: revenuePeriod.startDate, $lte: revenuePeriod.endDate },
+        createdAt: {
+          $gte: revenuePeriod.startDate,
+          $lte: revenuePeriod.endDate,
+        },
       },
     },
     { $group: { _id: '$type', total: { $sum: '$amount' } } },
   ]);
-  const subscriptionRevenue = revenueSummary.find((item) => item._id === 'SUBSCRIPTION')?.total || 0;
-  const walletRevenue = revenueSummary.find((item) => item._id === 'WALLET_TOPUP')?.total || 0;
+  const subscriptionRevenue =
+    revenueSummary.find((item) => item._id === 'SUBSCRIPTION')?.total || 0;
+  const walletRevenue =
+    revenueSummary.find((item) => item._id === 'WALLET_TOPUP')?.total || 0;
   const totalRevenue = subscriptionRevenue + walletRevenue;
-  const revenueThisMonth = revenueMetricType === 'WALLET_TOPUP' ? walletRevenue : subscriptionRevenue;
+  const revenueThisMonth =
+    revenueMetricType === 'WALLET_TOPUP' ? walletRevenue : subscriptionRevenue;
 
   const transactionMatch = {
     ...scopedReferenceMatch,
@@ -1036,7 +1134,10 @@ const getSuperAdminReports = async (filters = {}) => {
     },
   ]);
 
-  const { revenueDataMap, walletDataMap } = getMonthBuckets(chartRange.startDate, chartRange.endDate);
+  const { revenueDataMap, walletDataMap } = getMonthBuckets(
+    chartRange.startDate,
+    chartRange.endDate
+  );
 
   transactions.forEach((transaction) => {
     const key = `${transaction._id.year}-${transaction._id.month}`;
@@ -1064,9 +1165,16 @@ const getSuperAdminReports = async (filters = {}) => {
       walletRevenue,
       totalRevenue,
       totalUsers,
-      subscriptionMetricLabel: subscriptionStatus ? `${subscriptionStatus} Subscriptions` : 'Active Subscriptions',
-      revenueMetricLabel: revenueMetricType === 'WALLET_TOPUP' ? 'Wallet Revenue' : 'Subscription Revenue',
-      revenueMetricPeriodLabel: chartRange.isCustom ? 'Selected Period' : 'Current Month',
+      subscriptionMetricLabel: subscriptionStatus
+        ? `${subscriptionStatus} Subscriptions`
+        : 'Active Subscriptions',
+      revenueMetricLabel:
+        revenueMetricType === 'WALLET_TOPUP'
+          ? 'Wallet Revenue'
+          : 'Subscription Revenue',
+      revenueMetricPeriodLabel: chartRange.isCustom
+        ? 'Selected Period'
+        : 'Current Month',
     },
     filters: {
       timeRange: filters.timeRange || '7M',

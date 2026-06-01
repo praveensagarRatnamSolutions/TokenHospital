@@ -4,7 +4,10 @@ const Department = require('../department/department.model');
 const Kiosk = require('../kiosk/kiosk.model');
 const Plan = require('../subscription/plan.model');
 const HospitalSubscription = require('./hospitalSubscription.model');
-const { getHospitalLimits, isSubscriptionValid } = require('../hospital/subscription.utils');
+const {
+  getHospitalLimits,
+  isSubscriptionValid,
+} = require('../hospital/subscription.utils');
 const logger = require('../../config/logger');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
@@ -18,7 +21,9 @@ const getGlobalRazorpayClient = () => {
   const keySecret = process.env.RAZORPAY_CLIENT_SECRET;
 
   if (!keyId || !keySecret) {
-    throw new Error('Global Platform Razorpay credentials are not configured in .env');
+    throw new Error(
+      'Global Platform Razorpay credentials are not configured in .env'
+    );
   }
 
   return new Razorpay({
@@ -36,11 +41,15 @@ const getSubscriptionStatus = async (req, res) => {
   try {
     const hospital = await Hospital.findById(req.hospitalId);
     if (!hospital) {
-      return res.status(404).json({ success: false, message: 'Hospital not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Hospital not found' });
     }
 
     // Fetch active subscription for this hospital
-    const subscription = await HospitalSubscription.findOne({ hospitalId: req.hospitalId });
+    const subscription = await HospitalSubscription.findOne({
+      hospitalId: req.hospitalId,
+    });
 
     // 1. Get Plan Limits (async — must await)
     const limits = await getHospitalLimits(hospital);
@@ -69,6 +78,17 @@ const getSubscriptionStatus = async (req, res) => {
     // 4. Fetch full plan details for frontend rendering
     const currentPlan = await Plan.findOne({ planId, isActive: true });
 
+    const rawPendingPriceChange = subscription?.pendingPriceChange || null;
+    const pendingPriceChange =
+      rawPendingPriceChange &&
+      rawPendingPriceChange.status &&
+      rawPendingPriceChange.billingCycle &&
+      rawPendingPriceChange.currentAmount != null &&
+      rawPendingPriceChange.newAmount != null &&
+      rawPendingPriceChange.effectiveDate
+        ? rawPendingPriceChange
+        : null;
+
     res.json({
       success: true,
       data: {
@@ -83,7 +103,7 @@ const getSubscriptionStatus = async (req, res) => {
         billingCycle: subscription?.billingCycle || 'MONTHLY',
         cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd || false,
         razorpaySubscriptionId: subscription?.razorpaySubscriptionId || null,
-        pendingPriceChange: subscription?.pendingPriceChange || null,
+        pendingPriceChange,
         limits: {
           maxDoctors: limits.maxDoctors,
           maxDepartments: limits.maxDepartments,
@@ -108,12 +128,20 @@ const getSubscriptionStatus = async (req, res) => {
 const changePlan = async (req, res) => {
   try {
     const { planId } = req.body;
-    if (!planId) return res.status(400).json({ success: false, message: 'planId is required' });
+    if (!planId)
+      return res
+        .status(400)
+        .json({ success: false, message: 'planId is required' });
 
     const plan = await Plan.findOne({ planId, isActive: true });
-    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found or inactive' });
+    if (!plan)
+      return res
+        .status(404)
+        .json({ success: false, message: 'Plan not found or inactive' });
 
-    let subscription = await HospitalSubscription.findOne({ hospitalId: req.hospitalId });
+    let subscription = await HospitalSubscription.findOne({
+      hospitalId: req.hospitalId,
+    });
     if (subscription) {
       subscription.planId = plan.planId;
       subscription.status = 'ACTIVE';
@@ -135,10 +163,24 @@ const changePlan = async (req, res) => {
 
     if (plan?.limits) {
       if (plan.limits.freeSmsUnits > 0) {
-        await WalletService.creditWallet(req.hospitalId, 'SMS', plan.limits.freeSmsUnits, `Free credits from ${plan.name} upgrade`, 'SUBSCRIPTION_RENEWAL', subscription._id);
+        await WalletService.creditWallet(
+          req.hospitalId,
+          'SMS',
+          plan.limits.freeSmsUnits,
+          `Free credits from ${plan.name} upgrade`,
+          'SUBSCRIPTION_RENEWAL',
+          subscription._id
+        );
       }
       if (plan.limits.freeEmailUnits > 0) {
-        await WalletService.creditWallet(req.hospitalId, 'EMAIL', plan.limits.freeEmailUnits, `Free credits from ${plan.name} upgrade`, 'SUBSCRIPTION_RENEWAL', subscription._id);
+        await WalletService.creditWallet(
+          req.hospitalId,
+          'EMAIL',
+          plan.limits.freeEmailUnits,
+          `Free credits from ${plan.name} upgrade`,
+          'SUBSCRIPTION_RENEWAL',
+          subscription._id
+        );
       }
     }
 
@@ -164,10 +206,16 @@ const assignPlan = async (req, res) => {
     const { hospitalId } = req.params;
 
     const plan = await Plan.findOne({ planId, isActive: true });
-    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
+    if (!plan)
+      return res
+        .status(404)
+        .json({ success: false, message: 'Plan not found' });
 
     const hospital = await Hospital.findById(hospitalId);
-    if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
+    if (!hospital)
+      return res
+        .status(404)
+        .json({ success: false, message: 'Hospital not found' });
 
     let subscription = await HospitalSubscription.findOne({ hospitalId });
     if (subscription) {
@@ -188,10 +236,24 @@ const assignPlan = async (req, res) => {
 
     if (plan?.limits) {
       if (plan.limits.freeSmsUnits > 0) {
-        await WalletService.creditWallet(hospitalId, 'SMS', plan.limits.freeSmsUnits, `Free credits from ${plan.name} assignment`, 'SUBSCRIPTION_RENEWAL', subscription._id);
+        await WalletService.creditWallet(
+          hospitalId,
+          'SMS',
+          plan.limits.freeSmsUnits,
+          `Free credits from ${plan.name} assignment`,
+          'SUBSCRIPTION_RENEWAL',
+          subscription._id
+        );
       }
       if (plan.limits.freeEmailUnits > 0) {
-        await WalletService.creditWallet(hospitalId, 'EMAIL', plan.limits.freeEmailUnits, `Free credits from ${plan.name} assignment`, 'SUBSCRIPTION_RENEWAL', subscription._id);
+        await WalletService.creditWallet(
+          hospitalId,
+          'EMAIL',
+          plan.limits.freeEmailUnits,
+          `Free credits from ${plan.name} assignment`,
+          'SUBSCRIPTION_RENEWAL',
+          subscription._id
+        );
       }
     }
 
@@ -322,12 +384,19 @@ const resumeRenewal = async (req, res) => {
  */
 const schedulePriceMigration = async (req, res) => {
   try {
-    const { planId, billingCycle, newAmount, effectiveDate, sendEmails = true } = req.body;
+    const {
+      planId,
+      billingCycle,
+      newAmount,
+      effectiveDate,
+      sendEmails = true,
+    } = req.body;
 
     if (!planId || !billingCycle || newAmount === undefined || !effectiveDate) {
       return res.status(400).json({
         success: false,
-        message: 'planId, billingCycle, newAmount, and effectiveDate are required',
+        message:
+          'planId, billingCycle, newAmount, and effectiveDate are required',
       });
     }
 
@@ -350,10 +419,14 @@ const schedulePriceMigration = async (req, res) => {
 
     const plan = await Plan.findOne({ planId, isActive: true });
     if (!plan) {
-      return res.status(404).json({ success: false, message: 'Plan not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Plan not found' });
     }
 
-    const currentPriceIndex = plan.prices?.findIndex((price) => price.billingCycle === billingCycle);
+    const currentPriceIndex = plan.prices?.findIndex(
+      (price) => price.billingCycle === billingCycle
+    );
     if (currentPriceIndex === -1 || currentPriceIndex === undefined) {
       return res.status(400).json({
         success: false,
@@ -377,7 +450,7 @@ const schedulePriceMigration = async (req, res) => {
 
     try {
       const rzp = getGlobalRazorpayClient();
-      
+
       let period = 'monthly';
       let interval = currentPriceObj.intervalMonths || 1;
 
@@ -389,8 +462,10 @@ const schedulePriceMigration = async (req, res) => {
         interval = currentPriceObj.intervalMonths || 1;
       }
 
-      logger.info(`Creating brand new Razorpay plan for price migration: ${plan.name} (${billingCycle}) - ₹${parsedAmount}`);
-      
+      logger.info(
+        `Creating brand new Razorpay plan for price migration: ${plan.name} (${billingCycle}) - ₹${parsedAmount}`
+      );
+
       const razorpayPlan = await rzp.plans.create({
         period,
         interval,
@@ -404,9 +479,13 @@ const schedulePriceMigration = async (req, res) => {
 
       newRazorpayPlanId = razorpayPlan.id;
       isMock = false;
-      logger.info(`✅ Razorpay plan created during migration: ${newRazorpayPlanId}`);
+      logger.info(
+        `✅ Razorpay plan created during migration: ${newRazorpayPlanId}`
+      );
     } catch (err) {
-      logger.error(`⚠️ Razorpay plan creation failed during migration. Sandbox mode fallback activated: ${err.message}`);
+      logger.error(
+        `⚠️ Razorpay plan creation failed during migration. Sandbox mode fallback activated: ${err.message}`
+      );
     }
 
     // 2. Update Plan document immediately so new checkouts/signups pay the new price
@@ -421,9 +500,11 @@ const schedulePriceMigration = async (req, res) => {
       plan.yearlyPrice = parsedAmount;
       plan.razorpayPlanIdYearly = newRazorpayPlanId;
     }
-    
+
     await plan.save();
-    logger.info(`✅ Updated MongoDB Plan ${plan.planId} price cycle to ₹${parsedAmount} (Razorpay ID: ${newRazorpayPlanId})`);
+    logger.info(
+      `✅ Updated MongoDB Plan ${plan.planId} price cycle to ₹${parsedAmount} (Razorpay ID: ${newRazorpayPlanId})`
+    );
 
     // 3. Find and schedule active subscriptions for migration
     const subscriptions = await HospitalSubscription.find({
@@ -498,8 +579,9 @@ const schedulePriceMigration = async (req, res) => {
 const getBillingHistory = async (req, res) => {
   try {
     const SubscriptionTransaction = require('./subscription.model');
-    const query = req.user.role === 'SUPERADMIN' ? {} : { hospitalId: req.hospitalId };
-    
+    const query =
+      req.user.role === 'SUPERADMIN' ? {} : { hospitalId: req.hospitalId };
+
     const history = await SubscriptionTransaction.find(query)
       .populate('hospitalId', 'name email contactNumber')
       .sort({ createdAt: -1 })
@@ -520,8 +602,9 @@ const exportBillingHistory = async (req, res) => {
   try {
     const { status, service, startDate, endDate, search } = req.query;
     const SubscriptionTransaction = require('./subscription.model');
-    
-    let query = req.user.role === 'SUPERADMIN' ? {} : { hospitalId: req.hospitalId };
+
+    let query =
+      req.user.role === 'SUPERADMIN' ? {} : { hospitalId: req.hospitalId };
 
     if (status && status !== 'ALL') {
       query.status = status;
@@ -551,16 +634,20 @@ const exportBillingHistory = async (req, res) => {
 
     if (search) {
       const lowerSearch = search.toLowerCase();
-      history = history.filter(inv => {
+      history = history.filter((inv) => {
         const hospitalName = inv.hospitalId?.name?.toLowerCase() || '';
-        const invoiceId = inv.razorpayPaymentId?.toLowerCase() || inv._id.toString().toLowerCase();
-        return hospitalName.includes(lowerSearch) || invoiceId.includes(lowerSearch);
+        const invoiceId =
+          inv.razorpayPaymentId?.toLowerCase() ||
+          inv._id.toString().toLowerCase();
+        return (
+          hospitalName.includes(lowerSearch) || invoiceId.includes(lowerSearch)
+        );
       });
     }
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Billing History', {
-      views: [{ showGridLines: false }]
+      views: [{ showGridLines: false }],
     });
 
     // 1. Add Main Title
@@ -568,7 +655,11 @@ const exportBillingHistory = async (req, res) => {
     const titleCell = worksheet.getCell('A1');
     titleCell.value = 'Hospital Token Management - Billing History Report';
     titleCell.font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
-    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } }; // slate-800
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1E293B' },
+    }; // slate-800
     titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
 
     // 2. Empty row for spacing
@@ -580,7 +671,12 @@ const exportBillingHistory = async (req, res) => {
       { header: 'Date', key: 'date', width: 22 },
       { header: 'Hospital Name', key: 'hospital', width: 35 },
       { header: 'Service Type', key: 'service', width: 20 },
-      { header: 'Amount', key: 'amount', width: 18, style: { numFmt: '"₹"#,##0.00' } },
+      {
+        header: 'Amount',
+        key: 'amount',
+        width: 18,
+        style: { numFmt: '"₹"#,##0.00' },
+      },
       { header: 'Status', key: 'status', width: 15 },
       { header: 'Description', key: 'description', width: 50 },
     ];
@@ -589,31 +685,47 @@ const exportBillingHistory = async (req, res) => {
     const headerRow = worksheet.getRow(4);
     headerRow.height = 25;
     headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }; // slate-900
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF0F172A' },
+    }; // slate-900
     headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
     // 5. Add Data Rows
-    history.forEach(inv => {
+    history.forEach((inv) => {
       const isWallet = inv.type === 'WALLET_TOPUP';
       const serviceType = isWallet ? 'Wallet Top-up' : 'Subscription';
-      
+
       const row = worksheet.addRow({
         id: inv.razorpayPaymentId || inv._id.toString(),
-        date: new Date(inv.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }),
+        date: new Date(inv.createdAt).toLocaleString('en-IN', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }),
         hospital: inv.hospitalId?.name || 'Unknown',
         service: serviceType,
         amount: inv.amount || 0,
         status: inv.status === 'COMPLETED' ? 'PAID' : inv.status,
         description: inv.description || '',
       });
-      
+
       // Style row alignments
       row.height = 20;
       row.alignment = { vertical: 'middle' };
-      row.getCell('amount').alignment = { horizontal: 'right', vertical: 'middle' };
-      row.getCell('status').alignment = { horizontal: 'center', vertical: 'middle' };
-      row.getCell('date').alignment = { horizontal: 'center', vertical: 'middle' };
-      
+      row.getCell('amount').alignment = {
+        horizontal: 'right',
+        vertical: 'middle',
+      };
+      row.getCell('status').alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+      row.getCell('date').alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+
       // Color code status
       const statusCell = row.getCell('status');
       if (inv.status === 'COMPLETED') {
@@ -626,14 +738,15 @@ const exportBillingHistory = async (req, res) => {
     });
 
     // 6. Add Border to all data cells
-    worksheet.eachRow({ includeEmpty: false }, function(row, rowNumber) {
-      if (rowNumber >= 4) { // Apply borders to headers and data
-        row.eachCell({ includeEmpty: true }, function(cell) {
+    worksheet.eachRow({ includeEmpty: false }, function (row, rowNumber) {
+      if (rowNumber >= 4) {
+        // Apply borders to headers and data
+        row.eachCell({ includeEmpty: true }, function (cell) {
           cell.border = {
             top: { style: 'thin', color: { argb: 'FFCBD5E1' } }, // slate-300
             left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
             bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
-            right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+            right: { style: 'thin', color: { argb: 'FFCBD5E1' } },
           };
         });
       }
@@ -670,7 +783,8 @@ const startTrial = async (req, res) => {
     if (existingSub) {
       return res.status(400).json({
         success: false,
-        message: 'Your hospital has already used its trial or holds an active subscription.',
+        message:
+          'Your hospital has already used its trial or holds an active subscription.',
       });
     }
 
@@ -720,11 +834,13 @@ const createCheckout = async (req, res) => {
     // 1. Retrieve the designated plan
     plan = await Plan.findOne({ planId, isActive: true });
     if (!plan) {
-      return res.status(404).json({ success: false, message: 'Plan not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Plan not found' });
     }
 
     // 2. Extract corresponding price cycle
-    chosenPrice = plan.prices.find(p => p.billingCycle === billingCycle);
+    chosenPrice = plan.prices.find((p) => p.billingCycle === billingCycle);
     if (!chosenPrice) {
       return res.status(400).json({
         success: false,
@@ -734,13 +850,21 @@ const createCheckout = async (req, res) => {
 
     // 3. Initiate the global Platform Razorpay client
     const rzp = getGlobalRazorpayClient();
-    console.log("rzp", rzp);
-
+    console.log('rzp', rzp);
 
     // 4. Create the Subscription on Razorpay
-    const totalCount = billingCycle === 'YEARLY' ? 10 : (billingCycle === 'QUARTERLY' ? 40 : (billingCycle === 'HALF_YEARLY' ? 20 : 120));
+    const totalCount =
+      billingCycle === 'YEARLY'
+        ? 10
+        : billingCycle === 'QUARTERLY'
+          ? 40
+          : billingCycle === 'HALF_YEARLY'
+            ? 20
+            : 120;
 
-    console.log(`Creating Razorpay Subscription for plan ID: ${chosenPrice.razorpayPlanId}...`);
+    console.log(
+      `Creating Razorpay Subscription for plan ID: ${chosenPrice.razorpayPlanId}...`
+    );
     const rzpSubscription = await rzp.subscriptions.create({
       plan_id: chosenPrice.razorpayPlanId,
       total_count: totalCount,
@@ -759,9 +883,12 @@ const createCheckout = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Razorpay subscription creation failed. Falling back to test Sandbox mode.', error);
-    
-    // In development or test environments, if Razorpay subscription creation fails 
+    logger.error(
+      'Razorpay subscription creation failed. Falling back to test Sandbox mode.',
+      error
+    );
+
+    // In development or test environments, if Razorpay subscription creation fails
     // (e.g. planId not synchronized on real dashboard), we gracefully fall back to a mock subscription mandate!
     const mockSubscriptionId = `sub_mock_${crypto.randomBytes(8).toString('hex')}`;
     res.status(201).json({
@@ -771,7 +898,7 @@ const createCheckout = async (req, res) => {
         subscriptionId: mockSubscriptionId,
         keyId: process.env.RAZORPAY_CLIENT_ID || 'rzp_test_mock',
         amount: chosenPrice ? chosenPrice.amount : 0,
-        planId: plan ? plan.planId : (req.body.planId || 'FREE'),
+        planId: plan ? plan.planId : req.body.planId || 'FREE',
         billingCycle: req.body.billingCycle || 'MONTHLY',
         isMock: true,
       },
@@ -786,15 +913,27 @@ const createCheckout = async (req, res) => {
  */
 const verifyCheckout = async (req, res) => {
   try {
-    const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature, planId, billingCycle } = req.body;
+    const {
+      razorpay_payment_id,
+      razorpay_subscription_id,
+      razorpay_signature,
+      planId,
+      billingCycle,
+    } = req.body;
     const SubscriptionTransaction = require('./subscription.model');
 
     // 0. Idempotency Check
     if (razorpay_payment_id) {
-      const existingTransaction = await SubscriptionTransaction.findOne({ razorpayPaymentId: razorpay_payment_id });
+      const existingTransaction = await SubscriptionTransaction.findOne({
+        razorpayPaymentId: razorpay_payment_id,
+      });
       if (existingTransaction) {
-        logger.info(`Subscription payment already verified for payment ID: ${razorpay_payment_id}`);
-        const subscription = await HospitalSubscription.findOne({ razorpaySubscriptionId: razorpay_subscription_id });
+        logger.info(
+          `Subscription payment already verified for payment ID: ${razorpay_payment_id}`
+        );
+        const subscription = await HospitalSubscription.findOne({
+          razorpaySubscriptionId: razorpay_subscription_id,
+        });
         return res.status(200).json({
           success: true,
           message: 'Subscription payment already verified successfully!',
@@ -804,8 +943,13 @@ const verifyCheckout = async (req, res) => {
     }
 
     // 1. Perform HMAC SHA256 Signature Verification (Bypassed for mock subscriptions in sandbox mode)
-    if (razorpay_subscription_id && razorpay_subscription_id.startsWith('sub_mock')) {
-      logger.info(`Bypassing Razorpay signature verification for sandbox mock subscription: ${razorpay_subscription_id}`);
+    if (
+      razorpay_subscription_id &&
+      razorpay_subscription_id.startsWith('sub_mock')
+    ) {
+      logger.info(
+        `Bypassing Razorpay signature verification for sandbox mock subscription: ${razorpay_subscription_id}`
+      );
     } else {
       const secret = process.env.RAZORPAY_CLIENT_SECRET;
       const generated_signature = crypto
@@ -814,13 +958,18 @@ const verifyCheckout = async (req, res) => {
         .digest('hex');
 
       if (generated_signature !== razorpay_signature) {
-        return res.status(400).json({ success: false, message: 'Cryptographic signature verification failed.' });
+        return res.status(400).json({
+          success: false,
+          message: 'Cryptographic signature verification failed.',
+        });
       }
     }
 
     // 2. Fetch the plan details to calculate next renewal period date
     const plan = await Plan.findOne({ planId, isActive: true });
-    const chosenPrice = plan?.prices.find(p => p.billingCycle === billingCycle);
+    const chosenPrice = plan?.prices.find(
+      (p) => p.billingCycle === billingCycle
+    );
     const intervalMonths = chosenPrice?.intervalMonths || 1;
 
     const startDate = new Date();
@@ -828,7 +977,9 @@ const verifyCheckout = async (req, res) => {
     endDate.setMonth(endDate.getMonth() + intervalMonths);
 
     // 3. Upsert active subscription record (automatically syncs to legacy Hospital fields)
-    let subscription = await HospitalSubscription.findOne({ hospitalId: req.hospitalId });
+    let subscription = await HospitalSubscription.findOne({
+      hospitalId: req.hospitalId,
+    });
 
     if (subscription) {
       subscription.planId = planId;
@@ -871,10 +1022,24 @@ const verifyCheckout = async (req, res) => {
     // 5. Credit free wallet units based on plan limits
     if (plan?.limits) {
       if (plan.limits.freeSmsUnits > 0) {
-        await WalletService.creditWallet(req.hospitalId, 'SMS', plan.limits.freeSmsUnits, `Free credits from ${plan.name} subscription`, 'SUBSCRIPTION_RENEWAL', subscription._id);
+        await WalletService.creditWallet(
+          req.hospitalId,
+          'SMS',
+          plan.limits.freeSmsUnits,
+          `Free credits from ${plan.name} subscription`,
+          'SUBSCRIPTION_RENEWAL',
+          subscription._id
+        );
       }
       if (plan.limits.freeEmailUnits > 0) {
-        await WalletService.creditWallet(req.hospitalId, 'EMAIL', plan.limits.freeEmailUnits, `Free credits from ${plan.name} subscription`, 'SUBSCRIPTION_RENEWAL', subscription._id);
+        await WalletService.creditWallet(
+          req.hospitalId,
+          'EMAIL',
+          plan.limits.freeEmailUnits,
+          `Free credits from ${plan.name} subscription`,
+          'SUBSCRIPTION_RENEWAL',
+          subscription._id
+        );
       }
     }
 
@@ -900,11 +1065,17 @@ const handleSubscriptionWebhook = async (req, res) => {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
     if (!signature || !webhookSecret) {
-      logger.error('Missing signature or webhook secret for subscription webhook');
-      return res.status(400).json({ success: false, message: 'Invalid request' });
+      logger.error(
+        'Missing signature or webhook secret for subscription webhook'
+      );
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid request' });
     }
 
-    const rawBody = req.rawBody ? req.rawBody.toString() : JSON.stringify(req.body);
+    const rawBody = req.rawBody
+      ? req.rawBody.toString()
+      : JSON.stringify(req.body);
     const expectedSignature = crypto
       .createHmac('sha256', webhookSecret)
       .update(rawBody)
@@ -912,9 +1083,13 @@ const handleSubscriptionWebhook = async (req, res) => {
 
     const isSignatureValid = expectedSignature === signature;
     if (!isSignatureValid) {
-      logger.warn('Razorpay webhook signature verification failed for subscription webhook');
+      logger.warn(
+        'Razorpay webhook signature verification failed for subscription webhook'
+      );
       if (process.env.NODE_ENV === 'production') {
-        return res.status(400).json({ success: false, message: 'Signature verification failed' });
+        return res
+          .status(400)
+          .json({ success: false, message: 'Signature verification failed' });
       }
     }
 
@@ -926,11 +1101,15 @@ const handleSubscriptionWebhook = async (req, res) => {
       const rzpPayment = payload.payment.entity;
 
       const SubscriptionTransaction = require('./subscription.model');
-      
+
       // Idempotency check
-      const existingTransaction = await SubscriptionTransaction.findOne({ razorpayPaymentId: rzpPayment.id });
+      const existingTransaction = await SubscriptionTransaction.findOne({
+        razorpayPaymentId: rzpPayment.id,
+      });
       if (existingTransaction) {
-        logger.info(`Webhook idempotency: Subscription payment already processed for payment ID: ${rzpPayment.id}`);
+        logger.info(
+          `Webhook idempotency: Subscription payment already processed for payment ID: ${rzpPayment.id}`
+        );
         return res.json({ success: true, message: 'Already processed' });
       }
 
@@ -951,13 +1130,15 @@ const handleSubscriptionWebhook = async (req, res) => {
         await subscription.save();
 
         const plan = await Plan.findOne({ planId: subscription.planId });
-        const chosenPrice = plan?.prices.find(p => p.billingCycle === subscription.billingCycle);
+        const chosenPrice = plan?.prices.find(
+          (p) => p.billingCycle === subscription.billingCycle
+        );
 
         await SubscriptionTransaction.create({
           hospitalId: subscription.hospitalId,
           type: 'SUBSCRIPTION',
           planId: subscription.planId,
-          amount: chosenPrice?.amount || (rzpPayment.amount / 100) || 0,
+          amount: chosenPrice?.amount || rzpPayment.amount / 100 || 0,
           currency: plan?.currency || 'INR',
           status: 'COMPLETED',
           razorpaySubscriptionId: rzpSub.id,
@@ -967,14 +1148,30 @@ const handleSubscriptionWebhook = async (req, res) => {
 
         if (plan?.limits) {
           if (plan.limits.freeSmsUnits > 0) {
-            await WalletService.creditWallet(subscription.hospitalId, 'SMS', plan.limits.freeSmsUnits, `Free credits from auto-renewal of ${plan.name}`, 'SUBSCRIPTION_RENEWAL', subscription._id);
+            await WalletService.creditWallet(
+              subscription.hospitalId,
+              'SMS',
+              plan.limits.freeSmsUnits,
+              `Free credits from auto-renewal of ${plan.name}`,
+              'SUBSCRIPTION_RENEWAL',
+              subscription._id
+            );
           }
           if (plan.limits.freeEmailUnits > 0) {
-            await WalletService.creditWallet(subscription.hospitalId, 'EMAIL', plan.limits.freeEmailUnits, `Free credits from auto-renewal of ${plan.name}`, 'SUBSCRIPTION_RENEWAL', subscription._id);
+            await WalletService.creditWallet(
+              subscription.hospitalId,
+              'EMAIL',
+              plan.limits.freeEmailUnits,
+              `Free credits from auto-renewal of ${plan.name}`,
+              'SUBSCRIPTION_RENEWAL',
+              subscription._id
+            );
           }
         }
 
-        logger.info(`Subscription ${rzpSub.id} successfully auto-renewed through webhook!`);
+        logger.info(
+          `Subscription ${rzpSub.id} successfully auto-renewed through webhook!`
+        );
       }
     } else if (event === 'payment.failed') {
       // Handle payment failure for subscriptions
@@ -990,9 +1187,14 @@ const handleSubscriptionWebhook = async (req, res) => {
       if (subscription) {
         subscription.status = 'PAST_DUE';
         await subscription.save();
-        logger.info(`Subscription ${rzpSub.id} marked as PAST_DUE through webhook.`);
+        logger.info(
+          `Subscription ${rzpSub.id} marked as PAST_DUE through webhook.`
+        );
       }
-    } else if (event === 'subscription.cancelled' || event === 'subscription.halted') {
+    } else if (
+      event === 'subscription.cancelled' ||
+      event === 'subscription.halted'
+    ) {
       const rzpSub = payload.subscription.entity;
 
       const subscription = await HospitalSubscription.findOne({
@@ -1005,7 +1207,9 @@ const handleSubscriptionWebhook = async (req, res) => {
         subscription.canceledAt = new Date();
         subscription.endedAt = new Date();
         await subscription.save();
-        logger.info(`Subscription ${rzpSub.id} marked as CANCELLED through webhook.`);
+        logger.info(
+          `Subscription ${rzpSub.id} marked as CANCELLED through webhook.`
+        );
       }
     }
 
@@ -1020,7 +1224,7 @@ const runPriceMigrationsManual = async (req, res) => {
   try {
     const { executePriceMigrations } = require('../../utils/cronJob');
     const result = await executePriceMigrations();
-    
+
     res.json({
       success: true,
       message: `Manual price migration sweep completed. Succeeded: ${result.succeeded}, Failed: ${result.failed}`,

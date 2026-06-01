@@ -18,7 +18,7 @@ import {
   EyeOff,
   AlertCircle,
   Globe,
-  Info
+  Info,
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
@@ -50,7 +50,7 @@ export default function RazorpayCard() {
     keySecret: '',
     webhookSecret: '',
     webhookKey: '',
-    enabled: false
+    enabled: false,
   });
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function RazorpayCard() {
 
         setWebhookInfo({
           webhookUrl: res.data.webhookUrl,
-          webhookSecret: res.data.webhookSecret
+          webhookSecret: res.data.webhookSecret,
         });
 
         if (res.data.config) {
@@ -71,7 +71,7 @@ export default function RazorpayCard() {
             keySecret: res.data.config.keySecret || '',
             webhookSecret: res.data.webhookSecret || '',
             webhookKey: res.data.webhookKey || '',
-            enabled: res.data.config.enabled || false
+            enabled: res.data.config.enabled || false,
           });
         }
       } catch (err) {
@@ -96,21 +96,21 @@ export default function RazorpayCard() {
       await api.put('/api/razorpay/config', {
         keyId: formData.keyId,
         keySecret: formData.keySecret,
-        enabled: formData.enabled
+        enabled: formData.enabled,
       });
 
       // Refresh to get any updated info
       const res = await api.get('/api/razorpay/config');
       setWebhookInfo({
         webhookUrl: res.data.webhookUrl,
-        webhookSecret: res.data.webhookSecret
+        webhookSecret: res.data.webhookSecret,
       });
       if (res.data.config) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           keyId: res.data.config.keyId || '',
           keySecret: res.data.config.keySecret || '',
-          enabled: res.data.config.enabled || false
+          enabled: res.data.config.enabled || false,
         }));
       }
 
@@ -131,10 +131,22 @@ export default function RazorpayCard() {
   };
 
   const steps = [
-    { icon: <Settings className="w-3.5 h-3.5" />, text: "Navigate to Settings → API Keys in Razorpay Dashboard" },
-    { icon: <ShieldCheck className="w-3.5 h-3.5" />, text: "Copy your Live Key ID and Secret into the fields below" },
-    { icon: <LinkIcon className="w-3.5 h-3.5" />, text: "Add the Webhook URL provided here in Razorpay Settings" },
-    { icon: <Globe className="w-3.5 h-3.5" />, text: "Select 'payment.captured' as the mandatory event" },
+    {
+      icon: <Settings className="w-3.5 h-3.5" />,
+      text: 'Navigate to Settings → API Keys in Razorpay Dashboard',
+    },
+    {
+      icon: <ShieldCheck className="w-3.5 h-3.5" />,
+      text: 'Copy your Live Key ID and Secret into the fields below',
+    },
+    {
+      icon: <LinkIcon className="w-3.5 h-3.5" />,
+      text: 'Add the Webhook URL provided here in Razorpay Settings',
+    },
+    {
+      icon: <Globe className="w-3.5 h-3.5" />,
+      text: "Select 'payment.captured' as the mandatory event",
+    },
   ];
 
   if (loading) {
@@ -142,7 +154,9 @@ export default function RazorpayCard() {
       <Card className="overflow-hidden border-none shadow-xl bg-white dark:bg-slate-950 rounded-3xl py-24">
         <div className="flex flex-col items-center justify-center space-y-6">
           <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-          <p className="text-xs font-black text-slate-400 uppercase tracking-widest animate-pulse">Loading Gateway...</p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest animate-pulse">
+            Loading Gateway...
+          </p>
         </div>
       </Card>
     );
@@ -157,30 +171,36 @@ export default function RazorpayCard() {
               <CreditCard className="w-8 h-8" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Razorpay Payments</CardTitle>
-              <p className="text-sm font-bold text-slate-400">Configure your hospital's direct payment gateway</p>
+              <CardTitle className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                Razorpay Payments
+              </CardTitle>
+              <p className="text-sm font-bold text-slate-400">
+                Configure your hospital's direct payment gateway
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800">
-            <span className={`text-xs font-black tracking-tight px-2 ${formData.enabled ? 'text-blue-600' : 'text-slate-400'}`}>
+            <span
+              className={`text-xs font-black tracking-tight px-2 ${formData.enabled ? 'text-blue-600' : 'text-slate-400'}`}
+            >
               {formData.enabled ? 'ACTIVE' : 'DISABLED'}
             </span>
             <Switch
               disabled={saving}
               checked={formData.enabled}
               onCheckedChange={async (checked) => {
-                setFormData(prev => ({ ...prev, enabled: checked }));
+                setFormData((prev) => ({ ...prev, enabled: checked }));
                 // Immediate save for the toggle
                 try {
                   setSaving(true);
                   await api.put('/api/razorpay/config', {
                     ...formData,
-                    enabled: checked
+                    enabled: checked,
                   });
                 } catch (err) {
                   console.error('Failed to toggle Razorpay status:', err);
                   // Revert UI on failure
-                  setFormData(prev => ({ ...prev, enabled: !checked }));
+                  setFormData((prev) => ({ ...prev, enabled: !checked }));
                 } finally {
                   setSaving(false);
                 }
@@ -196,22 +216,30 @@ export default function RazorpayCard() {
         <div className="space-y-6">
           <div className="flex items-center gap-3 border-b border-slate-50 dark:border-slate-900 pb-4">
             <Zap className="w-5 h-5 text-amber-500" />
-            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Authentication Keys</h4>
+            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">
+              Authentication Keys
+            </h4>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Key ID</label>
+              <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">
+                Key ID
+              </label>
               <Input
                 placeholder="rzp_live_xxxxxxxxxxxxxx"
                 value={formData.keyId}
-                onChange={(e) => setFormData(prev => ({ ...prev, keyId: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, keyId: e.target.value }))
+                }
                 className="h-14 bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-2xl font-mono text-xs focus-visible:ring-blue-500"
               />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center px-1">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Key Secret</label>
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                  Key Secret
+                </label>
                 <button
                   onClick={() => setShowSecret(!showSecret)}
                   className="text-[10px] font-bold text-blue-600 hover:underline"
@@ -221,14 +249,20 @@ export default function RazorpayCard() {
               </div>
               <div className="relative group">
                 <Input
-                  type={showSecret ? "text" : "password"}
+                  type={showSecret ? 'text' : 'password'}
                   placeholder="Enter your razorpay secret"
                   value={formData.keySecret}
-                  onChange={(e) => setFormData(prev => ({ ...prev, keySecret: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, keySecret: e.target.value }))
+                  }
                   className="h-14 bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-2xl font-mono text-xs focus-visible:ring-blue-500 pr-14"
                 />
                 <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300">
-                  {showSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showSecret ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </div>
               </div>
             </div>
@@ -239,13 +273,17 @@ export default function RazorpayCard() {
         <div className="space-y-6">
           <div className="flex items-center gap-3 border-b border-slate-50 dark:border-slate-900 pb-4">
             <LinkIcon className="w-5 h-5 text-purple-500" />
-            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Webhook Integration</h4>
+            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">
+              Webhook Integration
+            </h4>
           </div>
 
           {webhookInfo && webhookInfo.webhookUrl ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Payload URL</label>
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">
+                  Payload URL
+                </label>
                 <div className="relative">
                   <Input
                     value={webhookInfo.webhookUrl}
@@ -258,13 +296,21 @@ export default function RazorpayCard() {
                     onClick={() => copyToClipboard(webhookInfo.webhookUrl, 'url')}
                     className="absolute right-2 top-2 bottom-2 px-4 rounded-xl hover:bg-white dark:hover:bg-slate-800 text-blue-600 font-black transition-all"
                   >
-                    {copiedField === 'url' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                    <span className="ml-2 text-[10px] uppercase">{copiedField === 'url' ? 'DONE' : 'COPY'}</span>
+                    {copiedField === 'url' ? (
+                      <Check className="w-4 h-4 text-emerald-500" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                    <span className="ml-2 text-[10px] uppercase">
+                      {copiedField === 'url' ? 'DONE' : 'COPY'}
+                    </span>
                   </Button>
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">Webhook Secret</label>
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider ml-1">
+                  Webhook Secret
+                </label>
                 <div className="relative">
                   <Input
                     value={webhookInfo.webhookSecret}
@@ -277,8 +323,14 @@ export default function RazorpayCard() {
                     onClick={() => copyToClipboard(webhookInfo.webhookSecret, 'secret')}
                     className="absolute right-2 top-2 bottom-2 px-4 rounded-xl hover:bg-white dark:hover:bg-slate-800 text-blue-600 font-black transition-all"
                   >
-                    {copiedField === 'secret' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                    <span className="ml-2 text-[10px] uppercase">{copiedField === 'secret' ? 'DONE' : 'COPY'}</span>
+                    {copiedField === 'secret' ? (
+                      <Check className="w-4 h-4 text-emerald-500" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                    <span className="ml-2 text-[10px] uppercase">
+                      {copiedField === 'secret' ? 'DONE' : 'COPY'}
+                    </span>
                   </Button>
                 </div>
               </div>
@@ -286,7 +338,9 @@ export default function RazorpayCard() {
           ) : (
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 text-amber-600">
               <Info className="w-5 h-5" />
-              <p className="text-xs font-bold uppercase tracking-tight">Save your API keys to generate your unique Webhook URL.</p>
+              <p className="text-xs font-bold uppercase tracking-tight">
+                Save your API keys to generate your unique Webhook URL.
+              </p>
             </div>
           )}
         </div>
@@ -294,10 +348,15 @@ export default function RazorpayCard() {
         {/* Section 3: Guide & Actions */}
         <div className="grid grid-cols-1  gap-8 items-start pt-6 border-t border-slate-50 dark:border-slate-900">
           <div className="lg:col-span-8 space-y-6">
-            <h5 className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">Quick Setup Guide</h5>
+            <h5 className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">
+              Quick Setup Guide
+            </h5>
             <div className="grid grid-cols-2 gap-4">
               {steps.map((step, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-800/50">
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-800/50"
+                >
                   <div className="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-blue-600 shadow-sm shrink-0">
                     <span className="text-[10px] font-black">{idx + 1}</span>
                   </div>
@@ -308,19 +367,18 @@ export default function RazorpayCard() {
               ))}
             </div>
           </div>
-
-
         </div>
         <div className="lg:col-span-4 space-y-4">
           <Button
             onClick={handleSave}
             disabled={saving}
-            className={`w-full h-16 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${saveStatus === 'success'
-              ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30'
-              : saveStatus === 'error'
-                ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/30'
-                : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-[1.02] active:scale-95'
-              }`}
+            className={`w-full h-16 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
+              saveStatus === 'success'
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30'
+                : saveStatus === 'error'
+                  ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/30'
+                  : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-[1.02] active:scale-95'
+            }`}
           >
             {saving ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -331,7 +389,13 @@ export default function RazorpayCard() {
             ) : (
               <Save className="w-5 h-5" />
             )}
-            {saving ? 'Syncing...' : saveStatus === 'success' ? 'Synchronized' : saveStatus === 'error' ? 'Retry Save' : 'Save Config'}
+            {saving
+              ? 'Syncing...'
+              : saveStatus === 'success'
+                ? 'Synchronized'
+                : saveStatus === 'error'
+                  ? 'Retry Save'
+                  : 'Save Config'}
           </Button>
 
           <AnimatePresence>

@@ -177,6 +177,10 @@ function startServer() {
         payment = {},
       } = req.body;
 
+      const CLOUDFRONT_BASE_URL =
+        process.env.PRINTER_CLOUDFRONT_URL ||
+        "https://d2rxrksscpnnty.cloudfront.net";
+
       const hospitalName: string =
         typeof hospital === "string"
           ? hospital
@@ -185,6 +189,11 @@ function startServer() {
         typeof hospital === "string"
           ? ""
           : hospital.logo || hospital.logoUrl || "";
+      const logoUrl: string = logo
+        ? /^https?:\/\//i.test(logo)
+          ? logo
+          : `${CLOUDFRONT_BASE_URL.replace(/\/$/, "")}/${logo.replace(/^\/+/, "")}`
+        : "";
       const patientName: string =
         typeof patient === "string" ? patient : patient.name || "---";
       const patientPhone: string =
@@ -290,6 +299,14 @@ function startServer() {
               line-height: 1.3;
             }
 
+            .ticket-container {
+              width: 280px;
+              margin: 0 auto;
+              padding: 6px;
+              box-sizing: border-box;
+              display: block;
+            }
+
             .logo {
               width: 55px;
               height: auto;
@@ -354,9 +371,10 @@ function startServer() {
         </head>
 
         <body>
+        <div class="ticket-container">
           ${
-            logo
-              ? `<img src="${logo}" class="logo" onerror="this.style.display='none'" />`
+            logoUrl
+              ? `<img src="${logoUrl}" class="logo" onerror="this.style.display='none'" />`
               : ""
           }
 
@@ -442,6 +460,7 @@ function startServer() {
             <div class="footer-line">
               Thank you for your patience
             </div>
+          </div>
           </div>
         </body>
       </html>

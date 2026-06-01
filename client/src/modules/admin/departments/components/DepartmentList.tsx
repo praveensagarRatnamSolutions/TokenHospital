@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Plus, AlertCircle, Loader, LayoutGrid, LayoutList } from 'lucide-react';
 import { DepartmentTable } from './DepartmentTable';
 import { DepartmentCard } from './DepartmentCard';
@@ -61,6 +62,27 @@ export const DepartmentList: React.FC<DepartmentListProps> = ({ isDarkMode = fal
       const timer = setTimeout(() => setSuccessMessage(''), 5000);
       return () => clearTimeout(timer);
     }
+  }, [successMessage]);
+
+  // Show toasts for errors and success
+  useEffect(() => {
+    if (deptError) toast.error(deptError);
+  }, [deptError]);
+
+  useEffect(() => {
+    if (createError) toast.error(createError);
+  }, [createError]);
+
+  useEffect(() => {
+    if (updateError) toast.error(updateError);
+  }, [updateError]);
+
+  useEffect(() => {
+    if (deleteError) toast.error(deleteError);
+  }, [deleteError]);
+
+  useEffect(() => {
+    if (successMessage) toast.success(successMessage);
   }, [successMessage]);
 
   const handleCreateClick = () => {

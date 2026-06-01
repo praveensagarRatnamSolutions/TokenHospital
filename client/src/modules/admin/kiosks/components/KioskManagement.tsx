@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Plus, Monitor, AlertCircle, Loader, CheckCircle2, LayoutGrid, Info } from 'lucide-react';
 import { useKiosks, useCreateKiosk, useUpdateKiosk, useDeleteKiosk } from '../../../kiosk/hooks';
+import { toast } from 'sonner';
 import { KioskTable } from './KioskTable';
 import { KioskModal } from './KioskModal';
 import { useAppSelector } from '@/store/hooks';
@@ -19,9 +20,26 @@ export const KioskManagement: React.FC = () => {
   const hospitalId = user?.hospitalId || '';
 
   const { kiosks, loading, error, refetch } = useKiosks();
-  const { createKiosk } = useCreateKiosk();
-  const { updateKiosk } = useUpdateKiosk();
-  const { deleteKiosk } = useDeleteKiosk();
+  const { createKiosk, error: createError } = useCreateKiosk();
+  const { updateKiosk, error: updateError } = useUpdateKiosk();
+  const { deleteKiosk, error: deleteError } = useDeleteKiosk();
+
+  // Show toast notifications for any errors from kiosk hooks
+  React.useEffect(() => {
+    if (error) toast.error(error);
+  }, [error]);
+
+  React.useEffect(() => {
+    if (createError) toast.error(createError);
+  }, [createError]);
+
+  React.useEffect(() => {
+    if (updateError) toast.error(updateError);
+  }, [updateError]);
+
+  React.useEffect(() => {
+    if (deleteError) toast.error(deleteError);
+  }, [deleteError]);
 
   const handleCreate = () => { setSelectedKiosk(null); setIsModalOpen(true); };
   const handleEdit = (kiosk: Kiosk) => { setSelectedKiosk(kiosk); setIsModalOpen(true); };

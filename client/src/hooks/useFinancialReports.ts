@@ -10,16 +10,34 @@ export function useFinancialReports() {
   const [departmentId, setDepartmentId] = useState('');
   const [method, setMethod] = useState('');
   const [dateRange, setDateRange] = useState('daily'); // daily, weekly, monthly
-  
+  // derive explicit startDate/endDate from the selected range to match backend
+  const computeDateRange = (range: string) => {
+    const today = new Date();
+    const start = new Date(today);
+
+    if (range === 'weekly') {
+      start.setDate(today.getDate() - 7);
+    } else if (range === 'monthly') {
+      start.setMonth(today.getMonth() - 1);
+    } else {
+      // daily
+      start.setHours(0, 0, 0, 0);
+    }
+
+    const format = (d: Date) => d.toISOString().split('T')[0];
+    return { startDate: format(start), endDate: format(today) };
+  };
+  const { startDate, endDate } = computeDateRange(dateRange);
+
   // 2. Fetch Summary Stats
   const { data: summaryData, isLoading: summaryLoading } = useQuery({
     queryKey: ['financialSummary', dateRange],
     queryFn: async () => {
       const response = await api.get('/api/reports/financial', {
-        params: { range: dateRange }
+        params: { startDate, endDate },
       });
       return response.data.data;
-    }
+    },
   });
 
   // 3. Fetch Detailed Transactions
@@ -33,12 +51,13 @@ export function useFinancialReports() {
           doctorId,
           departmentId,
           method,
-          range: dateRange,
-          limit: 10
-        }
+          startDate,
+          endDate,
+          limit: 10,
+        },
       });
       return response.data;
-    }
+    },
   });
 
   // 4. Fetch Doctors for Filter
@@ -48,7 +67,7 @@ export function useFinancialReports() {
       const response = await api.get('/api/doctor');
       // The backend returns { success: true, doctors: [...], ... }
       return response.data.doctors || response.data.data || [];
-    }
+    },
   });
 
   // 5. Fetch Departments for Filter
@@ -58,12 +77,16 @@ export function useFinancialReports() {
       const response = await api.get('/api/department');
       // Check for both departments or data properties
       return response.data.departments || response.data.data || [];
-    }
+    },
   });
 
   const [isExporting, setIsExporting] = useState(false);
 
-  const stats = summaryData?.summary || { totalRevenue: 0, transactionCount: 0, avgTransactionValue: 0 };
+  const stats = summaryData?.summary || {
+    totalRevenue: 0,
+    transactionCount: 0,
+    avgTransactionValue: 0,
+  };
   const methodSplit = summaryData?.methodSplit || [];
 
   const resetFilters = () => {
@@ -77,30 +100,31 @@ export function useFinancialReports() {
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      
+
       const response = await api.get('/api/reports/export-transactions', {
         params: {
           search,
           doctorId,
           departmentId,
           method,
-          range: dateRange
+          startDate,
+          endDate,
         },
-        responseType: 'blob' // Important for binary files
+        responseType: 'blob', // Important for binary files
       });
-      
+
       // Create a URL for the blob
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      
+
       // Set filename
       const filename = `Hospital_Report_${dateRange}_${new Date().toISOString().split('T')[0]}.xlsx`;
       link.setAttribute('download', filename);
-      
+
       document.body.appendChild(link);
       link.click();
-      
+
       // Cleanup
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
@@ -141,6 +165,6 @@ export function useFinancialReports() {
 
     // Actions
     resetFilters,
-    handleExport
+    handleExport,
   };
 }

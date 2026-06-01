@@ -2,6 +2,7 @@
 
 import { Plus, Search, Edit2, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import api from '@/services/api';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -21,7 +22,10 @@ export default function AdminDoctors() {
         const response = await doctorApi.getAll({ page, limit, name: search });
         return response;
       } catch (error) {
+        const message =
+          (error as any)?.response?.data?.message || 'Failed to fetch doctors';
         console.error('Failed to fetch doctors:', error);
+        toast.error(message);
         return { doctors: [], pagination: { total: 0, page: 1, pages: 1 } };
       }
     },
@@ -92,14 +96,16 @@ export default function AdminDoctors() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
                         {doctor.profilePic ? (
-                          <img 
-                            src={`https://d2rxrksscpnnty.cloudfront.net/${doctor.profilePic}`} 
-                            alt={doctor.name} 
-                            className="w-full h-full object-cover" 
+                          <img
+                            src={`https://d2rxrksscpnnty.cloudfront.net/${doctor.profilePic}`}
+                            alt={doctor.name}
+                            className="w-full h-full object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-400">
-                            <span className="text-[10px] font-bold uppercase">{doctor.name.charAt(0)}</span>
+                            <span className="text-[10px] font-bold uppercase">
+                              {doctor.name.charAt(0)}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -161,14 +167,16 @@ export default function AdminDoctors() {
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
                   {doctor.profilePic ? (
-                    <img 
-                      src={`https://d2rxrksscpnnty.cloudfront.net/${doctor.profilePic}`} 
-                      alt={doctor.name} 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={`https://d2rxrksscpnnty.cloudfront.net/${doctor.profilePic}`}
+                      alt={doctor.name}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
-                      <span className="text-sm font-bold uppercase">{doctor.name.charAt(0)}</span>
+                      <span className="text-sm font-bold uppercase">
+                        {doctor.name.charAt(0)}
+                      </span>
                     </div>
                   )}
                 </div>

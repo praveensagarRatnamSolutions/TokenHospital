@@ -20,7 +20,9 @@ export const useDoctors = (params: any = {}) => {
         setError(response.message || 'Failed to fetch doctors');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch doctors');
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to fetch doctors';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

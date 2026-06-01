@@ -25,7 +25,9 @@ export const useKiosks = (params: any = {}) => {
         setError(response.message || 'Failed to fetch kiosks');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch kiosks');
+      const serverMessage =
+        err?.response?.data?.message || err?.message || 'Failed to fetch kiosks';
+      setError(serverMessage);
     } finally {
       setLoading(false);
     }
@@ -51,7 +53,9 @@ export const useCreateKiosk = () => {
       setError(response.message || 'Failed to create kiosk');
       return null;
     } catch (err: any) {
-      setError(err.message || 'Failed to create kiosk');
+      const serverMessage =
+        err?.response?.data?.message || err?.message || 'Failed to create kiosk';
+      setError(serverMessage);
       return null;
     } finally {
       setLoading(false);
@@ -74,7 +78,9 @@ export const useUpdateKiosk = () => {
       setError(response.message || 'Failed to update kiosk');
       return null;
     } catch (err: any) {
-      setError(err.message || 'Failed to update kiosk');
+      const serverMessage =
+        err?.response?.data?.message || err?.message || 'Failed to update kiosk';
+      setError(serverMessage);
       return null;
     } finally {
       setLoading(false);
@@ -97,7 +103,9 @@ export const useDeleteKiosk = () => {
       setError(response.message || 'Failed to delete kiosk');
       return false;
     } catch (err: any) {
-      setError(err.message || 'Failed to delete kiosk');
+      const serverMessage =
+        err?.response?.data?.message || err?.message || 'Failed to delete kiosk';
+      setError(serverMessage);
       return false;
     } finally {
       setLoading(false);
