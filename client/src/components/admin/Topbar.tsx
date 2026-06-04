@@ -1,21 +1,22 @@
 'use client';
 
-import Link from 'next/link';
+import { LogOut, Search, Settings,User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, User, LogOut, Settings } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { logout } from '@/store/slices/authSlice';
+
+import { NotificationDropdown } from '@/components/common/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { logout } from '@/store/slices/authSlice';
 
 export function Topbar() {
   const router = useRouter();
@@ -45,10 +46,7 @@ export function Topbar() {
 
         <ThemeToggle />
 
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-        </Button>
+        <NotificationDropdown />
 
         <div className="hidden sm:block h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
 

@@ -266,3 +266,41 @@ export const useDeleteAd = (): UseDeleteAdReturn => {
     error,
   };
 };
+
+export const useReviewAd = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const review = useCallback(
+    async (id: string, status: 'accepted' | 'rejected', reason?: string): Promise<Ad | null> => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await adApi.reviewAd(id, status, reason);
+        if (response.success && response.data) {
+          return response.data;
+        }
+        setError(response.message || 'Failed to review ad');
+        return null;
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : err && typeof err === 'object' && 'message' in err
+            ? (err as any).message
+            : 'Failed to review ad';
+        setError(errorMessage);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  return {
+    reviewAd: review,
+    loading,
+    error,
+  };
+};

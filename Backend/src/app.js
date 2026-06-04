@@ -131,6 +131,7 @@ app.use('/api/patient', require('./modules/patient/patient.routes'));
 app.use('/api/token', require('./modules/token/token.routes'));
 app.use('/api/razorpay', require('./modules/razorpay/razorpay.routes'));
 app.use('/api/ads', require('./modules/ads/ads.routes'));
+app.use('/api/notifications', require('./modules/notification/notification.routes'));
 app.use('/api/reports', require('./modules/reports/reports.routes'));
 app.use('/api/settings', require('./modules/settings/settings.routes'));
 app.use('/api/payment', require('./modules/payment/payment.routes'));

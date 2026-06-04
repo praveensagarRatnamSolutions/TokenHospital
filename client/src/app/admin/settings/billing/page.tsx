@@ -665,16 +665,32 @@ export default function BillingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {Array.isArray(packages) && packages.map((pkg) => {
-                const isSms = pkg.service === 'SMS';
+                const hasSms = (pkg.creditsMap?.SMS || 0) > 0;
+                const hasEmail = (pkg.creditsMap?.EMAIL || 0) > 0;
+                
+                // Styling classes
+                let cardColor = 'bg-sky-100 dark:bg-sky-950/30 text-sky-600';
+                let hoverBorderColor = 'hover:border-sky-500/50';
+                let buttonColor = 'bg-sky-600 hover:bg-sky-500 text-white shadow-md';
+                let CardIcon = Mail;
+
+                if (hasSms && hasEmail) {
+                  cardColor = 'bg-indigo-100 dark:bg-indigo-950/30 text-indigo-600';
+                  hoverBorderColor = 'hover:border-indigo-500/50';
+                  buttonColor = 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md';
+                  CardIcon = Zap;
+                } else if (hasSms) {
+                  cardColor = 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-600';
+                  hoverBorderColor = 'hover:border-emerald-500/50';
+                  buttonColor = 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md';
+                  CardIcon = MessageSquare;
+                }
+
                 return (
-                  <Card key={pkg._id} className={`flex flex-col relative overflow-hidden transition-all duration-300 border border-slate-200 dark:border-slate-800 hover:shadow-lg ${
-                    isSms ? 'hover:border-emerald-500/50' : 'hover:border-sky-500/50'
-                  }`}>
+                  <Card key={pkg._id} className={`flex flex-col relative overflow-hidden transition-all duration-300 border border-slate-200 dark:border-slate-800 hover:shadow-lg ${hoverBorderColor}`}>
                     <CardHeader>
-                      <div className={`p-2.5 w-fit rounded-xl mb-3 flex items-center justify-center ${
-                        isSms ? 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-600' : 'bg-sky-100 dark:bg-sky-950/30 text-sky-600'
-                      }`}>
-                        {isSms ? <MessageSquare className="w-6 h-6" /> : <Mail className="w-6 h-6" />}
+                      <div className={`p-2.5 w-fit rounded-xl mb-3 flex items-center justify-center ${cardColor}`}>
+                        <CardIcon className="w-6 h-6" />
                       </div>
                       <CardTitle className="text-lg">{pkg.name}</CardTitle>
                       <CardDescription>{pkg.description || `Add-on top-up bundle`}</CardDescription>
@@ -685,18 +701,27 @@ export default function BillingPage() {
                     </CardHeader>
                     
                     <CardContent className="flex-1">
-                      <div className="space-y-2.5 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Credit Units:</span>
-                          <span className="font-bold text-slate-900 dark:text-white">{pkg.credits.toLocaleString()} {pkg.service}</span>
+                      <div className="space-y-3.5 text-sm">
+                        <div className="flex flex-col gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Credits Included:</span>
+                          <div className="flex flex-col gap-1.5 mt-1">
+                            {hasSms && (
+                              <div className="flex items-center justify-between text-slate-900 dark:text-white">
+                                <span className="flex items-center gap-2 text-xs font-bold"><MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" /> SMS Credits</span>
+                                <span className="font-extrabold text-sm">{(pkg.creditsMap?.SMS || 0).toLocaleString()}</span>
+                              </div>
+                            )}
+                            {hasEmail && (
+                              <div className="flex items-center justify-between text-slate-900 dark:text-white">
+                                <span className="flex items-center gap-2 text-xs font-bold"><Mail className="w-4 h-4 text-sky-600 shrink-0" /> Email Credits</span>
+                                <span className="font-extrabold text-sm">{(pkg.creditsMap?.EMAIL || 0).toLocaleString()}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Rate breakdown:</span>
-                          <span className="font-medium text-xs text-slate-700 dark:text-slate-350">₹{(pkg.price / pkg.credits).toFixed(2)} / unit</span>
-                        </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center text-xs">
                           <span className="text-muted-foreground">Expiration:</span>
-                          <span className="text-green-600 font-semibold">Never</span>
+                          <span className="text-green-600 dark:text-green-400 font-semibold uppercase tracking-wider text-[10px]">Never Expires</span>
                         </div>
                       </div>
                     </CardContent>
@@ -705,16 +730,12 @@ export default function BillingPage() {
                       <Button
                         onClick={() => handleBuyPackage(pkg._id)}
                         disabled={purchasingPackage !== null}
-                        className={`w-full h-10 rounded-xl font-bold transition-all ${
-                          isSms 
-                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md' 
-                            : 'bg-sky-600 hover:bg-sky-500 text-white shadow-md'
-                        }`}
+                        className={`w-full h-10 rounded-xl font-bold transition-all ${buttonColor}`}
                       >
                         {purchasingPackage === pkg._id ? (
                           <Loader className="w-4 h-4 animate-spin" />
                         ) : (
-                          `Buy ${pkg.credits.toLocaleString()} Credits ⚡`
+                          `Buy Bundle ⚡`
                         )}
                       </Button>
                     </CardFooter>

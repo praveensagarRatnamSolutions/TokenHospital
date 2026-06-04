@@ -33,27 +33,35 @@ const getHospitalLimits = async (hospital) => {
   const now = new Date();
 
   // 1. Fetch Subscription from Database
-  const subscription = await HospitalSubscription.findOne({ hospitalId: hospital._id });
+  const subscription = await HospitalSubscription.findOne({
+    hospitalId: hospital._id,
+  });
 
+  console.log(
+    `Fetched subscription for hospital ${hospital.name}:`,
+    subscription
+  );
   // 2. Identify which plan ID to fetch
   let planToFetch = 'BASIC';
   let isTrialActive = false;
 
   if (subscription) {
     planToFetch = subscription.planId || 'BASIC';
-    if (subscription.status === 'TRIAL' && subscription.currentPeriodEnd > now) {
+    if (
+      subscription.status === 'TRIAL' &&
+      subscription.currentPeriodEnd > now
+    ) {
       isTrialActive = true;
     }
   }
-
-  // 3. If in trial and not expired, give PRO features
-  if (isTrialActive) {
-    planToFetch = 'PRO';
-  }
+  console.log(
+    `Determined plan to fetch for hospital ${hospital.name}: ${planToFetch}, Trial Active: ${isTrialActive}`
+  );
 
   // 4. Fetch Plan from Database
   try {
     const plan = await Plan.findOne({ planId: planToFetch, isActive: true });
+    console.log(`Fetched plan for hospital ${hospital.name}:`, plan);
     if (plan) {
       return {
         maxDepartments: plan.limits.maxDepartments,
@@ -76,8 +84,10 @@ const getHospitalLimits = async (hospital) => {
  */
 const isSubscriptionValid = async (hospital) => {
   const now = new Date();
-  
-  const subscription = await HospitalSubscription.findOne({ hospitalId: hospital._id });
+
+  const subscription = await HospitalSubscription.findOne({
+    hospitalId: hospital._id,
+  });
   if (!subscription) return false;
 
   const validStatuses = ['ACTIVE', 'GRACE_PERIOD'];
@@ -87,7 +97,8 @@ const isSubscriptionValid = async (hospital) => {
     }
   }
 
-  if (subscription.status === 'TRIAL' && subscription.currentPeriodEnd > now) return true;
+  if (subscription.status === 'TRIAL' && subscription.currentPeriodEnd > now)
+    return true;
 
   return false;
 };

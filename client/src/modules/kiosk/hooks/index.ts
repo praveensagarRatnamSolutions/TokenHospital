@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect,useState } from 'react';
+
 import { useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store/store';
+
 import * as kioskApi from '../api/kioskApi';
-import { Kiosk, CreateKioskPayload, UpdateKioskPayload } from '../types';
+import { CreateKioskPayload, Kiosk, UpdateKioskPayload } from '../types';
 
 export const useKiosks = (params: any = {}) => {
   const [kiosks, setKiosks] = useState<Kiosk[]>([]);
@@ -113,4 +115,29 @@ export const useDeleteKiosk = () => {
   };
 
   return { deleteKiosk: remove, loading, error };
+};
+
+export const useReviewKiosk = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const review = async (id: string, status: 'accepted' | 'rejected', reason?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await kioskApi.reviewKiosk(id, status, reason);
+      if (response.success) return response.data;
+      setError(response.message || 'Failed to review kiosk');
+      return null;
+    } catch (err: any) {
+      const serverMessage =
+        err?.response?.data?.message || err?.message || 'Failed to review kiosk';
+      setError(serverMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { reviewKiosk: review, loading, error };
 };

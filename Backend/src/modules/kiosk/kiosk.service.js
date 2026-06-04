@@ -156,7 +156,7 @@ const getKioskTokenStats = async (hospitalId, kioskId = null) => {
   const query = {
     hospitalId,
     appointmentDate: today,
-    status: { $in: ['WAITING', 'CALLED'] },
+    status: { $in: ['WAITING', 'CALLED', 'COMPLETED'] },
   };
 
   // 🏥 Apply Kiosk-specific filters if kioskId is provided
@@ -215,6 +215,7 @@ const getKioskTokenStats = async (hospitalId, kioskId = null) => {
             active: null,
             waiting: [],
             emergency: null,
+            completed: null,
           };
         }
       }
@@ -233,14 +234,20 @@ const getKioskTokenStats = async (hospitalId, kioskId = null) => {
         active: null, // The person currently in the room (CALLED)
         waiting: [], // People in the queue (WAITING)
         emergency: null, // Latest emergency
+        completed: null,
       };
     }
 
     // Identify if this is the active patient or queue
     if (token.status === 'CALLED') {
       grouped[key].active = token;
-    } else {
+    } else if (token.status === 'WAITING') {
       grouped[key].waiting.push(token);
+    } else if (token.status === 'COMPLETED') {
+      // Find the most recently completed token
+      if (!grouped[key].completed || new Date(token.completedAt || token.updatedAt) > new Date(grouped[key].completed.completedAt || grouped[key].completed.updatedAt)) {
+        grouped[key].completed = token;
+      }
     }
 
     // Separate flag for UI badge
@@ -271,9 +278,33 @@ const getKioskTokenStats = async (hospitalId, kioskId = null) => {
         emergency: item.emergency?.tokenNumber || null,
         current: activeToken || 'Ready',
         next: nextToken,
+        currentInfo: item.active ? {
+          tokenNumber: item.active.tokenNumber,
+          isEmergency: item.active.isEmergency,
+          isPostponed: item.active.isPostponed,
+          status: item.active.status,
+        } : null,
+        nextInfo: item.waiting[0] ? {
+          tokenNumber: item.waiting[0].tokenNumber,
+          isEmergency: item.waiting[0].isEmergency,
+          isPostponed: item.waiting[0].isPostponed,
+          status: item.waiting[0].status,
+        } : null,
+        completedInfo: item.completed ? {
+          tokenNumber: item.completed.tokenNumber,
+          isEmergency: item.completed.isEmergency,
+          isPostponed: item.completed.isPostponed,
+          status: item.completed.status,
+        } : null,
       },
       // The queue starts from the 2nd person in the waiting list (since the 1st is in 'next')
       queue: item.waiting.slice(1, 6).map((t) => t.tokenNumber),
+      queueInfo: item.waiting.slice(1, 6).map((t) => ({
+        tokenNumber: t.tokenNumber,
+        isEmergency: t.isEmergency,
+        isPostponed: t.isPostponed,
+        status: t.status,
+      })),
       meta: {
         totalWaiting: item.waiting.length,
         estimatedWaitTime: `${item.waiting.length * 10} mins`,

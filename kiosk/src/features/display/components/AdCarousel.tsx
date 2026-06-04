@@ -106,10 +106,15 @@ const AdCarousel: React.FC<AdCarouselProps> = ({
 
         {/* 🟣 Tokens ONLY if not fullscreen */}
         {!isFullscreen && (
-          <div className="h-[20%] w-full bg-slate-900 border-t border-slate-800 px-6 py-3">
+          <div className={`h-[20%] w-full border-t px-6 py-3 transition-colors duration-500 ${
+            theme === "dark" 
+              ? "bg-slate-900 border-slate-800 text-white" 
+              : "bg-white border-slate-200 text-slate-900 shadow-lg"
+          }`}>
             <DoctorTokenPanel
               doctorId={user?.doctorId}
               departments={departments}
+              theme={theme}
             />
           </div>
         )}
@@ -401,6 +406,13 @@ const DoctorRow: React.FC<{
   const isCurrent = doctor?.display?.current !== "---";
   const isEvenRow = idx % 2 === 0;
 
+  const currentInfo = doctor?.display?.currentInfo;
+  const nextInfo = doctor?.display?.nextInfo;
+  const queueInfo = doctor?.queueInfo || [];
+
+  const isEmergencyCurrent = currentInfo?.isEmergency || hasEmergency;
+  const isPostponedCurrent = currentInfo?.isPostponed || false;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -30 }}
@@ -479,9 +491,17 @@ const DoctorRow: React.FC<{
           transition={{ type: "spring", stiffness: 400, damping: 20 }}
           className={`w-40 inline-flex items-center justify-center px-5 py-2 rounded-xl font-black text-2xl tracking-tighter border transition-colors duration-500 ${
             isCurrent
-              ? isDark
-                ? "bg-teal-500/20 border-teal-500/40 text-teal-300"
-                : "bg-emerald-50 border-emerald-200 text-emerald-600 shadow-sm"
+              ? isEmergencyCurrent
+                ? isDark
+                  ? "bg-red-500/20 border-red-500/40 text-red-400 animate-pulse"
+                  : "bg-red-50 border-red-200 text-red-600 shadow-sm animate-pulse"
+                : isPostponedCurrent
+                  ? isDark
+                    ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                    : "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm"
+                  : isDark
+                    ? "bg-teal-500/20 border-teal-500/40 text-teal-300"
+                    : "bg-emerald-50 border-emerald-200 text-emerald-600 shadow-sm"
               : isDark
                 ? "bg-white/5 border-white/5 text-slate-600"
                 : "bg-slate-100 border-slate-200 text-slate-300"
@@ -501,7 +521,15 @@ const DoctorRow: React.FC<{
             className={isDark ? "text-slate-600" : "text-blue-400"}
           />
           <span
-            className={`text-xl font-black tracking-tighter ${isDark ? "text-slate-400" : "text-slate-700"}`}
+            className={`text-xl font-black tracking-tighter ${
+              nextInfo?.isEmergency
+                ? "text-red-400 animate-pulse"
+                : nextInfo?.isPostponed
+                  ? "text-indigo-400"
+                  : isDark
+                    ? "text-slate-400"
+                    : "text-slate-700"
+            }`}
           >
             {doctor?.display?.next || "---"}
           </span>
@@ -512,18 +540,32 @@ const DoctorRow: React.FC<{
       <div
         className={`px-8 flex flex-wrap gap-1.5 border-r transition-colors duration-500 ${isDark ? "border-white/5" : "border-slate-100"}`}
       >
-        {(doctor?.queue || []).slice(0, 3).map((tok: string, i: number) => (
-          <span
-            key={i}
-            className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border transition-colors duration-500 ${
-              isDark
-                ? "bg-white/5 text-slate-500 border-white/5"
-                : "bg-slate-50 text-slate-500 border-slate-200"
-            }`}
-          >
-            {tok}
-          </span>
-        ))}
+        {(doctor?.queue || []).slice(0, 3).map((tok: string, i: number) => {
+          const info = queueInfo[i];
+          const isEmerg = info?.isEmergency;
+          const isPostp = info?.isPostponed;
+
+          return (
+            <span
+              key={i}
+              className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border transition-colors duration-500 ${
+                isEmerg
+                  ? isDark
+                    ? "bg-red-500/10 text-red-400 border-red-500/20 animate-pulse"
+                    : "bg-red-50 text-red-600 border-red-200"
+                  : isPostp
+                    ? isDark
+                      ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+                      : "bg-indigo-50 text-indigo-600 border-indigo-200"
+                    : isDark
+                      ? "bg-white/5 text-slate-500 border-white/5"
+                      : "bg-slate-50 text-slate-500 border-slate-200"
+              }`}
+            >
+              {tok}
+            </span>
+          );
+        })}
         {(doctor?.queue?.length || 0) > 3 && (
           <span
             className={`text-[10px] font-bold self-center ${isDark ? "text-slate-600" : "text-slate-400"}`}

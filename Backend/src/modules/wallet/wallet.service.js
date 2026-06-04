@@ -11,7 +11,8 @@ class WalletService {
   static async creditWallet(hospitalId, service, amount, description, referenceType, referenceId, session = null) {
     if (amount <= 0) return;
 
-    const updateField = service === 'SMS' ? 'wallet.smsCredits' : 'wallet.emailCredits';
+    const serviceKey = `${service.toLowerCase()}Credits`;
+    const updateField = `wallet.${serviceKey}`;
     
     const hospital = await Hospital.findByIdAndUpdate(
       hospitalId,
@@ -23,7 +24,7 @@ class WalletService {
       throw new Error('Hospital not found for wallet credit');
     }
 
-    const balanceAfter = service === 'SMS' ? hospital.wallet.smsCredits : hospital.wallet.emailCredits;
+    const balanceAfter = hospital.wallet ? hospital.wallet[serviceKey] : 0;
 
     await WalletLedger.create([{
       hospitalId,
@@ -45,7 +46,8 @@ class WalletService {
   static async deductWallet(hospitalId, service, amount = 1, description = 'Service Usage', referenceType = 'TOKEN_ALERT', referenceId = null, session = null) {
     if (amount <= 0) return;
 
-    const updateField = service === 'SMS' ? 'wallet.smsCredits' : 'wallet.emailCredits';
+    const serviceKey = `${service.toLowerCase()}Credits`;
+    const updateField = `wallet.${serviceKey}`;
     
     // Atomic findAndModify ensuring we don't drop below 0
     const hospital = await Hospital.findOneAndUpdate(
@@ -61,7 +63,7 @@ class WalletService {
       throw new Error(`Insufficient ${service} credits or Hospital not found`);
     }
 
-    const balanceAfter = service === 'SMS' ? hospital.wallet.smsCredits : hospital.wallet.emailCredits;
+    const balanceAfter = hospital.wallet ? hospital.wallet[serviceKey] : 0;
 
     await WalletLedger.create([{
       hospitalId,

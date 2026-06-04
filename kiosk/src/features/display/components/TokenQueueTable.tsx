@@ -110,6 +110,12 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
 }) => {
   const hasEmergency = !!doctor.display.emergency;
   const isCurrent = doctor.display.current !== "---";
+  const currentInfo = doctor.display.currentInfo;
+  const nextInfo = doctor.display.nextInfo;
+  const queueInfo = doctor.queueInfo || [];
+
+  const isEmergencyCurrent = currentInfo?.isEmergency || hasEmergency;
+  const isPostponedCurrent = currentInfo?.isPostponed || false;
 
   return (
     <motion.div
@@ -161,32 +167,54 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
       <div className="flex items-stretch gap-2">
         {/* Current Token */}
         <div
-          className={`flex-1 rounded-xl p-3 flex flex-col items-center justify-center gap-1 ${isCurrent
-              ? isDark
-                ? "bg-teal-500/15 border border-teal-500/25"
-                : "bg-teal-50 border border-teal-200"
+          className={`flex-1 rounded-xl p-3 flex flex-col items-center justify-center gap-1 ${
+            isCurrent
+              ? isEmergencyCurrent
+                ? "bg-red-500/15 border border-red-500/25 text-red-500"
+                : isPostponedCurrent
+                  ? "bg-indigo-500/15 border border-indigo-500/25 text-indigo-500"
+                  : isDark
+                    ? "bg-teal-500/15 border border-teal-500/25"
+                    : "bg-teal-50 border border-teal-200"
               : isDark
                 ? "bg-white/5 border border-white/5"
                 : "bg-slate-50 border border-slate-100"
-            }`}
+          }`}
         >
           <span
-            className={`text-[9px] font-black uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}
+            className={`text-[9px] font-black uppercase tracking-widest ${
+              isEmergencyCurrent
+                ? "text-red-400"
+                : isPostponedCurrent
+                  ? "text-indigo-400"
+                  : isDark
+                    ? "text-slate-500"
+                    : "text-slate-400"
+            }`}
           >
-            Current
+            {isEmergencyCurrent
+              ? "Emergency"
+              : isPostponedCurrent
+                ? "Postponed"
+                : "Current"}
           </span>
           <motion.span
             key={doctor.display.current}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`text-2xl font-black tracking-tighter ${isCurrent
-                ? isDark
-                  ? "text-teal-400"
-                  : "text-teal-600"
+            className={`text-2xl font-black tracking-tighter ${
+              isCurrent
+                ? isEmergencyCurrent
+                  ? "text-red-500"
+                  : isPostponedCurrent
+                    ? "text-indigo-400"
+                    : isDark
+                      ? "text-teal-400"
+                      : "text-teal-600"
                 : isDark
                   ? "text-slate-600"
                   : "text-slate-300"
-              }`}
+            }`}
           >
             {doctor.display.current}
           </motion.span>
@@ -199,21 +227,50 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
 
         {/* Next Token */}
         <div
-          className={`flex-1 rounded-xl p-3 flex flex-col items-center justify-center gap-1 ${isDark
-              ? "bg-white/5 border border-white/5"
-              : "bg-slate-50 border border-slate-100"
-            }`}
+          className={`flex-1 rounded-xl p-3 flex flex-col items-center justify-center gap-1 ${
+            isDark
+              ? nextInfo?.isEmergency
+                ? "bg-red-500/15 border border-red-500/25"
+                : nextInfo?.isPostponed
+                  ? "bg-indigo-500/15 border border-indigo-500/25"
+                  : "bg-white/5 border border-white/5"
+              : nextInfo?.isEmergency
+                ? "bg-red-50 border border-red-200"
+                : nextInfo?.isPostponed
+                  ? "bg-indigo-50 border border-indigo-200"
+                  : "bg-slate-50 border border-slate-100"
+          }`}
         >
           <span
-            className={`text-[9px] font-black uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}
+            className={`text-[9px] font-black uppercase tracking-widest ${
+              nextInfo?.isEmergency
+                ? "text-red-400"
+                : nextInfo?.isPostponed
+                  ? "text-indigo-400"
+                  : isDark
+                    ? "text-slate-500"
+                    : "text-slate-400"
+            }`}
           >
-            Next
+            {nextInfo?.isEmergency
+              ? "Emergency"
+              : nextInfo?.isPostponed
+                ? "Postponed"
+                : "Next"}
           </span>
           <motion.span
             key={doctor.display.next}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`text-xl font-black tracking-tighter opacity-60 ${isDark ? "text-sky-400" : "text-sky-600"}`}
+            className={`text-xl font-black tracking-tighter opacity-60 ${
+              nextInfo?.isEmergency
+                ? "text-red-400"
+                : nextInfo?.isPostponed
+                  ? "text-indigo-400"
+                  : isDark
+                    ? "text-sky-400"
+                    : "text-sky-600"
+            }`}
           >
             {doctor.display.next}
           </motion.span>
@@ -223,17 +280,32 @@ const DoctorQueueCard: React.FC<DoctorQueueCardProps> = ({
       {/* Upcoming Queue Pills */}
       {doctor.queue.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {doctor.queue.slice(0, 6).map((tok, i) => (
-            <span
-              key={i}
-              className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${isDark
-                  ? "bg-white/5 text-slate-400"
-                  : "bg-slate-100 text-slate-500"
+          {doctor.queue.slice(0, 6).map((tok, i) => {
+            const info = queueInfo[i];
+            const isEmerg = info?.isEmergency;
+            const isPostp = info?.isPostponed;
+
+            return (
+              <span
+                key={i}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-colors duration-500 ${
+                  isEmerg
+                    ? isDark
+                      ? "bg-red-500/10 text-red-400 border-red-500/20"
+                      : "bg-red-50 text-red-600 border-red-200"
+                    : isPostp
+                      ? isDark
+                        ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+                        : "bg-indigo-50 text-indigo-600 border-indigo-200"
+                      : isDark
+                        ? "bg-white/5 text-slate-400 border-white/5"
+                        : "bg-slate-100 text-slate-500 border-slate-200"
                 }`}
-            >
-              {tok}
-            </span>
-          ))}
+              >
+                {tok}
+              </span>
+            );
+          })}
           {doctor.queue.length > 6 && (
             <span
               className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${isDark ? "text-slate-600" : "text-slate-400"}`}

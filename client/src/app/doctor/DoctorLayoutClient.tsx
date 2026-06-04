@@ -1,8 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { LogOut, User, Bell, Search, Settings } from 'lucide-react';
+import { LogOut, Search,User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect } from 'react';
+
+import { NotificationDropdown } from '@/components/common/NotificationDropdown';
+import { DoctorSidebar } from '@/components/doctor/DoctorSidebar';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import {
@@ -14,12 +18,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { RootState } from '@/store/store';
-import { logout } from '@/store/slices/authSlice';
-import { useRouter } from 'next/navigation';
-import { DoctorSidebar } from '@/components/doctor/DoctorSidebar';
 import { authApi } from '@/services/authApi';
+import { useAppDispatch,useAppSelector } from '@/store/hooks';
+import { logout } from '@/store/slices/authSlice';
+import { RootState } from '@/store/store';
 
 export default function DoctorLayoutClient({ children }: { children: React.ReactNode }) {
   const { user } = useAppSelector((state: RootState) => state.auth);
@@ -63,10 +65,7 @@ export default function DoctorLayoutClient({ children }: { children: React.React
 
             <div className="flex items-center gap-3">
               {/* Notification Bell */}
-              <button className="p-2.5 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-primary transition-all relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900" />
-              </button>
+              <NotificationDropdown />
 
               <div className="w-[1px] h-6 bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block"></div>
 

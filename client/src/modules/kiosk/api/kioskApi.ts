@@ -39,3 +39,12 @@ export const deleteKiosk = async (id: string): Promise<{ success: boolean; messa
   const response = await api.delete(`${ENDPOINT}/${id}`);
   return response.data;
 };
+
+export const reviewKiosk = async (
+  id: string,
+  status: 'accepted' | 'rejected',
+  reason?: string,
+): Promise<KioskResponse> => {
+  const response = await api.patch<KioskResponse>(`${ENDPOINT}/${id}/review`, { status, reason });
+  return response.data;
+};

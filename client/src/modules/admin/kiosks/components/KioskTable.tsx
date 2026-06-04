@@ -1,15 +1,18 @@
 'use client';
 
+import { Check, Edit2, ExternalLink, MapPin, Monitor, Power, Trash2, User, Users, X } from 'lucide-react';
 import React from 'react';
-import { Edit2, Trash2, Monitor, MapPin, Power, ExternalLink, User, Users } from 'lucide-react';
-import { Kiosk } from '../../../kiosk/types';
+
 import { useAppSelector } from '@/store/hooks';
+
+import { Kiosk } from '../../../kiosk/types';
 
 interface KioskTableProps {
   kiosks: Kiosk[];
   onEdit: (kiosk: Kiosk) => void;
   onDelete: (kiosk: Kiosk) => void;
   onToggleActive: (kiosk: Kiosk) => void;
+  onReview?: (kiosk: Kiosk, status: 'accepted' | 'rejected', reason?: string) => void;
 }
 
 export const KioskTable: React.FC<KioskTableProps> = ({
@@ -17,6 +20,7 @@ export const KioskTable: React.FC<KioskTableProps> = ({
   onEdit,
   onDelete,
   onToggleActive,
+  onReview,
 }) => {
   const user = useAppSelector((state) => state.auth.user);
 
@@ -103,23 +107,63 @@ export const KioskTable: React.FC<KioskTableProps> = ({
 
                 {/* Status */}
                 <td className="px-8 py-5">
-                  <button
-                    onClick={() => onToggleActive(kiosk)}
-                    disabled={!canEditOrDelete}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
-                      kiosk.isActive
-                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/50'
-                        : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100 dark:bg-slate-800/50 dark:text-slate-500 dark:border-slate-800'
-                    } ${!canEditOrDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <Power className="w-3 h-3" />
-                    {kiosk.isActive ? 'Active' : 'Offline'}
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => onToggleActive(kiosk)}
+                      disabled={!canEditOrDelete || kiosk.approvalStatus !== 'accepted'}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border w-fit ${
+                        kiosk.isActive
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/50'
+                          : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100 dark:bg-slate-800/50 dark:text-slate-500 dark:border-slate-800'
+                      } ${(!canEditOrDelete || kiosk.approvalStatus !== 'accepted') ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      title={
+                        kiosk.approvalStatus !== 'accepted'
+                          ? 'Cannot toggle active state on unapproved kiosks'
+                          : kiosk.isActive ? 'Deactivate' : 'Activate'
+                      }
+                    >
+                      <Power className="w-3 h-3" />
+                      {kiosk.isActive ? 'Active' : 'Offline'}
+                    </button>
+                    
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border w-fit
+                      ${kiosk.approvalStatus === 'accepted' 
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/50'
+                        : kiosk.approvalStatus === 'rejected'
+                        ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/50'
+                        : 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/50'
+                      }`}>
+                      {kiosk.approvalStatus || 'pending'}
+                    </span>
+                    {kiosk.approvalStatus === 'rejected' && kiosk.rejectionReason && (
+                      <span className="text-[10px] font-medium text-red-500 dark:text-red-400 max-w-[200px] break-words whitespace-normal leading-relaxed" title={kiosk.rejectionReason}>
+                        Reason: {kiosk.rejectionReason}
+                      </span>
+                    )}
+                  </div>
                 </td>
 
                 {/* Actions */}
                 <td className="px-8 py-5">
                   <div className="flex items-center justify-end gap-1">
+                    {user?.role === 'ADMIN' && kiosk.approvalStatus === 'pending' && onReview && (
+                      <>
+                        <button
+                          onClick={() => onReview(kiosk, 'accepted')}
+                          className="p-2.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl transition-all"
+                          title="Approve Kiosk"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => onReview(kiosk, 'rejected')}
+                          className="p-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
+                          title="Reject Kiosk"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
                     {canEditOrDelete && (
                       <button
                         onClick={() => onEdit(kiosk)}

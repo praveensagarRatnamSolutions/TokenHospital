@@ -191,4 +191,11 @@ router.delete(
   kioskController.deleteKiosk
 );
 
+router.patch(
+  '/:id/review',
+  protect,
+  authorize('ADMIN'),
+  kioskController.reviewKiosk
+);
+
 module.exports = router;

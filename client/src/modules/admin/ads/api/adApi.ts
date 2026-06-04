@@ -160,3 +160,19 @@ export const deleteAd = async (id: string): Promise<void> => {
     };
   }
 };
+
+export const reviewAd = async (
+  id: string,
+  status: 'accepted' | 'rejected',
+  reason?: string,
+): Promise<AdResponse> => {
+  try {
+    const response = await api.patch<AdResponse>(`${ENDPOINT}/${id}/review`, { status, reason });
+    return response.data;
+  } catch (error: any) {
+    throw {
+      success: false,
+      message: error.response?.data?.message || 'Failed to review ad',
+    };
+  }
+};

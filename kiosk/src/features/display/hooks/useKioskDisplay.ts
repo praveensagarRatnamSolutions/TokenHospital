@@ -33,6 +33,43 @@ const getApiErrorMessage = (err: any) => {
   );
 };
 
+// Module-level voice queue to prevent garbage collection and play announcements sequentially
+const speechQueue: string[] = [];
+let isCurrentlySpeaking = false;
+let activeUtterance: SpeechSynthesisUtterance | null = null;
+
+const speakNextInQueue = () => {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  if (speechQueue.length === 0 || isCurrentlySpeaking) return;
+  isCurrentlySpeaking = true;
+
+  const text = speechQueue.shift()!;
+  
+  // Clean up any ongoing synthesis block safely
+  window.speechSynthesis.cancel();
+  
+  activeUtterance = new SpeechSynthesisUtterance(text);
+  activeUtterance.lang = "en-IN";
+  activeUtterance.rate = 0.85;
+  activeUtterance.pitch = 1;
+  activeUtterance.volume = 1;
+
+  activeUtterance.onend = () => {
+    isCurrentlySpeaking = false;
+    activeUtterance = null;
+    // Play next announcement after a brief 500ms gap
+    setTimeout(speakNextInQueue, 500);
+  };
+
+  activeUtterance.onerror = () => {
+    isCurrentlySpeaking = false;
+    activeUtterance = null;
+    speakNextInQueue();
+  };
+
+  window.speechSynthesis.speak(activeUtterance);
+};
+
 export const useKioskDisplay = (code: string) => {
   const navigate = useNavigate();
   // Idle timeout configuration (3 minutes = 180000 milliseconds)
@@ -103,13 +140,8 @@ export const useKioskDisplay = (code: string) => {
       .filter(Boolean)
       .join(", ");
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = "en-IN";
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    window.speechSynthesis.speak(utterance);
+    speechQueue.push(message);
+    speakNextInQueue();
   };
 
   // Idle timeout handler - resets to LANDING after inactivity

@@ -1,15 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, AlertCircle, Loader, LayoutGrid, LayoutList, Filter, CheckCircle2, Clock, Layers, X, Monitor } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, Filter, Layers, LayoutGrid, LayoutList, Loader, Monitor,Plus, X } from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
 import { Pagination } from '@/components/common/Pagination';
+import { ReviewModal } from '@/components/common/ReviewModal';
+import { useAppSelector } from '@/store/hooks';
+import { RootState } from '@/store/store';
 
-
-import { AdTable } from './AdTable';
+import { useAds, useCreateAd, useDeleteAd, useReviewAd,useUpdateAd } from '../hooks';
+import type { Ad } from '../types';
 import { AdCard } from './AdCard';
 import { AdModal } from './AdModal';
-import type { Ad } from '../types';
-import { useAds, useCreateAd, useUpdateAd, useDeleteAd } from '../hooks';
+import { AdTable } from './AdTable';
 
 interface AdListProps {
   isDarkMode?: boolean;
@@ -34,7 +37,10 @@ export const AdList: React.FC<AdListProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Ad | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [previewAd, setPreviewAd] = useState<Ad | null>(null);
+  const [reviewingAd, setReviewingAd] = useState<Ad | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
+  const { user } = useAppSelector((state: RootState) => state.auth);
 
   // Hooks
   const [page, setPage] = useState(1);
@@ -48,9 +54,10 @@ export const AdList: React.FC<AdListProps> = ({
   const { createAd, loading: createLoading, error: createError } = useCreateAd();
   const { updateAd, loading: updateLoading, error: updateError } = useUpdateAd();
   const { deleteAd, loading: deleteLoading, error: deleteError } = useDeleteAd();
+  const { reviewAd, loading: reviewLoading, error: reviewError } = useReviewAd();
 
-  const isLoading = createLoading || updateLoading || deleteLoading;
-  const error = createError || updateError || deleteError || adsError;
+  const isLoading = createLoading || updateLoading || deleteLoading || reviewLoading;
+  const error = createError || updateError || deleteError || adsError || reviewError;
 
   // Auto-clear messages
   useEffect(() => {
@@ -89,6 +96,30 @@ export const AdList: React.FC<AdListProps> = ({
     const success = await updateAd(ad._id, { isActive: !ad.isActive });
     if (success) {
       setSuccessMessage(`Ad ${!ad.isActive ? 'activated' : 'deactivated'} successfully`);
+      refetch();
+    }
+  };
+
+  const handleReview = async (ad: Ad, status: 'accepted' | 'rejected') => {
+    if (status === 'rejected') {
+      setReviewingAd(ad);
+      setIsReviewModalOpen(true);
+    } else {
+      const success = await reviewAd(ad._id, 'accepted');
+      if (success) {
+        setSuccessMessage('Ad approved successfully');
+        refetch();
+      }
+    }
+  };
+
+  const handleReviewSubmit = async (reason: string) => {
+    if (!reviewingAd) return;
+    const success = await reviewAd(reviewingAd._id, 'rejected', reason);
+    if (success) {
+      setSuccessMessage('Ad rejected successfully');
+      setIsReviewModalOpen(false);
+      setReviewingAd(null);
       refetch();
     }
   };
@@ -213,6 +244,8 @@ export const AdList: React.FC<AdListProps> = ({
                 onToggleActive={handleToggleActive} 
                 onPreview={setPreviewAd}
                 isDarkMode={isDarkMode} 
+                userRole={user?.role}
+                onReview={handleReview}
               />
 
           ) : (
@@ -226,6 +259,8 @@ export const AdList: React.FC<AdListProps> = ({
                   onToggleActive={handleToggleActive}
                   onPreview={setPreviewAd}
                   isDarkMode={isDarkMode} 
+                  userRole={user?.role}
+                  onReview={handleReview}
                 />
 
               ))}
@@ -276,6 +311,21 @@ export const AdList: React.FC<AdListProps> = ({
         uploadProgress={uploadProgress}
         isDarkMode={isDarkMode}
       />
+
+      {/* Review Rejection Reason Modal */}
+      {reviewingAd && (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => {
+            setIsReviewModalOpen(false);
+            setReviewingAd(null);
+          }}
+          onSubmit={handleReviewSubmit}
+          title="Reject Advertisement"
+          itemName={reviewingAd.title}
+          isLoading={isLoading}
+        />
+      )}
 
       {/* Media Preview Lightbox */}
       {previewAd && (

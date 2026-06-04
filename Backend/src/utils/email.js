@@ -211,9 +211,90 @@ const sendPriceChangeNoticeEmail = async ({
   return sendEmail({ to, subject, text, html });
 };
 
+const sendApprovalRequestEmail = async ({
+  to,
+  adminName,
+  doctorName,
+  itemName,
+  itemType,
+}) => {
+  try {
+    const subject = `Approval Required: New ${itemType} Created`;
+    const text = [
+      `Dear ${adminName || 'Administrator'},`,
+      '',
+      `A new ${itemType} titled "${itemName}" has been created/updated by Doctor ${doctorName} and is pending your approval.`,
+      '',
+      `Please log in to the administrator dashboard to approve or reject this request.`,
+      '',
+      `Thank you,`,
+      `Hospital Token Platform`,
+    ].join('\n');
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;padding:20px;color:#0f172a;">
+        <h2 style="color:#2563eb;">Approval Required</h2>
+        <p>Dear ${adminName || 'Administrator'},</p>
+        <p>A new <strong>${itemType}</strong> titled "<strong>${itemName}</strong>" has been created/updated by <strong>Doctor ${doctorName}</strong> and requires your review.</p>
+        <p>Please log in to the administrator dashboard to approve or reject this request.</p>
+        <br/>
+        <p style="font-size:12px;color:#64748b;">This is an automated notification from the Hospital Token Platform.</p>
+      </div>
+    `;
+
+    await sendEmail({ to, subject, text, html });
+    return true;
+  } catch (error) {
+    logger.error('Failed to send approval request email:', error);
+  }
+};
+
+const sendApprovalResultEmail = async ({
+  to,
+  doctorName,
+  itemName,
+  itemType,
+  status,
+  reason,
+}) => {
+  try {
+    const isApproved = status === 'accepted';
+    const subject = `${itemType} Approval Decision: ${isApproved ? 'Approved' : 'Rejected'}`;
+    const text = [
+      `Dear Doctor ${doctorName},`,
+      '',
+      `Your request to deploy the ${itemType} "${itemName}" has been ${status}.`,
+      !isApproved && reason ? `Reason for rejection: ${reason}` : null,
+      '',
+      `Thank you,`,
+      `Hospital Token Platform`,
+    ].filter(Boolean).join('\n');
+
+    const statusColor = isApproved ? '#16a34a' : '#dc2626';
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;padding:20px;color:#0f172a;">
+        <h2 style="color:${statusColor};">${itemType} ${isApproved ? 'Approved' : 'Rejected'}</h2>
+        <p>Dear Doctor ${doctorName},</p>
+        <p>Your request to deploy the <strong>${itemType}</strong> "<strong>${itemName}</strong>" has been <strong style="color:${statusColor}; text-transform:uppercase;">${status}</strong>.</p>
+        ${!isApproved && reason ? `<div style="padding:15px;background:#fef2f2;border:1px solid #fee2e2;border-radius:8px;color:#991b1b;margin-top:15px;"><strong>Reason for Rejection:</strong> ${reason}</div>` : ''}
+        <br/>
+        <p style="font-size:12px;color:#64748b;">This is an automated notification from the Hospital Token Platform.</p>
+      </div>
+    `;
+
+    await sendEmail({ to, subject, text, html });
+    return true;
+  } catch (error) {
+    logger.error('Failed to send approval result email:', error);
+  }
+};
+
 module.exports = {
   sendEmail,
   buildDoctorWelcomeEmail,
   sendOnboardingEmail,
   sendPriceChangeNoticeEmail,
+  sendApprovalRequestEmail,
+  sendApprovalResultEmail,
 };

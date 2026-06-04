@@ -15,6 +15,8 @@ export interface Ad {
   departmentId: string | null;
   duration: number;
   isActive: boolean;
+  approvalStatus: 'pending' | 'accepted' | 'rejected';
+  rejectionReason?: string;
   createdAt: string;
   updatedAt: string;
   __v: number;

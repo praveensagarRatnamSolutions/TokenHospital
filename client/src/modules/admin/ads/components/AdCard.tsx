@@ -1,16 +1,18 @@
 'use client';
 
-import React from 'react';
 import {
+  Check,
+  Clock,
   Edit,
-  Trash2,
   Eye,
   EyeOff,
-  Clock,
   Image as ImageIcon,
-  Video,
   Play,
+  Trash2,
+  Video,
+  X,
 } from 'lucide-react';
+import React from 'react';
 
 import type { Ad } from '../types';
 
@@ -21,6 +23,8 @@ interface AdCardProps {
   onToggleActive?: (ad: Ad) => void;
   onPreview?: (ad: Ad) => void;
   isDarkMode?: boolean;
+  userRole?: string;
+  onReview?: (ad: Ad, status: 'accepted' | 'rejected', reason?: string) => void;
 }
 
 export const AdCard: React.FC<AdCardProps> = ({
@@ -30,6 +34,8 @@ export const AdCard: React.FC<AdCardProps> = ({
   onToggleActive,
   onPreview,
   isDarkMode = false,
+  userRole,
+  onReview,
 }) => {
 
   const cardBg = isDarkMode ? 'bg-slate-900' : 'bg-white';
@@ -115,6 +121,24 @@ export const AdCard: React.FC<AdCardProps> = ({
         <div>
           <h3 className={`text-md font-bold ${textColor} line-clamp-1`}>{ad.title}</h3>
           <p className={`text-xs ${mutedText} mt-1`}>Added on {new Date(ad.createdAt).toLocaleDateString()}</p>
+          
+          {/* Approval Badge */}
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider
+              ${ad.approvalStatus === 'accepted' 
+                ? (isDarkMode ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/50' : 'bg-emerald-50 text-emerald-700 border border-emerald-100')
+                : ad.approvalStatus === 'rejected'
+                ? (isDarkMode ? 'bg-red-950/30 text-red-400 border border-red-900/50' : 'bg-red-50 text-red-700 border border-red-100')
+                : (isDarkMode ? 'bg-amber-950/30 text-amber-400 border border-amber-900/50' : 'bg-amber-50 text-amber-700 border border-amber-100')
+              }`}>
+              {ad.approvalStatus || 'pending'}
+            </span>
+            {ad.approvalStatus === 'rejected' && ad.rejectionReason && (
+              <span className="text-[9px] font-semibold text-red-500 max-w-[180px] break-words whitespace-normal leading-relaxed" title={ad.rejectionReason}>
+                Reason: {ad.rejectionReason}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-between">
@@ -124,15 +148,38 @@ export const AdCard: React.FC<AdCardProps> = ({
           </div>
         </div>
 
+        {/* Admin Review Action Banner */}
+        {userRole === 'ADMIN' && ad.approvalStatus === 'pending' && onReview && (
+          <div className="flex gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/80">
+            <button
+              onClick={() => onReview(ad, 'accepted')}
+              className="flex-1 py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Check size={12} /> Approve
+            </button>
+            <button
+              onClick={() => onReview(ad, 'rejected')}
+              className="flex-1 py-1.5 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <X size={12} /> Reject
+            </button>
+          </div>
+        )}
+
         {/* Action Grid */}
         <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
           {onToggleActive && (
             <button
               onClick={() => onToggleActive(ad)}
+              disabled={ad.approvalStatus !== 'accepted'}
               className={`flex flex-col items-center justify-center gap-1 py-2 rounded-lg transition-colors ${
                 isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-600'
-              }`}
-              title={ad.isActive ? 'Deactivate' : 'Activate'}
+              } ${ad.approvalStatus !== 'accepted' ? 'opacity-40 cursor-not-allowed' : ''}`}
+              title={
+                ad.approvalStatus !== 'accepted'
+                  ? 'Cannot toggle active state on unapproved ads'
+                  : ad.isActive ? 'Deactivate' : 'Activate'
+              }
             >
               {ad.isActive ? <Eye size={16} /> : <EyeOff size={16} />}
               <span className="text-[10px] font-bold uppercase">{ad.isActive ? 'Hide' : 'Show'}</span>

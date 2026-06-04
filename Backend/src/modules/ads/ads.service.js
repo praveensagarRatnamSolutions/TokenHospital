@@ -70,6 +70,7 @@ const getActiveAds = async (hospitalId, departmentId) => {
   const query = {
     hospitalId,
     isActive: true,
+    approvalStatus: 'accepted',
   };
 
   if (departmentId) {

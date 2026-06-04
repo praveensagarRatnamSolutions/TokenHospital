@@ -160,4 +160,11 @@ router.put(
  */
 router.delete('/:id', protect, authorize('ADMIN', 'DOCTOR'), adsController.deleteAd);
 
+router.patch(
+  '/:id/review',
+  protect,
+  authorize('ADMIN'),
+  adsController.reviewAd
+);
+
 module.exports = router;

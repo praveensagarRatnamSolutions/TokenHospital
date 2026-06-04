@@ -75,6 +75,16 @@ const kioskSchema = new mongoose.Schema(
       default: true,
       index: true,
     },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "accepted", "rejected"],
+      default: "pending",
+      index: true,
+    },
+    rejectionReason: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

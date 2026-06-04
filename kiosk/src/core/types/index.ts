@@ -81,6 +81,13 @@ export interface Token {
   };
 }
 
+export interface TokenInfo {
+  tokenNumber: string;
+  isEmergency: boolean;
+  isPostponed: boolean;
+  status: string;
+}
+
 /** Grouped token display data from /api/kiosk/token */
 export interface DoctorQueueDisplay {
   id: string;
@@ -90,8 +97,12 @@ export interface DoctorQueueDisplay {
     emergency: string | null;
     current: string;
     next: string;
+    currentInfo?: TokenInfo | null;
+    nextInfo?: TokenInfo | null;
+    completedInfo?: TokenInfo | null;
   };
   queue: string[];
+  queueInfo?: TokenInfo[];
   meta: {
     totalWaiting: number;
     estimatedWaitTime: string;

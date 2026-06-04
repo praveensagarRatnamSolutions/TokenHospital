@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { Plus, Monitor, AlertCircle, Loader, CheckCircle2, LayoutGrid, Info } from 'lucide-react';
-import { useKiosks, useCreateKiosk, useUpdateKiosk, useDeleteKiosk } from '../../../kiosk/hooks';
+import { useKiosks, useCreateKiosk, useUpdateKiosk, useDeleteKiosk, useReviewKiosk } from '../../../kiosk/hooks';
 import { toast } from 'sonner';
 import { KioskTable } from './KioskTable';
 import { KioskModal } from './KioskModal';
+import { ReviewModal } from '@/components/common/ReviewModal';
 import { useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store/store';
 import { Kiosk } from '../../../kiosk/types';
@@ -15,6 +16,8 @@ export const KioskManagement: React.FC = () => {
   const [selectedKiosk, setSelectedKiosk] = useState<Kiosk | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Kiosk | null>(null);
+  const [reviewingKiosk, setReviewingKiosk] = useState<Kiosk | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const { user } = useAppSelector((state: RootState) => state.auth);
   const hospitalId = user?.hospitalId || '';
@@ -23,6 +26,7 @@ export const KioskManagement: React.FC = () => {
   const { createKiosk, error: createError } = useCreateKiosk();
   const { updateKiosk, error: updateError } = useUpdateKiosk();
   const { deleteKiosk, error: deleteError } = useDeleteKiosk();
+  const { reviewKiosk, error: reviewError } = useReviewKiosk();
 
   // Show toast notifications for any errors from kiosk hooks
   React.useEffect(() => {
@@ -40,6 +44,10 @@ export const KioskManagement: React.FC = () => {
   React.useEffect(() => {
     if (deleteError) toast.error(deleteError);
   }, [deleteError]);
+
+  React.useEffect(() => {
+    if (reviewError) toast.error(reviewError);
+  }, [reviewError]);
 
   const handleCreate = () => { setSelectedKiosk(null); setIsModalOpen(true); };
   const handleEdit = (kiosk: Kiosk) => { setSelectedKiosk(kiosk); setIsModalOpen(true); };
@@ -59,6 +67,30 @@ export const KioskManagement: React.FC = () => {
     const result = await updateKiosk(kiosk._id, { isActive: !kiosk.isActive });
     if (result) {
       setSuccessMessage(`Kiosk ${!kiosk.isActive ? 'activated' : 'deactivated'} successfully`);
+      refetch();
+    }
+  };
+
+  const handleReview = async (kiosk: Kiosk, status: 'accepted' | 'rejected') => {
+    if (status === 'rejected') {
+      setReviewingKiosk(kiosk);
+      setIsReviewModalOpen(true);
+    } else {
+      const result = await reviewKiosk(kiosk._id, 'accepted');
+      if (result) {
+        setSuccessMessage('Kiosk approved successfully');
+        refetch();
+      }
+    }
+  };
+
+  const handleReviewSubmit = async (reason: string) => {
+    if (!reviewingKiosk) return;
+    const result = await reviewKiosk(reviewingKiosk._id, 'rejected', reason);
+    if (result) {
+      setSuccessMessage('Kiosk rejected successfully');
+      setIsReviewModalOpen(false);
+      setReviewingKiosk(null);
       refetch();
     }
   };
@@ -171,6 +203,7 @@ export const KioskManagement: React.FC = () => {
           onEdit={handleEdit}
           onDelete={setShowDeleteConfirm}
           onToggleActive={handleToggleActive}
+          onReview={handleReview}
         />
       )}
 
@@ -213,6 +246,21 @@ export const KioskManagement: React.FC = () => {
         initialData={selectedKiosk}
         hospitalId={hospitalId}
       />
+
+      {/* Review Rejection Reason Modal */}
+      {reviewingKiosk && (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => {
+            setIsReviewModalOpen(false);
+            setReviewingKiosk(null);
+          }}
+          onSubmit={handleReviewSubmit}
+          title="Reject Kiosk Configuration"
+          itemName={reviewingKiosk.name}
+          isLoading={loading}
+        />
+      )}
     </div>
   );
 };

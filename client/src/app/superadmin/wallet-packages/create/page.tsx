@@ -16,6 +16,11 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { walletApi } from '@/services/walletApi';
 
+const SERVICES = [
+  { key: 'SMS', label: 'SMS Credits', icon: MessageSquare, placeholder: 'e.g. 1000', units: 'SMS' },
+  { key: 'EMAIL', label: 'Email Credits', icon: Mail, placeholder: 'e.g. 500', units: 'Emails' },
+];
+
 export default function TopupPackageFormPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,10 +29,12 @@ export default function TopupPackageFormPage() {
 
   const [loading, setLoading] = useState(isEdit);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     name: '',
-    service: 'SMS',
-    credits: 0,
+    creditsMap: {
+      SMS: 0,
+      EMAIL: 0,
+    },
     price: 0,
     isActive: true,
   });
@@ -36,7 +43,13 @@ export default function TopupPackageFormPage() {
     if (isEdit) {
       walletApi.getPackageById(editId)
         .then(res => {
-          setFormData(res.data.data);
+          const pkg = res.data.data;
+          setFormData({
+            name: pkg.name || '',
+            creditsMap: pkg.creditsMap || { SMS: 0, EMAIL: 0 },
+            price: pkg.price || 0,
+            isActive: pkg.isActive !== undefined ? pkg.isActive : true,
+          });
           setLoading(false);
         })
         .catch(() => {
@@ -47,8 +60,20 @@ export default function TopupPackageFormPage() {
   }, [isEdit, editId]);
 
   const handleSave = async () => {
-    if (!formData.name || formData.credits <= 0) {
-      toast.error("Please provide a name and valid credits amount");
+    if (!formData.name) {
+      toast.error("Please provide a package name");
+      return;
+    }
+
+    const sms = formData.creditsMap?.SMS || 0;
+    const email = formData.creditsMap?.EMAIL || 0;
+    if (sms <= 0 && email <= 0) {
+      toast.error("Please provide a valid credit amount for at least one service");
+      return;
+    }
+
+    if (formData.price < 0) {
+      toast.error("Price cannot be negative");
       return;
     }
 
@@ -72,8 +97,23 @@ export default function TopupPackageFormPage() {
     </div>
   );
 
-  const isSms = formData.service === 'SMS';
-  const Icon = isSms ? MessageSquare : Mail;
+  const hasSms = (formData.creditsMap?.SMS || 0) > 0;
+  const hasEmail = (formData.creditsMap?.EMAIL || 0) > 0;
+
+  // Render icons / bg based on configuration
+  let cardBgClass = 'bg-blue-600 shadow-blue-500/30';
+  let badgeLabel = 'SMS BUNDLE';
+  let Icon = MessageSquare;
+
+  if (hasSms && hasEmail) {
+    cardBgClass = 'bg-gradient-to-br from-blue-600 via-indigo-650 to-purple-650 shadow-indigo-500/30';
+    badgeLabel = 'MIXED BUNDLE';
+    Icon = Package;
+  } else if (hasEmail) {
+    cardBgClass = 'bg-purple-600 shadow-purple-500/30';
+    badgeLabel = 'EMAIL BUNDLE';
+    Icon = Mail;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 lg:p-10">
@@ -88,7 +128,7 @@ export default function TopupPackageFormPage() {
               {isEdit ? 'Edit Wallet Package' : 'Create Wallet Package'}
             </h1>
             <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">
-              {formData.service} BUNDLE
+              {badgeLabel}
             </p>
           </div>
         </div>
@@ -118,46 +158,39 @@ export default function TopupPackageFormPage() {
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   className="w-full h-14 px-5 bg-slate-50 dark:bg-slate-800 rounded-2xl font-bold outline-none focus:ring-2 ring-primary/20 text-slate-800 dark:text-white"
-                  placeholder="e.g. Starter SMS Pack"
+                  placeholder="e.g. Starter Pack"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
-                  Service Type
-                </label>
-                <div className="flex gap-4 p-1 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-                  <button
-                    onClick={() => setFormData({ ...formData, service: 'SMS' })}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${isSms ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                  >
-                    <MessageSquare className="w-4 h-4" /> SMS Credits
-                  </button>
-                  <button
-                    onClick={() => setFormData({ ...formData, service: 'EMAIL' })}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${!isSms ? 'bg-white dark:bg-slate-700 text-purple-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                  >
-                    <Mail className="w-4 h-4" /> Email Credits
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
-                    Credit Amount
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={1}
-                      value={formData.credits || ''}
-                      onChange={e => setFormData({ ...formData, credits: Number(e.target.value) })}
-                      className="w-full h-14 pl-5 pr-16 bg-slate-50 dark:bg-slate-800 rounded-2xl font-bold outline-none focus:ring-2 ring-primary/20 text-slate-800 dark:text-white"
-                      placeholder="e.g. 1000"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Units</span>
-                  </div>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {SERVICES.map((srv) => {
+                    const SrvIcon = srv.icon;
+                    const value = formData.creditsMap?.[srv.key] || 0;
+                    return (
+                      <div key={srv.key} className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1 flex items-center gap-1.5">
+                          <SrvIcon className="w-3.5 h-3.5" />
+                          {srv.label}
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min={0}
+                            value={value || ''}
+                            onChange={e => {
+                              const newMap = { ...(formData.creditsMap || {}) };
+                              newMap[srv.key] = Number(e.target.value);
+                              setFormData({ ...formData, creditsMap: newMap });
+                            }}
+                            className="w-full h-14 pl-5 pr-16 bg-slate-50 dark:bg-slate-800 rounded-2xl font-bold outline-none focus:ring-2 ring-primary/20 text-slate-800 dark:text-white"
+                            placeholder={srv.placeholder}
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase tracking-widest">{srv.units}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="space-y-2">
@@ -194,7 +227,7 @@ export default function TopupPackageFormPage() {
         {/* Right Side: Live Premium Preview Card */}
         <div className="lg:col-span-5">
           <div className="sticky top-10 space-y-6">
-            <div className={`rounded-[3rem] p-8 text-white shadow-2xl relative overflow-hidden transition-colors duration-500 ${isSms ? 'bg-blue-600 shadow-blue-500/30' : 'bg-purple-600 shadow-purple-500/30'}`}>
+            <div className={`rounded-[3rem] p-8 text-white shadow-2xl relative overflow-hidden transition-all duration-500 ${cardBgClass}`}>
               {/* Decorative blurs */}
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-3xl" />
               <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-black/20 rounded-full blur-2xl" />
@@ -209,7 +242,7 @@ export default function TopupPackageFormPage() {
                       Top-up Package
                     </p>
                     <p className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full inline-block mt-1">
-                      {isSms ? 'SMS Wallet' : 'Email Wallet'}
+                      Preview Card
                     </p>
                   </div>
                 </div>
@@ -225,18 +258,33 @@ export default function TopupPackageFormPage() {
                   </div>
                 </div>
 
-                <div className="py-6 border-y border-white/10 flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase opacity-60">Credits Included</p>
-                    <p className="text-4xl font-black tracking-tighter">
-                      {formData.credits ? formData.credits.toLocaleString() : '0'}
-                    </p>
-                  </div>
-                  <div className="text-right space-y-1">
-                    <p className="text-[10px] font-black uppercase opacity-60">Package Price</p>
-                    <p className="text-3xl font-black text-yellow-300 italic">
-                      ₹{formData.price ? formData.price.toLocaleString() : '0'}
-                    </p>
+                <div className="py-6 border-y border-white/10 flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1 flex-1">
+                      <p className="text-[10px] font-black uppercase opacity-60 pb-2">Credits Included</p>
+                      <div className="flex flex-col gap-2">
+                        {SERVICES.map(srv => {
+                          const val = formData.creditsMap?.[srv.key] || 0;
+                          if (val <= 0) return null;
+                          const SrvIcon = srv.icon;
+                          return (
+                            <div key={srv.key} className="flex items-center gap-2 text-white">
+                              <SrvIcon className="w-4 h-4 text-white/80 shrink-0" />
+                              <span className="font-extrabold text-sm sm:text-base">{val.toLocaleString()} {srv.units}</span>
+                            </div>
+                          );
+                        })}
+                        {!hasSms && !hasEmail && (
+                          <span className="text-xs opacity-60">Enter credits...</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right space-y-1 self-start">
+                      <p className="text-[10px] font-black uppercase opacity-60">Package Price</p>
+                      <p className="text-3xl font-black text-yellow-300 italic">
+                        ₹{formData.price ? formData.price.toLocaleString() : '0'}
+                      </p>
+                    </div>
                   </div>
                 </div>
 

@@ -17,6 +17,8 @@ export interface Kiosk {
   locationType: 'reception' | 'waiting_area' | 'doctor_room' | 'general';
   createdBy: string;
   isActive: boolean;
+  approvalStatus: 'pending' | 'accepted' | 'rejected';
+  rejectionReason?: string;
   createdAt: string;
   updatedAt: string;
 }

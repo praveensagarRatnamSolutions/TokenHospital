@@ -189,8 +189,8 @@ exports.buyPackage = async (req, res, next) => {
       notes: {
         hospitalId: req.hospitalId.toString(),
         packageId: pkg._id.toString(),
-        credits: pkg.credits.toString(),
-        service: pkg.service
+        credits: (pkg.credits || 0).toString(),
+        service: pkg.service || 'MULTI'
       }
     });
 
@@ -201,7 +201,7 @@ exports.buyPackage = async (req, res, next) => {
         keyId: process.env.RAZORPAY_CLIENT_ID,
         amount: pkg.price,
         packageId: pkg._id,
-        service: pkg.service,
+        service: pkg.service || 'MULTI',
         name: pkg.name
       }
     });
@@ -244,15 +244,47 @@ exports.verifyPayment = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Cryptographic signature verification failed.' });
     }
 
-    // Atomically credit clinic wallet balances
-    await WalletService.creditWallet(
-      req.hospitalId,
-      pkg.service, // 'SMS' or 'EMAIL'
-      pkg.credits,
-      `Purchased credit bundle: ${pkg.name}`,
-      'MANUAL_TOPUP',
-      razorpay_payment_id
-    );
+    // Atomically credit clinic wallet balances for all services in creditsMap
+    if (pkg.creditsMap && pkg.creditsMap.size > 0) {
+      for (const [service, amount] of pkg.creditsMap.entries()) {
+        if (amount > 0) {
+          await WalletService.creditWallet(
+            req.hospitalId,
+            service,
+            amount,
+            `Purchased credit bundle: ${pkg.name}`,
+            'MANUAL_TOPUP',
+            razorpay_payment_id
+          );
+        }
+      }
+    } else {
+      // Fallback for legacy documents
+      await WalletService.creditWallet(
+        req.hospitalId,
+        pkg.service,
+        pkg.credits,
+        `Purchased credit bundle: ${pkg.name}`,
+        'MANUAL_TOPUP',
+        razorpay_payment_id
+      );
+    }
+
+    // Generate transaction description
+    let desc = `Bought messaging bundle: ${pkg.name}`;
+    const descParts = [];
+    if (pkg.creditsMap && pkg.creditsMap.size > 0) {
+      for (const [service, amount] of pkg.creditsMap.entries()) {
+        if (amount > 0) {
+          descParts.push(`${amount.toLocaleString()} ${service}`);
+        }
+      }
+    } else {
+      descParts.push(`${pkg.credits.toLocaleString()} ${pkg.service}`);
+    }
+    if (descParts.length > 0) {
+      desc += ` (${descParts.join(' & ')} Credits)`;
+    }
 
     // Write payment transaction to SubscriptionTransaction collection for payment history
     await SubscriptionTransaction.create({
@@ -263,11 +295,10 @@ exports.verifyPayment = async (req, res, next) => {
       status: 'COMPLETED',
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,
-      description: `Bought messaging bundle: ${pkg.name} (${pkg.credits.toLocaleString()} ${pkg.service} Credits)`,
+      description: desc,
       metadata: {
         packageId,
-        service: pkg.service,
-        credits: pkg.credits
+        creditsMap: pkg.creditsMap ? Object.fromEntries(pkg.creditsMap) : { [pkg.service]: pkg.credits }
       }
     });
 
@@ -312,9 +343,9 @@ exports.handleWalletWebhook = async (req, res) => {
 
       // Extract metadata from order notes
       const notes = rzpOrder.notes || {};
-      const { hospitalId, packageId, credits, service } = notes;
+      const { hospitalId, packageId } = notes;
 
-      if (!hospitalId || !packageId || !credits || !service) {
+      if (!hospitalId || !packageId) {
         // Not a wallet order
         return res.json({ success: true, message: 'Not a wallet order' });
       }
@@ -330,15 +361,47 @@ exports.handleWalletWebhook = async (req, res) => {
         return res.json({ success: true, message: 'Package not found' });
       }
 
-      // Atomically credit clinic wallet balances
-      await WalletService.creditWallet(
-        hospitalId,
-        service, // 'SMS' or 'EMAIL'
-        Number(credits),
-        `Purchased credit bundle: ${pkg.name}`,
-        'MANUAL_TOPUP',
-        rzpPayment.id
-      );
+      // Atomically credit clinic wallet balances for all services in creditsMap
+      if (pkg.creditsMap && pkg.creditsMap.size > 0) {
+        for (const [service, amount] of pkg.creditsMap.entries()) {
+          if (amount > 0) {
+            await WalletService.creditWallet(
+              hospitalId,
+              service,
+              amount,
+              `Purchased credit bundle: ${pkg.name}`,
+              'MANUAL_TOPUP',
+              rzpPayment.id
+            );
+          }
+        }
+      } else {
+        // Fallback for legacy documents
+        await WalletService.creditWallet(
+          hospitalId,
+          pkg.service,
+          pkg.credits,
+          `Purchased credit bundle: ${pkg.name}`,
+          'MANUAL_TOPUP',
+          rzpPayment.id
+        );
+      }
+
+      // Generate transaction description
+      let desc = `Bought messaging bundle: ${pkg.name}`;
+      const descParts = [];
+      if (pkg.creditsMap && pkg.creditsMap.size > 0) {
+        for (const [service, amount] of pkg.creditsMap.entries()) {
+          if (amount > 0) {
+            descParts.push(`${amount.toLocaleString()} ${service}`);
+          }
+        }
+      } else {
+        descParts.push(`${pkg.credits.toLocaleString()} ${pkg.service}`);
+      }
+      if (descParts.length > 0) {
+        desc += ` (${descParts.join(' & ')} Credits)`;
+      }
 
       // Write payment transaction to SubscriptionTransaction collection
       await SubscriptionTransaction.create({
@@ -349,11 +412,10 @@ exports.handleWalletWebhook = async (req, res) => {
         status: 'COMPLETED',
         razorpayOrderId: rzpOrder.id,
         razorpayPaymentId: rzpPayment.id,
-        description: `Bought messaging bundle: ${pkg.name} (${Number(credits).toLocaleString()} ${service} Credits) [Webhook]`,
+        description: desc + ' [Webhook]',
         metadata: {
           packageId,
-          service,
-          credits: Number(credits)
+          creditsMap: pkg.creditsMap ? Object.fromEntries(pkg.creditsMap) : { [pkg.service]: pkg.credits }
         }
       });
     }
