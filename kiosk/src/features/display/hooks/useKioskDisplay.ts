@@ -44,10 +44,10 @@ const speakNextInQueue = () => {
   isCurrentlySpeaking = true;
 
   const text = speechQueue.shift()!;
-  
+
   // Clean up any ongoing synthesis block safely
   window.speechSynthesis.cancel();
-  
+
   activeUtterance = new SpeechSynthesisUtterance(text);
   activeUtterance.lang = "en-IN";
   activeUtterance.rate = 0.85;
@@ -106,8 +106,10 @@ export const useKioskDisplay = (code: string, onKioskExit?: () => void) => {
   };
 
   const isTokenVisibleForKiosk = (token: any) => {
-    const kioskDepartmentIds = kiosk?.departmentIds?.map(getEntityId).filter(Boolean) || [];
-    const kioskDoctorIds = kiosk?.doctorIds?.map(getEntityId).filter(Boolean) || [];
+    const kioskDepartmentIds =
+      kiosk?.departmentIds?.map(getEntityId).filter(Boolean) || [];
+    const kioskDoctorIds =
+      kiosk?.doctorIds?.map(getEntityId).filter(Boolean) || [];
     const tokenDepartmentId = getEntityId(token?.departmentId);
     const tokenDoctorId = getEntityId(token?.doctorId);
 
@@ -416,8 +418,7 @@ export const useKioskDisplay = (code: string, onKioskExit?: () => void) => {
         console.error("Failed to fetch or send print data", err);
       }
     } catch (err: any) {
-      const message = getApiErrorMessage(err);
-      throw new Error(message);
+      throw new Error(err);
       console.error("❌ Process failed", err);
     }
   };

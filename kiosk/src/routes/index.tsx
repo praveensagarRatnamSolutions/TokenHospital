@@ -1,72 +1,94 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from '../features/auth/components/ProtectedRoute';
-import LoginForm from '../features/auth/components/LoginForm';
-import KioskSelector from '../features/setup/components/KioskSelector';
-import KioskDisplay from '../features/display/components/KioskDisplay';
-import type { User, Kiosk } from '../core/types';
-import KioskLoginLayout from '../components/layout/KioskLoginLayout';
-import PrivacyPolicyPage from '../features/legal/PrivacyPolicyPage';
-import RefundPolicyPage from '../features/legal/RefundPolicyPage';
-import TermsAndConditionsPage from '../features/legal/TermsAndConditionsPage';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "../features/auth/components/ProtectedRoute";
+import LoginForm from "../features/auth/components/LoginForm";
+import KioskSelector from "../features/setup/components/KioskSelector";
+import KioskDisplay from "../features/display/components/KioskDisplay";
+import type { User, Kiosk } from "../core/types";
+import KioskLoginLayout from "../components/layout/KioskLoginLayout";
+import PrivacyPolicyPage from "../features/legal/PrivacyPolicyPage";
+import RefundPolicyPage from "../features/legal/RefundPolicyPage";
+import TermsAndConditionsPage from "../features/legal/TermsAndConditionsPage";
 
 interface AppRoutesProps {
   user: User | null;
   selectedKiosk: Kiosk | null;
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   onLoginSuccess: (user: User) => void;
   onKioskSelect: (kiosk: Kiosk) => void;
   onToggleTheme: () => void;
   onKioskExit: () => void;
 }
 
-const AppRoutes: React.FC<AppRoutesProps> = ({ 
-  user, 
-  selectedKiosk, 
+const AppRoutes: React.FC<AppRoutesProps> = ({
+  user,
+  selectedKiosk,
   theme,
   onLoginSuccess,
   onKioskSelect,
   onKioskExit,
-  onToggleTheme 
+  onToggleTheme,
 }) => {
   const canOpenKioskSelector =
-    !selectedKiosk || localStorage.getItem('kiosk_admin_unlocked') === 'true';
+    !selectedKiosk || localStorage.getItem("kiosk_admin_unlocked") === "true";
 
   return (
     <Routes>
-      <Route path="/" element={
-        user ? (
-          <Navigate to="/select" replace />
-        ) : (
-          <KioskLoginLayout>
-            <LoginForm onLoginSuccess={onLoginSuccess} />
-          </KioskLoginLayout>
-        )
-      } />
+      <Route
+        path="/"
+        element={
+          user ? (
+            <Navigate to="/select" replace />
+          ) : (
+            <KioskLoginLayout>
+              <LoginForm onLoginSuccess={onLoginSuccess} />
+            </KioskLoginLayout>
+          )
+        }
+      />
 
       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-      <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
+      <Route
+        path="/terms-and-conditions"
+        element={<TermsAndConditionsPage />}
+      />
       <Route path="/refund-policy" element={<RefundPolicyPage />} />
 
-      <Route element={<ProtectedRoute user={user} selectedKiosk={selectedKiosk} requireKiosk={false} />}>
-        <Route path="/select" element={
-          canOpenKioskSelector ? (
-            <KioskSelector onSelect={onKioskSelect} />
-          ) : (
-            <Navigate to={`/display/${selectedKiosk.code}`} replace />
-          )
-        } />
+      <Route
+        element={
+          <ProtectedRoute
+            user={user}
+            selectedKiosk={selectedKiosk}
+            requireKiosk={false}
+          />
+        }
+      >
+        <Route
+          path="/select"
+          element={
+            canOpenKioskSelector ? (
+              <KioskSelector onSelect={onKioskSelect} />
+            ) : (
+              <Navigate to={`/display/${selectedKiosk.code}`} replace />
+            )
+          }
+        />
       </Route>
 
-      <Route element={<ProtectedRoute user={user} selectedKiosk={selectedKiosk} />}>
-        <Route path="/display/:code" element={
-          <KioskDisplay 
-            code={selectedKiosk?.code || ''} 
-            theme={theme} 
-            onToggleTheme={onToggleTheme} 
-            onKioskExit={onKioskExit}
-          />
-        } />
+      <Route
+        element={<ProtectedRoute user={user} selectedKiosk={selectedKiosk} />}
+      >
+        <Route
+          path="/display/:code"
+          element={
+            <KioskDisplay
+              code={selectedKiosk?.code || ""}
+              theme={theme}
+              onToggleTheme={onToggleTheme}
+              onKioskExit={onKioskExit}
+            />
+          }
+        />
       </Route>
 
       {/* Fallback */}

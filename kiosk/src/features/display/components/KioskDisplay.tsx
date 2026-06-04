@@ -136,8 +136,6 @@ const KioskDisplay: React.FC<KioskDisplayProps> = ({
               departments={state.departmentQueue}
               theme={theme}
             />
-
-            
           </div>
         );
     }
