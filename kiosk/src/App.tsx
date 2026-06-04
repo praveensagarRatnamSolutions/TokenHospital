@@ -56,6 +56,10 @@ const App: React.FC = () => {
     localStorage.setItem('active_kiosk_data', JSON.stringify(kiosk));
   };
 
+  const handleKioskExit = () => {
+    setSelectedKiosk(null);
+  };
+
   if (loading) return null;
 
   return (
@@ -66,6 +70,7 @@ const App: React.FC = () => {
         theme={theme}
         onLoginSuccess={handleLoginSuccess}
         onKioskSelect={handleKioskSelect}
+        onKioskExit={handleKioskExit}
         onToggleTheme={toggleTheme}
       />
     </HashRouter>

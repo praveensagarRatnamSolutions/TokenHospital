@@ -28,14 +28,16 @@ interface KioskDisplayProps {
   code: string;
   theme: "light" | "dark";
   onToggleTheme: () => void;
+  onKioskExit: () => void;
 }
 
 const KioskDisplay: React.FC<KioskDisplayProps> = ({
   code,
   theme,
   onToggleTheme,
+  onKioskExit,
 }) => {
-  const { state, actions } = useKioskDisplay(code);
+  const { state, actions } = useKioskDisplay(code, onKioskExit);
 
   const handlePinKeyPress = (key: string) => {
     if (key === "backspace") {

@@ -27,7 +27,13 @@ export const authApi = {
 
 export const kioskApi = {
   getAll: async (): Promise<KioskListResponse> => {
-    const response = await api.get("/api/kiosk");
+    const response = await api.get("/api/kiosk",{
+      params: {
+        filters: {
+          isKiosk: true,
+        }
+      }
+    });
     return response.data;
   },
   getByCode: async (code: string) => {

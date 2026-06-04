@@ -94,10 +94,8 @@ const DoctorTokenPanel = ({ doctorId, departments, theme = "dark" }: DoctorToken
           ? "bg-red-950/80 text-red-400 border border-red-700/50 animate-pulse"
           : "bg-red-50 text-red-600 border border-red-200 animate-pulse";
       }
-    } else if (step.isPostponed) {
-      if (step.type === "current") {
-        borderShadowRing = "bg-indigo-600 text-white shadow-[0_0_40px_rgba(79,70,229,0.5)] ring-8 ring-indigo-500/30";
-      } else if (step.type === "next") {
+    } else if (step.isPostponed && step.type !== "current") {
+      if (step.type === "next") {
         borderShadowRing = "bg-indigo-500 text-white ring-4 ring-indigo-500/20";
       } else {
         borderShadowRing = isDark 
@@ -127,18 +125,18 @@ const DoctorTokenPanel = ({ doctorId, departments, theme = "dark" }: DoctorToken
 
   const getLabelText = (step: typeof steps[0]) => {
     if (step.isEmergency) return "Emergency";
+    if (step.type === "current") return "Serving";
     if (step.isPostponed) return "Postponed";
     if (step.type === "completed") return "Done";
-    if (step.type === "current") return "Serving";
     if (step.type === "next") return "Next";
     return "";
   };
 
   const getLabelColor = (step: typeof steps[0]) => {
     if (step.isEmergency) return "text-red-400";
+    if (step.type === "current") return "text-emerald-400";
     if (step.isPostponed) return "text-indigo-400";
     if (step.type === "completed") return "text-slate-500";
-    if (step.type === "current") return "text-emerald-400";
     if (step.type === "next") return "text-amber-400";
     return isDark ? "text-slate-500" : "text-slate-400";
   };

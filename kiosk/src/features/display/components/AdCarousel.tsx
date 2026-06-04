@@ -411,7 +411,7 @@ const DoctorRow: React.FC<{
   const queueInfo = doctor?.queueInfo || [];
 
   const isEmergencyCurrent = currentInfo?.isEmergency || hasEmergency;
-  const isPostponedCurrent = currentInfo?.isPostponed || false;
+  const isPostponedCurrent = false;
 
   return (
     <motion.div

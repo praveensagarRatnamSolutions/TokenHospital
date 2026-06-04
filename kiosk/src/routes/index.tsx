@@ -17,6 +17,7 @@ interface AppRoutesProps {
   onLoginSuccess: (user: User) => void;
   onKioskSelect: (kiosk: Kiosk) => void;
   onToggleTheme: () => void;
+  onKioskExit: () => void;
 }
 
 const AppRoutes: React.FC<AppRoutesProps> = ({ 
@@ -25,6 +26,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
   theme,
   onLoginSuccess,
   onKioskSelect,
+  onKioskExit,
   onToggleTheme 
 }) => {
   const canOpenKioskSelector =
@@ -62,6 +64,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
             code={selectedKiosk?.code || ''} 
             theme={theme} 
             onToggleTheme={onToggleTheme} 
+            onKioskExit={onKioskExit}
           />
         } />
       </Route>

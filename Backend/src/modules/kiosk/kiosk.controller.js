@@ -31,7 +31,7 @@ const getKioskTokenStats = async (req, res, next) => {
   try {
     console.log('Getting kiosk token stats for hospital:', req.hospitalId);
     const stats = await kioskService.getKioskTokenStats(req.hospitalId);
-    res.status(200).json({ success: true ,data: stats });
+    res.status(200).json({ success: true, data: stats });
   } catch (error) {
     next(error);
   }
@@ -44,7 +44,10 @@ const getKioskTokensByHospital = async (req, res, next) => {
   try {
     const { hospitalId, kioskId } = req.query;
     if (!hospitalId) {
-      return res.status(400).json({ success: false, message: 'hospitalId query param is required' });
+      return res.status(400).json({
+        success: false,
+        message: 'hospitalId query param is required',
+      });
     }
     const stats = await kioskService.getKioskTokenStats(hospitalId, kioskId);
     res.status(200).json({ success: true, data: stats });
@@ -54,15 +57,17 @@ const getKioskTokensByHospital = async (req, res, next) => {
 };
 
 const getPublicQueue = async (req, res, next) => {
-    try {
-      const { hospitalId } = req.params;
-      const { kioskId } = req.query;
-      const stats = await kioskService.getKioskTokenStats(hospitalId, kioskId);
-      res.status(200).json({ success: true, data: stats, lastUpdated: new Date() });
-    } catch (error) {
-      next(error);
-    }
-  };
+  try {
+    const { hospitalId } = req.params;
+    const { kioskId } = req.query;
+    const stats = await kioskService.getKioskTokenStats(hospitalId, kioskId);
+    res
+      .status(200)
+      .json({ success: true, data: stats, lastUpdated: new Date() });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * @desc Get all kiosks for hospital (Admin sees all, Doctor sees own)
@@ -70,7 +75,7 @@ const getPublicQueue = async (req, res, next) => {
 const getKiosks = async (req, res, next) => {
   try {
     const filters = {};
-    console.log('req.doctor._id456', req.user.doctorId);
+    console.log('req.doctor._id456', req.query);
 
     if (req.user.role === 'DOCTOR') {
       filters.$or = [
@@ -78,6 +83,11 @@ const getKiosks = async (req, res, next) => {
         { createdBy: req.user._id },
       ];
     }
+    if (req?.query?.filters?.isKiosk === 'true') {
+      filters.approvalStatus = 'accepted';
+    }
+
+    logger.info(`Fetching kiosks for hospital ${req.hospitalId} with filters: ${JSON.stringify(filters)}`);
     const kiosks = await kioskService.getKiosks(req.hospitalId, filters);
     res.status(200).json({ success: true, count: kiosks.length, data: kiosks });
   } catch (error) {
@@ -162,14 +172,19 @@ const updateKiosk = async (req, res, next) => {
     const Kiosk = require('./kiosk.model');
     const existingKiosk = await Kiosk.findOne(query);
     if (!existingKiosk) {
-      return res.status(404).json({ success: false, message: 'Kiosk not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Kiosk not found' });
     }
 
     // Prevent toggling active state on unapproved kiosks
-    if (req.body.hasOwnProperty('isActive') && existingKiosk.approvalStatus !== 'accepted') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Cannot activate/deactivate unapproved kiosks.' 
+    if (
+      req.body.hasOwnProperty('isActive') &&
+      existingKiosk.approvalStatus !== 'accepted'
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot activate/deactivate unapproved kiosks.',
       });
     }
 
@@ -223,7 +238,10 @@ const deleteKiosk = async (req, res, next) => {
 const notifyAdminsAboutKiosk = async (req, kiosk) => {
   try {
     const User = require('../auth/auth.model');
-    const admins = await User.find({ hospitalId: req.hospitalId, role: 'ADMIN' });
+    const admins = await User.find({
+      hospitalId: req.hospitalId,
+      role: 'ADMIN',
+    });
     const notificationService = require('../notification/notification.service');
     const emailUtil = require('../../utils/email');
 
@@ -241,13 +259,19 @@ const notifyAdminsAboutKiosk = async (req, kiosk) => {
       });
 
       // Email Notification (non-blocking)
-      emailUtil.sendApprovalRequestEmail({
-        to: admin.email,
-        adminName: admin.name,
-        doctorName: req.user.name,
-        itemName: kiosk.name,
-        itemType: 'Kiosk',
-      }).catch(err => logger.error(`Error sending email to admin ${admin.email}: ${err.message}`));
+      emailUtil
+        .sendApprovalRequestEmail({
+          to: admin.email,
+          adminName: admin.name,
+          doctorName: req.user.name,
+          itemName: kiosk.name,
+          itemType: 'Kiosk',
+        })
+        .catch((err) =>
+          logger.error(
+            `Error sending email to admin ${admin.email}: ${err.message}`
+          )
+        );
     });
 
     await Promise.all(notificationPromises);
@@ -260,7 +284,9 @@ const reviewKiosk = async (req, res, next) => {
   try {
     const { status, reason } = req.body;
     if (!['accepted', 'rejected'].includes(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid review status' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid review status' });
     }
 
     const kiosk = await kioskService.updateKiosk(
@@ -269,7 +295,9 @@ const reviewKiosk = async (req, res, next) => {
     );
 
     if (!kiosk) {
-      return res.status(404).json({ success: false, message: 'Kiosk not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Kiosk not found' });
     }
 
     // Notify the doctor who created it
@@ -292,14 +320,18 @@ const reviewKiosk = async (req, res, next) => {
 
         // Send email (non-blocking)
         const emailUtil = require('../../utils/email');
-        emailUtil.sendApprovalResultEmail({
-          to: doctorUser.email,
-          doctorName: doctorUser.name,
-          itemName: kiosk.name,
-          itemType: 'Kiosk',
-          status,
-          reason,
-        }).catch(err => logger.error(`Error sending email to doctor: ${err.message}`));
+        emailUtil
+          .sendApprovalResultEmail({
+            to: doctorUser.email,
+            doctorName: doctorUser.name,
+            itemName: kiosk.name,
+            itemType: 'Kiosk',
+            status,
+            reason,
+          })
+          .catch((err) =>
+            logger.error(`Error sending email to doctor: ${err.message}`)
+          );
       }
     }
 

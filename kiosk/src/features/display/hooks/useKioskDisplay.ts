@@ -70,7 +70,7 @@ const speakNextInQueue = () => {
   window.speechSynthesis.speak(activeUtterance);
 };
 
-export const useKioskDisplay = (code: string) => {
+export const useKioskDisplay = (code: string, onKioskExit?: () => void) => {
   const navigate = useNavigate();
   // Idle timeout configuration (3 minutes = 180000 milliseconds)
   const IDLE_TIMEOUT = 180000;
@@ -307,7 +307,11 @@ export const useKioskDisplay = (code: string) => {
       localStorage.setItem("kiosk_admin_unlocked", "true");
       localStorage.removeItem("active_kiosk_id");
       localStorage.removeItem("active_kiosk_data");
+      onKioskExit?.();
+      setShowPinModal(false);
+      setPin("");
       navigate("/select", { replace: true });
+      console.log("Exiting kiosk mode");
     } else {
       setPinError(true);
       setTimeout(() => setPinError(false), 2000);
